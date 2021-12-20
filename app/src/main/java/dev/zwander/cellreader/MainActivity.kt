@@ -238,11 +238,12 @@ fun Content() {
                 entryList.add(0, (primaryCell to primaryInfo))
 
                 entryList.forEach { (t, u) ->
-                    item {
+                    item(t) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                .animateItemPlacement(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(text = "SIM $t")
@@ -272,11 +273,12 @@ fun Content() {
                         }
                     }
 
-                    items(u.size) {
+                    items(u.size, { "$t:$it:${u[it].cellIdentity.globalCellId}" }) {
                         val info = u[it]
 
                         Card(
                             modifier = Modifier.fillMaxWidth()
+                                .animateItemPlacement()
                         ) {
                             SignalCard(cellInfo = info)
                         }
