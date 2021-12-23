@@ -72,3 +72,18 @@ object CellUtils {
         }
     }
 }
+
+val CellConfigLte.endcAvailable: Boolean
+    get() = this::class.java
+        .getDeclaredMethod("isEndcAvailable")
+        .apply { isAccessible = true }
+        .invoke(this) as Boolean
+
+inline fun <reified T : CellInfo> CellInfo.cast() = castGeneric<T>()
+inline fun <reified T : CellIdentity> CellIdentity.cast() = castGeneric<T>()
+inline fun <reified T : CellSignalStrength> CellSignalStrength.cast() = castGeneric<T>()
+
+inline fun <reified T : Any> Any.castGeneric(): T? {
+    return if (this is T) this
+            else null
+}

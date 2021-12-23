@@ -19,6 +19,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -31,6 +32,8 @@ import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.layout.StaggeredVerticalGrid
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.PermissionUtils
+import dev.zwander.cellreader.utils.cast
+import dev.zwander.cellreader.utils.endcAvailable
 import kotlin.math.floor
 
 
@@ -110,56 +113,62 @@ fun SignalCard(cellInfo: CellInfo) {
                     mainAxisSpacing = 16.dp,
                     mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
                 ) {
-                    with(cellInfo.cellIdentity.operatorAlphaLong) {
-                        if (!isNullOrBlank()) {
-                            Text(
-                                text = "Carrier: $this"
-                            )
-                        }
-                    }
-
-                    with(cellInfo.cellIdentity.mccString) {
-                        if (!isNullOrBlank()) {
-                            Text(
-                                text = "MCC-MNC: ${this}-${cellInfo.cellIdentity.mncString}"
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = "Signal type: ${
-                            when (cellInfo.cellSignalStrength) {
-                                is CellSignalStrengthGsm -> "GSM"
-                                is CellSignalStrengthWcdma -> "WCDMA"
-                                is CellSignalStrengthCdma -> "CDMA"
-                                is CellSignalStrengthTdscdma -> "TDSCDMA"
-                                is CellSignalStrengthLte -> "LTE"
-                                is CellSignalStrengthNr -> "5G NR"
-                                else -> "Unknown"
+                    with (cellInfo) {
+                        with (cellIdentity) {
+                            with (operatorAlphaLong) {
+                                if (!isNullOrBlank()) {
+                                    Text(
+                                        text = "Carrier: $this"
+                                    )
+                                }
                             }
-                        }"
-                    )
 
-                    with(cellInfo.cellSignalStrength) {
-                        when (this) {
-                            is CellSignalStrengthLte -> {
-                                Text(text = "RSSI: ${rssi}")
-                                Text(text = "RSRQ: ${rsrq}")
+                            with (mccString) {
+                                if (!isNullOrBlank()) {
+                                    Text(
+                                        text = "PLMN: ${this}-${mncString}"
+                                    )
+                                }
                             }
-                            is CellSignalStrengthNr -> {
+
+                            Text(
+                                text = "Signal type: ${
+                                    when (type) {
+                                        CellInfo.TYPE_GSM -> "GSM"
+                                        CellInfo.TYPE_WCDMA -> "WCDMA"
+                                        CellInfo.TYPE_CDMA -> "CDMA"
+                                        CellInfo.TYPE_TDSCDMA -> "TDSCDMA"
+                                        CellInfo.TYPE_LTE -> "LTE"
+                                        CellInfo.TYPE_NR -> "5G NR"
+                                        else -> "Unknown"
+                                    }
+                                }"
+                            )
+
+                            cast<CellIdentityLte>()?.apply {
+                                Text(text = "Bands: ${bands.joinToString(", ")}")
+                                Text(text = "Bandwidth: $bandwidth kHz")
+                            }
+
+                            cast<CellIdentityNr>()?.apply {
+                                Text(text = "Bands: ${bands.joinToString(", ")}")
+                            }
+                        }
+
+                        with (cellSignalStrength) {
+                            cast<CellSignalStrengthLte>()?.apply {
+                                Text(text = "RSRQ: $rsrq")
+                                Text(text = "RSSI: $rssi")
+                            }
+
+                            cast<CellSignalStrengthNr>()?.apply {
                                 Text(text = "RSRQ: ${csiRsrq}/${ssRsrq}")
+
                             }
                         }
-                    }
 
-                    with(cellInfo.cellIdentity) {
-                        when (this) {
-                            is CellIdentityLte -> {
-                                Text(text = "Bands: ${bands.contentToString()}")
-                            }
-                            is CellIdentityNr -> {
-                                Text(text = "Bands: ${bands.contentToString()}")
-                            }
+                        cast<CellInfoLte>()?.apply {
+                            Text(text = "ENDC: ${cellConfig.endcAvailable}")
                         }
                     }
                 }
@@ -182,51 +191,6 @@ fun Content() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
-            val cells = 205.dp
-
-//            Column(
-//                modifier = Modifier.verticalScroll(rememberScrollState())
-//            ) {
-//                StaggeredVerticalGrid(maxColumnWidth = cells) {
-//                    val map = HashMap(cellInfos)
-//                    val primaryInfo = map.remove(primaryCell) ?: return@StaggeredVerticalGrid
-//
-//                    val entryList = map.entries.map { it.key to it.value }.toMutableList()
-//                    entryList.add(0, (primaryCell to primaryInfo))
-//
-//                    entryList.forEach { (t, u) ->
-//                        Column(
-//                            modifier = Modifier
-//                                .fullSpan()
-//                                .padding(8.dp),
-//                            horizontalAlignment = Alignment.CenterHorizontally
-//                        ) {
-//                            Text(text = "SIM $t")
-//
-//                            val subInfo = subs.getActiveSubscriptionInfo(t)
-//                            val telephony = TelephonyManager.from(context).createForSubscriptionId(t)
-//
-//                            val properInfo = telephony.serviceState
-//                                .getNetworkRegistrationInfoListForTransportType(
-//                                    AccessNetworkConstants.TRANSPORT_TYPE_WWAN
-//                                )
-//                                .first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
-//
-//                            Text(text = "Carrier Name: ${subInfo.carrierName}")
-//                            Text(text = "MCC-MNC: ${properInfo.cellIdentity.mccString}-${properInfo.cellIdentity.mncString}")
-//                        }
-//
-//                        u.forEach { info ->
-//                            Card(
-//                                modifier = Modifier
-//                            ) {
-//                                SignalCard(cellInfo = info)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-
             LazyColumn(
                 contentPadding = PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -246,8 +210,6 @@ fun Content() {
                                 .animateItemPlacement(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = "SIM $t")
-
                             val subInfo = subs.getActiveSubscriptionInfo(t)
                             val telephony = TelephonyManager.from(context).createForSubscriptionId(t)
 
@@ -262,8 +224,16 @@ fun Content() {
                                 mainAxisSpacing = 16.dp,
                                 mainAxisAlignment = FlowMainAxisAlignment.Center
                             ) {
-                                Text(text = "Carrier: ${subInfo.carrierName}")
-                                Text(text = "RPLMN: ${properInfo.registeredPlmn}")
+                                Image(bitmap = subInfo.createIconBitmap(context).asImageBitmap(), contentDescription = null)
+                                Text(text = "${subInfo.carrierName}")
+                            }
+
+                            FlowRow(
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                mainAxisSpacing = 16.dp,
+                                mainAxisAlignment = FlowMainAxisAlignment.Center
+                            ) {
+                                Text(text = "R-PLMN: ${StringBuilder(properInfo.registeredPlmn).insert(3, "-")}")
                                 Text(text = "Type: ${telephony.networkTypeName}")
                                 Text(text = "CA: ${telephony.serviceState.isUsingCarrierAggregation}")
                                 Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState.nrState)}/" +
@@ -277,7 +247,8 @@ fun Content() {
                         val info = u[it]
 
                         Card(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .animateItemPlacement()
                         ) {
                             SignalCard(cellInfo = info)
