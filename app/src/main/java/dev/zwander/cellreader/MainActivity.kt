@@ -317,6 +317,8 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                         Text("Channel Number: $channelNumber")
                                     }
 
+                                    Text(text = "GCI: $globalCellId")
+
                                     cast<CellIdentityGsm>()?.apply {
                                         if (additionalPlmns.isNotEmpty()) {
                                             Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
@@ -334,7 +336,7 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                             Text("LAC: $lac")
                                         }
                                         if (mobileNetworkOperator != null) {
-                                            Text("Network Operator: $mobileNetworkOperator")
+                                            Text("Operator: $mobileNetworkOperator")
                                         }
                                     }
 
@@ -375,7 +377,7 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                             Text("Home Node-B Name: $homeNodebName")
                                         }
                                         if (mobileNetworkOperator != null) {
-                                            Text("Network Operator: $mobileNetworkOperator")
+                                            Text("Operator: $mobileNetworkOperator")
                                         }
                                         uarfcn.onAvail {
                                             Text("UARFCN: $uarfcn")
@@ -398,7 +400,7 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                             Text("Home Node-B Name: $homeNodebName")
                                         }
                                         if (mobileNetworkOperator != null) {
-                                            Text("Network Operator: $mobileNetworkOperator")
+                                            Text("Operator: $mobileNetworkOperator")
                                         }
                                         psc.onAvail {
                                             Text("PSC: $psc")
@@ -427,7 +429,7 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                             Text("Home Node-B Name: $homeNodebName")
                                         }
                                         if (mobileNetworkOperator != null) {
-                                            Text("Network Operator: $mobileNetworkOperator")
+                                            Text("Operator: $mobileNetworkOperator")
                                         }
                                         earfcn.onAvail {
                                             Text("EARFCN: $earfcn")
