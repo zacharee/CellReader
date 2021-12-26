@@ -5,16 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.telephony.*
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,18 +21,20 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import dev.zwander.cellreader.layout.StaggeredVerticalGrid
+import com.google.accompanist.flowlayout.SizeMode
+import dev.zwander.cellreader.layout.AutoResizeText
+import dev.zwander.cellreader.layout.AutosizeText
+import dev.zwander.cellreader.layout.FontSizeRange
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.PermissionUtils
 import dev.zwander.cellreader.utils.cast
 import dev.zwander.cellreader.utils.endcAvailable
-import kotlin.math.floor
 
 
 class MainActivity : ComponentActivity() {
@@ -104,7 +104,21 @@ fun SignalCard(cellInfo: CellInfo) {
 
                     Spacer(Modifier.size(8.dp))
 
-                    Text(text = "${cellInfo.cellSignalStrength.dbm} dBm")
+//                    Box(
+//                        modifier = Modifier.width(48.dp)
+//                    ) {
+//                        AutosizeText(
+//                            text = "${cellInfo.cellSignalStrength.dbm} dBm",
+//                        )
+//                    }
+
+                    AutoResizeText(
+                        text = "${cellInfo.cellSignalStrength.dbm} dBm",
+                        fontSizeRange = FontSizeRange(8.sp, 16.sp),
+                        modifier = Modifier.width(64.dp),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center
+                    )
                 }
 
                 Spacer(Modifier.size(16.dp))
@@ -112,6 +126,7 @@ fun SignalCard(cellInfo: CellInfo) {
                 FlowRow(
                     mainAxisSpacing = 16.dp,
                     mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
+                    mainAxisSize = SizeMode.Expand
                 ) {
                     with (cellInfo) {
                         with (cellIdentity) {
@@ -132,7 +147,7 @@ fun SignalCard(cellInfo: CellInfo) {
                             }
 
                             Text(
-                                text = "Signal type: ${
+                                text = "Type: ${
                                     when (type) {
                                         CellInfo.TYPE_GSM -> "GSM"
                                         CellInfo.TYPE_WCDMA -> "WCDMA"
@@ -147,7 +162,12 @@ fun SignalCard(cellInfo: CellInfo) {
 
                             cast<CellIdentityLte>()?.apply {
                                 Text(text = "Bands: ${bands.joinToString(", ")}")
-                                Text(text = "Bandwidth: $bandwidth kHz")
+
+                                bandwidth.let {
+                                    if (it != CellInfo.UNAVAILABLE) {
+                                        Text(text = "Bandwidth: $it kHz")
+                                    }
+                                }
                             }
 
                             cast<CellIdentityNr>()?.apply {
@@ -202,7 +222,7 @@ fun Content() {
                 entryList.add(0, (primaryCell to primaryInfo))
 
                 entryList.forEach { (t, u) ->
-                    item(t) {
+                    stickyHeader(t) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
