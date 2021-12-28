@@ -182,23 +182,11 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                             with (cellSignalStrength) {
                                 cast<CellSignalStrengthLte>()?.apply {
                                     Text(text = "RSRQ: $rsrq")
-                                    Text(text = "RSSI: $rssi")
+
                                 }
 
                                 cast<CellSignalStrengthNr>()?.apply {
                                     Text(text = "RSRQ: ${csiRsrq}/${ssRsrq}")
-                                }
-
-                                cast<CellSignalStrengthGsm>()?.apply {
-                                    Text(text = "RSSI: $rssi")
-                                }
-
-                                cast<CellSignalStrengthTdscdma>()?.apply {
-                                    Text(text = "RSSI: $rssi")
-                                }
-
-                                cast<CellSignalStrengthWcdma>()?.apply {
-                                    Text(text = "RSSI: $rssi")
                                 }
                             }
 
@@ -241,6 +229,9 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                     Text(text = "Valid: $isValid")
 
                                     cast<CellSignalStrengthGsm>()?.apply {
+                                        rssi.onAvail {
+                                            Text(text = "RSSI: $rssi")
+                                        }
                                         bitErrorRate.onAvail {
                                             Text(text = "Bit Error Rate: $bitErrorRate")
                                         }
@@ -268,6 +259,10 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                     }
 
                                     cast<CellSignalStrengthTdscdma>()?.apply {
+                                        rssi.onAvail {
+                                            Text(text = "RSSI: $rssi")
+                                        }
+
                                         bitErrorRate.onAvail {
                                             Text(text = "Bit Error Rate: $bitErrorRate")
                                         }
@@ -278,6 +273,10 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                     }
 
                                     cast<CellSignalStrengthWcdma>()?.apply {
+                                        rssi.onAvail {
+                                            Text(text = "RSSI: $rssi")
+                                        }
+
                                         bitErrorRate.onAvail {
                                             Text(text = "Bit Error Rate: $bitErrorRate")
                                         }
@@ -292,6 +291,9 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                     }
 
                                     cast<CellSignalStrengthLte>()?.apply {
+                                        rssi.onAvail {
+                                            Text(text = "RSSI: $rssi")
+                                        }
                                         cqi.onAvail {
                                             Text(text = "CQI: $cqi")
                                         }
@@ -324,7 +326,9 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
                                         Text("Channel Number: $channelNumber")
                                     }
 
-                                    Text(text = "GCI: $globalCellId")
+                                    globalCellId?.let {
+                                        Text(text = "GCI: $globalCellId")
+                                    }
 
                                     cast<CellIdentityGsm>()?.apply {
                                         if (additionalPlmns.isNotEmpty()) {
