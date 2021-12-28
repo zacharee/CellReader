@@ -36,6 +36,7 @@ import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.PermissionUtils
 import dev.zwander.cellreader.utils.cast
 import dev.zwander.cellreader.utils.endcAvailable
+import dev.zwander.cellreader.utils.safeRegisteredPlmn
 
 
 class MainActivity : ComponentActivity() {
@@ -519,7 +520,7 @@ fun Content() {
                                 mainAxisSpacing = 16.dp,
                                 mainAxisAlignment = FlowMainAxisAlignment.Center
                             ) {
-                                Text(text = "R-PLMN: ${StringBuilder(properInfo.registeredPlmn).insert(3, "-")}")
+                                Text(text = "R-PLMN: ${StringBuilder(properInfo.safeRegisteredPlmn).insert(3, "-")}")
                                 Text(text = "Type: ${telephony.networkTypeName}")
                                 Text(text = "CA: ${telephony.serviceState.isUsingCarrierAggregation}")
                                 Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState.nrState)}/" +

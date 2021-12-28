@@ -79,6 +79,18 @@ val CellConfigLte.endcAvailable: Boolean
         .apply { isAccessible = true }
         .invoke(this) as Boolean
 
+val NetworkRegistrationInfo.safeRegisteredPlmn: String
+    get() = when {
+        registeredPlmn.isNullOrBlank() -> "000000"
+        registeredPlmn.length < 3 -> StringBuilder(registeredPlmn).run {
+            val makeup = 6 - registeredPlmn.length
+
+            appendRange("000000", 0, makeup + 1)
+            toString()
+        }
+        else -> registeredPlmn
+    }
+
 inline fun <reified T : CellInfo> CellInfo.cast() = castGeneric<T>()
 inline fun <reified T : CellIdentity> CellIdentity.cast() = castGeneric<T>()
 inline fun <reified T : CellSignalStrength> CellSignalStrength.cast() = castGeneric<T>()
