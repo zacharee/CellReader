@@ -3,8 +3,13 @@ package dev.zwander.cellreader
 import android.app.Application
 import android.telephony.CellInfo
 import androidx.compose.runtime.*
+import dev.zwander.cellreader.data.CellInfoWrapper
+import dev.zwander.cellreader.utils.CellUtils
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
+val sortedInfos by derivedStateOf {
+    cellInfos.toSortedMap(CellUtils.SubsComparator(primaryCell))
+}
 val cellInfos = mutableStateMapOf<Int, List<CellInfo>>()
 var primaryCell by mutableStateOf(0)
 

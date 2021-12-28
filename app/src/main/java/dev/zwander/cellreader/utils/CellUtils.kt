@@ -1,6 +1,7 @@
 package dev.zwander.cellreader.utils
 
 import android.telephony.*
+import dev.zwander.cellreader.data.CellInfoWrapper
 import kotlin.math.absoluteValue
 
 object CellUtils {
@@ -69,6 +70,20 @@ object CellUtils {
             }
 
             return o1.cellSignalStrength.dbm.absoluteValue - o2.cellSignalStrength.dbm.absoluteValue
+        }
+    }
+
+    class SubsComparator(private val primarySub: Int) : Comparator<Int> {
+        override fun compare(o1: Int, o2: Int): Int {
+            if (o1 == primarySub) {
+                return -1
+            }
+
+            if (o2 == primarySub) {
+                return 1
+            }
+
+            return o1.compareTo(o2)
         }
     }
 }

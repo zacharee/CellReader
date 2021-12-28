@@ -47,10 +47,8 @@ class SignalWidget : GlanceAppWidget() {
 
     @Composable
     override fun Content() {
-        val prefs = currentState<Preferences>()
-        val infos = PrefUtils.getCellInfo(prefs)
-
-        val size = LocalSize.current
+//        val prefs = currentState<Preferences>()
+//        val infos = PrefUtils.getCellInfo(prefs)
 
         Box(
             modifier = GlanceModifier.cornerRadius(8.dp)
@@ -60,25 +58,18 @@ class SignalWidget : GlanceAppWidget() {
             LazyColumn(
                 modifier = GlanceModifier.fillMaxSize()
             ) {
-                infos.let { (map, primary) ->
-                    val primaryInfo = map.remove(primary) ?: return@let
-
-                    val entryList = map.entries.map { it.key to it.value }.toMutableList()
-                    entryList.add(0, (primary to primaryInfo))
-
-                    (entryList).forEach { (t, u) ->
-                        item {
-                            Box(
-                                modifier = GlanceModifier.height(48.dp)
-                                    .fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "SIM $t")
-                            }
+                sortedInfos.forEach { (t, u) ->
+                    item {
+                        Box(
+                            modifier = GlanceModifier.height(48.dp)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "SIM $t")
                         }
-                        items(u.size) {
-                            SignalCard(cellInfo = u[it])
-                        }
+                    }
+                    items(u.size) {
+                        SignalCard(cellInfo = u[it])
                     }
                 }
             }

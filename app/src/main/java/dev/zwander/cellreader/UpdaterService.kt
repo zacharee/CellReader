@@ -3,25 +3,15 @@ package dev.zwander.cellreader
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import android.os.Message
-import android.telecom.PhoneAccountHandle
 import android.telephony.*
-import android.util.Log
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
-import androidx.glance.state.PreferencesGlanceStateDefinition
-import dev.zwander.cellreader.utils.CellUtils
-import dev.zwander.cellreader.utils.PrefUtils
 import kotlinx.coroutines.*
+import kotlin.collections.HashMap
 
 class UpdaterService : Service(), CoroutineScope by MainScope() {
     companion object {
@@ -106,11 +96,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     private fun update(subId: Int, infos: List<CellInfo>) {
-        cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator())
         primaryCell = subs.defaultDataSubscriptionInfo.subscriptionId
+        cellInfos[subId] = infos
 
         launch(Dispatchers.IO) {
-            PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)
+//            PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)
             SignalWidget().updateAll(this@UpdaterService)
         }
     }

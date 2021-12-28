@@ -34,10 +34,7 @@ import dev.zwander.cellreader.layout.AutoResizeText
 import dev.zwander.cellreader.layout.AutoResizingText
 import dev.zwander.cellreader.layout.FontSizeRange
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
-import dev.zwander.cellreader.utils.PermissionUtils
-import dev.zwander.cellreader.utils.cast
-import dev.zwander.cellreader.utils.endcAvailable
-import dev.zwander.cellreader.utils.safeRegisteredPlmn
+import dev.zwander.cellreader.utils.*
 
 
 class MainActivity : ComponentActivity() {
@@ -491,13 +488,7 @@ fun Content() {
                 contentPadding = PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val map = HashMap(cellInfos)
-                val primaryInfo = map.remove(primaryCell) ?: return@LazyColumn
-
-                val entryList = map.entries.map { it.key to it.value }.toMutableList()
-                entryList.add(0, (primaryCell to primaryInfo))
-
-                entryList.forEach { (t, u) ->
+                sortedInfos.forEach { (t, u) ->
                     stickyHeader(t) {
                         Column(
                             modifier = Modifier
