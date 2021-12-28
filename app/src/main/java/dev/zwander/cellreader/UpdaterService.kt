@@ -109,7 +109,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator())
         primaryCell = subs.defaultDataSubscriptionInfo.subscriptionId
 
-        launch {
+        launch(Dispatchers.IO) {
             PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)
             SignalWidget().updateAll(this@UpdaterService)
         }
