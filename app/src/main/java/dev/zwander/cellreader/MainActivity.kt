@@ -31,6 +31,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.layout.AutoResizeText
+import dev.zwander.cellreader.layout.AutoResizingText
 import dev.zwander.cellreader.layout.FontSizeRange
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.PermissionUtils
@@ -110,12 +111,20 @@ fun SignalCard(cellInfo: CellInfo, expanded: Boolean, onExpand: (Boolean) -> Uni
 
                         Spacer(Modifier.size(8.dp))
 
-                        AutoResizeText(
+//                        AutoResizeText(
+//                            text = "${cellInfo.cellSignalStrength.dbm} dBm",
+//                            fontSizeRange = FontSizeRange(8.sp, 16.sp),
+//                            modifier = Modifier.width(64.dp),
+//                            maxLines = 1,
+//                            textAlign = TextAlign.Center
+//                        )
+
+                        AutoResizingText(
                             text = "${cellInfo.cellSignalStrength.dbm} dBm",
-                            fontSizeRange = FontSizeRange(8.sp, 16.sp),
                             modifier = Modifier.width(64.dp),
                             maxLines = 1,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontSize = 16.sp
                         )
                     }
 
