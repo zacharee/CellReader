@@ -10,6 +10,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
+import dev.zwander.cellreader.utils.CellUtils
 import kotlinx.coroutines.*
 import kotlin.collections.HashMap
 
@@ -97,7 +98,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
     private fun update(subId: Int, infos: List<CellInfo>) {
         primaryCell = subs.defaultDataSubscriptionInfo.subscriptionId
-        cellInfos[subId] = infos
+        cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator)
 
         launch(Dispatchers.IO) {
 //            PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)

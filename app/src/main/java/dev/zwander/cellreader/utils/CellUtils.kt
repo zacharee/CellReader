@@ -14,7 +14,7 @@ object CellUtils {
         }
     }
 
-    class CellInfoComparator : Comparator<CellInfo> {
+    object CellInfoComparator : Comparator<CellInfo> {
         override fun compare(o1: CellInfo, o2: CellInfo): Int {
             val statusResult = if (o1.cellConnectionStatus != CellInfo.CONNECTION_NONE && o2.cellConnectionStatus != CellInfo.CONNECTION_NONE
                 && o1.cellConnectionStatus != CellInfo.CONNECTION_UNKNOWN && o2.cellConnectionStatus != CellInfo.CONNECTION_UNKNOWN) {
