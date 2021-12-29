@@ -2,6 +2,7 @@ package dev.zwander.cellreader
 
 import android.app.Application
 import android.telephony.CellInfo
+import androidx.collection.ArraySet
 import androidx.compose.runtime.*
 import dev.zwander.cellreader.data.CellInfoWrapper
 import dev.zwander.cellreader.utils.CellUtils

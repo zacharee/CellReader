@@ -1,7 +1,7 @@
 package dev.zwander.cellreader.utils
 
 import android.telephony.*
-import dev.zwander.cellreader.data.CellInfoWrapper
+import androidx.compose.runtime.Composable
 import kotlin.math.absoluteValue
 
 object CellUtils {
@@ -113,4 +113,51 @@ inline fun <reified T : CellSignalStrength> CellSignalStrength.cast() = castGene
 inline fun <reified T : Any> Any.castGeneric(): T? {
     return if (this is T) this
             else null
+}
+
+fun Int.avail() = this != CellInfo.UNAVAILABLE
+fun Long.avail() = this != CellInfo.UNAVAILABLE_LONG
+
+@Composable
+fun Int.onAvail(block: @Composable()(Int) -> Unit) {
+    if (avail()) block(this)
+}
+
+@Composable
+fun Long.onAvail(block: @Composable()(Long) -> Unit) {
+    if (avail()) block(this)
+}
+
+@Composable
+fun Int.onNegAvail(block: @Composable()(Int) -> Unit) {
+    if (this != -1) block(this)
+}
+
+fun duplexModeToString(duplex: Int): String {
+    return when (duplex) {
+        ServiceState.DUPLEX_MODE_FDD -> "FDD"
+        ServiceState.DUPLEX_MODE_TDD -> "TDD"
+        else -> "UNKNOWN"
+    }
+}
+
+fun domainToString(@NetworkRegistrationInfo.Domain domain: Int): String {
+    return when (domain) {
+        NetworkRegistrationInfo.DOMAIN_CS -> "CS"
+        NetworkRegistrationInfo.DOMAIN_PS -> "PS"
+        NetworkRegistrationInfo.DOMAIN_CS_PS -> "CS_PS"
+        else -> "UNKNOWN"
+    }
+}
+
+fun typeToString(type: Int): String {
+    return when (type) {
+        CellInfo.TYPE_GSM -> "GSM"
+        CellInfo.TYPE_CDMA -> "CDMA"
+        CellInfo.TYPE_TDSCDMA -> "TDSCDMA"
+        CellInfo.TYPE_WCDMA -> "WCDMA"
+        CellInfo.TYPE_LTE -> "LTE"
+        CellInfo.TYPE_NR -> "NR"
+        else -> "UNKNOWN"
+    }
 }

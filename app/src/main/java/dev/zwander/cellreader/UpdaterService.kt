@@ -6,6 +6,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.telephony.*
+import androidx.collection.ArraySet
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -97,10 +98,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     private fun update(subId: Int, infos: List<CellInfo>) {
-        primaryCell = subs.defaultDataSubscriptionInfo.subscriptionId
-        cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator)
-
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
+            primaryCell = subs.defaultDataSubscriptionInfo.subscriptionId
+            cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator)
 //            PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)
             SignalWidget().updateAll(this@UpdaterService)
         }
