@@ -115,6 +115,7 @@ fun Content() {
                             SignalCard(
                                 cellInfo = info,
                                 expanded = expanded,
+                                isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
                                 onExpand = { expanded = it },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -127,6 +128,7 @@ fun Content() {
 
                             SignalStrength(
                                 cellSignalStrength = info,
+                                isFinal = it == signalStrengths.lastIndex,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateItemPlacement()

@@ -33,6 +33,7 @@ import dev.zwander.cellreader.utils.onAvail
 @Composable
 fun SignalStrength(
     cellSignalStrength: CellSignalStrength,
+    isFinal: Boolean,
     modifier: Modifier = Modifier
 ) {
     var size by remember {
@@ -46,7 +47,7 @@ fun SignalStrength(
             modifier = Modifier
                 .height(size.height.asDp())
                 .width(16.dp)
-                .padding(start = 13.5.dp)
+                .padding(start = 13.5.dp, bottom = if (isFinal) (size.height / 2f).asDp() else 0.dp)
                 .background(Color.White, RoundedCornerShape(1.25.dp))
                 .align(Alignment.CenterStart)
         )
