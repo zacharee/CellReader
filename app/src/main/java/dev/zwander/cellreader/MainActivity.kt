@@ -15,6 +15,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -77,92 +78,94 @@ fun Content() {
     }
 
     CellReaderTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.background
-        ) {
-            LazyColumn(
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        SelectionContainer {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
             ) {
-                sortedInfos.forEach { (t, u) ->
-                    item(t) {
-                        var expanded by mutableStateOf(false)
+                LazyColumn(
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    sortedInfos.forEach { (t, u) ->
+                        item(t) {
+                            var expanded by mutableStateOf(false)
 
-                        Card(
-                            modifier = Modifier.clickable {
-                                expanded = !expanded
-                            },
-                            backgroundColor = MaterialTheme.colors.background,
-                            elevation = 8.dp
-                        ) {
-                            val subInfo = subs.getActiveSubscriptionInfo(t)
-                            val telephony = TelephonyManager.from(context).createForSubscriptionId(t)
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .animateItemPlacement(),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            Card(
+                                modifier = Modifier.clickable {
+                                    expanded = !expanded
+                                },
+                                backgroundColor = MaterialTheme.colors.background,
+                                elevation = 8.dp
                             ) {
-                                val properInfo = telephony.serviceState
-                                    .getNetworkRegistrationInfoListForTransportType(
-                                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN
-                                    )
-                                    .first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                                val subInfo = subs.getActiveSubscriptionInfo(t)
+                                val telephony = TelephonyManager.from(context).createForSubscriptionId(t)
 
-                                FlowRow(
-                                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                                    mainAxisSpacing = 16.dp,
-                                    mainAxisAlignment = FlowMainAxisAlignment.Center
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                        .animateItemPlacement(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Image(bitmap = subInfo.createIconBitmap(context).asImageBitmap(), contentDescription = null)
-                                    Text(text = "${subInfo.carrierName}")
-                                }
+                                    val properInfo = telephony.serviceState
+                                        .getNetworkRegistrationInfoListForTransportType(
+                                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                                        )
+                                        .first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
 
-                                FlowRow(
-                                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                                    mainAxisSpacing = 16.dp,
-                                    mainAxisAlignment = FlowMainAxisAlignment.Center
-                                ) {
-                                    Text(text = "R-PLMN: ${StringBuilder(properInfo.safeRegisteredPlmn).insert(3, "-")}")
-                                    Text(text = "Type: ${telephony.networkTypeName}")
-                                    Text(text = "CA: ${telephony.serviceState.isUsingCarrierAggregation}")
-                                    Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState.nrState)}/" +
-                                            ServiceState.frequencyRangeToString(telephony.serviceState.nrFrequencyRange)
-                                    )
-                                }
+                                    FlowRow(
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        mainAxisSpacing = 16.dp,
+                                        mainAxisAlignment = FlowMainAxisAlignment.Center
+                                    ) {
+                                        Image(bitmap = subInfo.createIconBitmap(context).asImageBitmap(), contentDescription = null)
+                                        Text(text = "${subInfo.carrierName}")
+                                    }
 
-                                AnimatedVisibility(
-                                    visible = expanded
-                                ) {
-                                    Column {
-                                        Spacer(Modifier.size(4.dp))
+                                    FlowRow(
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        mainAxisSpacing = 16.dp,
+                                        mainAxisAlignment = FlowMainAxisAlignment.Center
+                                    ) {
+                                        Text(text = "R-PLMN: ${StringBuilder(properInfo.safeRegisteredPlmn).insert(3, "-")}")
+                                        Text(text = "Type: ${telephony.networkTypeName}")
+                                        Text(text = "CA: ${telephony.serviceState.isUsingCarrierAggregation}")
+                                        Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState.nrState)}/" +
+                                                ServiceState.frequencyRangeToString(telephony.serviceState.nrFrequencyRange)
+                                        )
+                                    }
 
-                                        Divider()
+                                    AnimatedVisibility(
+                                        visible = expanded
+                                    ) {
+                                        Column {
+                                            Spacer(Modifier.size(4.dp))
 
-                                        Spacer(Modifier.size(4.dp))
+                                            Divider()
 
-                                        AdvancedSubInfo(telephony = telephony, subs = subs)
+                                            Spacer(Modifier.size(4.dp))
+
+                                            AdvancedSubInfo(telephony = telephony, subs = subs)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    items(u.size, { "$t:${u[it]}" }) {
-                        var expanded by remember {
-                            mutableStateOf(false)
-                        }
-                        val info = u[it]
+                        items(u.size, { "$t:${u[it]}" }) {
+                            var expanded by remember {
+                                mutableStateOf(false)
+                            }
+                            val info = u[it]
 
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateItemPlacement()
-                        ) {
-                            SignalCard(cellInfo = info, expanded = expanded, onExpand = { expanded = it })
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItemPlacement()
+                            ) {
+                                SignalCard(cellInfo = info, expanded = expanded, onExpand = { expanded = it })
+                            }
                         }
                     }
                 }

@@ -161,3 +161,32 @@ fun typeToString(type: Int): String {
         else -> "UNKNOWN"
     }
 }
+
+fun subscriptionTypeToString(type: Int): String {
+    return when (type) {
+        SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM -> "Local SIM"
+        SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM -> "Remote SIM"
+        else -> "Unknown"
+    }
+}
+
+fun profileClassToString(clazz: Int): String {
+    return when (clazz) {
+        SubscriptionManager.PROFILE_CLASS_OPERATIONAL -> "Operational"
+        SubscriptionManager.PROFILE_CLASS_PROVISIONING -> "Provisioning"
+        SubscriptionManager.PROFILE_CLASS_TESTING -> "Testing"
+        SubscriptionManager.PROFILE_CLASS_UNSET -> "Unset"
+        else -> "Unknown"
+    }
+}
+
+fun nameSourceToString(source: Int): String {
+    return when (source) {
+        SubscriptionManager.NAME_SOURCE_CARRIER -> "Carrier"
+        SubscriptionManager.NAME_SOURCE_CARRIER_ID -> "Carrier ID"
+        SubscriptionManager.NAME_SOURCE_SIM_SPN -> "SIM SPN"
+        SubscriptionManager.NAME_SOURCE_SIM_PNN -> "SIM PNN"
+        SubscriptionManager.NAME_SOURCE_USER_INPUT -> "User Input"
+        else -> "Unknown"
+    }
+}
