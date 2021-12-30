@@ -69,7 +69,31 @@ object CellUtils {
                 return rankResult
             }
 
-            return o1.cellSignalStrength.dbm.absoluteValue - o2.cellSignalStrength.dbm.absoluteValue
+            return CellSignalStrengthComparator.compare(o1.cellSignalStrength, o2.cellSignalStrength)
+        }
+    }
+
+    object CellSignalStrengthComparator : Comparator<CellSignalStrength> {
+        override fun compare(o1: CellSignalStrength, o2: CellSignalStrength): Int {
+            fun getTypeRanking(strength: CellSignalStrength): Int {
+                return when (strength) {
+                    is CellSignalStrengthGsm -> 0
+                    is CellSignalStrengthCdma -> 0
+                    is CellSignalStrengthTdscdma -> 1
+                    is CellSignalStrengthWcdma -> 2
+                    is CellSignalStrengthLte -> 3
+                    is CellSignalStrengthNr -> 4
+                    else -> 0
+                }
+            }
+
+            val rankResult = getTypeRanking(o2) - getTypeRanking(o1)
+
+            if (rankResult != 0) {
+                return rankResult
+            }
+
+            return o1.dbm.absoluteValue - o2.dbm.absoluteValue
         }
     }
 

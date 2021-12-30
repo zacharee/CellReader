@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.telephony.*
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,17 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.layout.*
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.*
@@ -88,22 +82,32 @@ fun Content() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     sortedInfos.forEach { (t, u) ->
+                        val (signalStrengths, cellInfos) = u
+
+                        val subInfo = subs.getActiveSubscriptionInfo(t)
+                        val telephony = TelephonyManager.from(context).createForSubscriptionId(t)
+
                         item(t) {
-                            var expanded by mutableStateOf(false)
+                            var expanded by remember {
+                                mutableStateOf(false)
+                            }
 
                             Card(
                                 modifier = Modifier.clickable {
                                     expanded = !expanded
                                 },
-                                backgroundColor = MaterialTheme.colors.background,
-                                elevation = 8.dp
+                                backgroundColor = Color.Transparent
                             ) {
-                                val subInfo = subs.getActiveSubscriptionInfo(t)
-                                val telephony = TelephonyManager.from(context).createForSubscriptionId(t)
-
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .angledGradient(
+                                            listOf(
+                                                colorResource(id = R.color.sim_card),
+                                                colorResource(id = R.color.sim_card_1)
+                                            ),
+                                            60f
+                                        )
                                         .padding(8.dp)
                                         .animateItemPlacement(),
                                     horizontalAlignment = Alignment.CenterHorizontally
@@ -155,19 +159,31 @@ fun Content() {
                             }
                         }
 
-                        items(u.size, { "$t:${u[it]}" }) {
+                        items(cellInfos.size, { "$t:${cellInfos[it].cellIdentity}" }) {
                             var expanded by remember {
                                 mutableStateOf(false)
                             }
-                            val info = u[it]
+                            val info = cellInfos[it]
 
-                            Card(
+                            SignalCard(
+                                cellInfo = info,
+                                expanded = expanded,
+                                onExpand = { expanded = it },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateItemPlacement()
-                            ) {
-                                SignalCard(cellInfo = info, expanded = expanded, onExpand = { expanded = it })
-                            }
+                            )
+                        }
+
+                        items(signalStrengths.size, { "$t:$it" }) {
+                            val info = signalStrengths[it]
+
+                            SignalStrength(
+                                cellSignalStrength = info,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItemPlacement()
+                            )
                         }
                     }
                 }

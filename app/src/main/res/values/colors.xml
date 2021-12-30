@@ -7,4 +7,11 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="sim_card">#3499ff</color>
+    <color name="sim_card_1">#5b247a</color>
+    <color name="cell_info">#42e695</color>
+    <color name="cell_info_1">#3bb2b8</color>
+    <color name="signal_strength">#f76b1c</color>
+    <color name="signal_strength_1">#ea4d2c</color>
 </resources>

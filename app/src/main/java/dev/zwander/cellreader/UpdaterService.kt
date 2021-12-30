@@ -92,25 +92,42 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
                 callbacks[telephony.subscriptionId] = this
             }
 
+            updateSignal(telephony.subscriptionId, telephony.signalStrength)
             update(telephony.subscriptionId, telephony.allCellInfo)
             telephony.registerTelephonyCallback(Dispatchers.Main.asExecutor(), callback)
         }
     }
 
-    private fun update(subId: Int, infos: List<CellInfo>) {
+    private fun update(subId: Int, infos: MutableList<CellInfo>) {
         launch(Dispatchers.Main) {
             primaryCell = subs.defaultDataSubscriptionInfo?.subscriptionId ?: 0
-            cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator)
-//            PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)
+            infos.sortWith(CellUtils.CellInfoComparator)
+
+            val foundIDs = mutableListOf<String>()
+
+            val (strengths, _) = cellInfos[subId] ?: (listOf<CellSignalStrength>() to listOf())
+            cellInfos[subId] = strengths to infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
+            SignalWidget().updateAll(this@UpdaterService)
+        }
+    }
+
+    private fun updateSignal(subId: Int, strength: SignalStrength?) {
+        launch(Dispatchers.Main) {
+            val (_, infos) = cellInfos[subId] ?: (listOf<CellSignalStrength>() to listOf())
+            cellInfos[subId] = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf()) to infos
             SignalWidget().updateAll(this@UpdaterService)
         }
     }
 
     private inner class TelephonyListener(private val subId: Int) : TelephonyCallback(),
-        TelephonyCallback.CellInfoListener {
+        TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener {
         @SuppressLint("MissingPermission")
         override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
-            update(subId, cellInfo ?: listOf())
+            update(subId, cellInfo ?: mutableListOf())
+        }
+
+        override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
+            updateSignal(subId, signalStrength)
         }
     }
 }

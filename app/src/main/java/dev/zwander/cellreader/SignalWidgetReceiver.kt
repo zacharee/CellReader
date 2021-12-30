@@ -59,6 +59,8 @@ class SignalWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.fillMaxSize()
             ) {
                 sortedInfos.forEach { (t, u) ->
+                    val (_, cellInfos) = u
+
                     item {
                         Box(
                             modifier = GlanceModifier.height(48.dp)
@@ -68,8 +70,8 @@ class SignalWidget : GlanceAppWidget() {
                             Text(text = "SIM $t")
                         }
                     }
-                    items(u.size) {
-                        SignalCard(cellInfo = u[it])
+                    items(cellInfos.size) {
+                        SignalCard(cellInfo = cellInfos[it])
                     }
                 }
             }

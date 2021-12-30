@@ -2,15 +2,21 @@ package dev.zwander.cellreader.layout
 
 import android.annotation.SuppressLint
 import android.telephony.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
+import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.*
 
 @SuppressLint("MissingPermission")
@@ -31,86 +37,6 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
 
                 Text("Level: $level")
                 Text("Timestamp: $timestampMillis")
-
-                Spacer(Modifier.size(4.dp))
-                Divider(modifier = Modifier.padding(start = 32.dp, end = 32.dp))
-                Spacer(Modifier.size(4.dp))
-
-                Text(
-                    text = "Cell Signal Strengths",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-
-                cellSignalStrengths.forEach { cellSignalStrength ->
-                    Card(
-                        elevation = 8.dp
-                    ) {
-                        FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = MainAxisAlignment.Center,
-                            mainAxisSize = SizeMode.Expand,
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            with(cellSignalStrength) {
-                                Text("dBm: $dbm")
-                                Text("Level: $level")
-                                Text("Valid: $isValid")
-                                Text("ASU Level: $asuLevel")
-
-                                cast<CellSignalStrengthGsm>()?.apply {
-                                    Text("Type: GSM")
-                                    Text("Timing Advance: $timingAdvance")
-                                    Text("Bit Error Rate: $bitErrorRate")
-                                    Text("RSSI: $rssi")
-                                    this.bitErrorRate
-                                }
-
-                                cast<CellSignalStrengthCdma>()?.apply {
-                                    Text("Type: CDMA")
-                                    Text("SnR: $evdoSnr")
-                                    Text("dBm: $cdmaDbm/$evdoDbm")
-                                    Text("Level: $cdmaLevel/$evdoLevel")
-                                    Text("Ec/Io: $cdmaEcio/$evdoEcio")
-                                    Text("EvDO ASU Level: $evdoAsuLevel")
-                                }
-
-                                cast<CellSignalStrengthWcdma>()?.apply {
-                                    Text("Type: WCDMA")
-                                    Text("Bit Error Rate: $bitErrorRate")
-                                    Text("RSSI: $rssi")
-                                    Text("RSCP: $rscp")
-                                    Text("EcNo: $ecNo")
-                                }
-
-                                cast<CellSignalStrengthTdscdma>()?.apply {
-                                    Text("Type: TDSCDMA")
-                                    Text("Bit Error Rate: $bitErrorRate")
-                                    Text("RSSI: $rssi")
-                                    Text("RSCP: $rscp")
-                                }
-
-                                cast<CellSignalStrengthLte>()?.apply {
-                                    Text("Type: LTE")
-                                    Text("Timing Advance: $timingAdvance")
-                                    Text("RSRP: $rsrp")
-                                    Text("RSRQ: $rsrq")
-                                    Text("RSSI: $rssi")
-                                    Text("RSSnR: $rssnr")
-                                    Text("CQI/Index: ${cqi}/${cqiTableIndex}")
-                                }
-
-                                cast<CellSignalStrengthNr>()?.apply {
-                                    Text("Type: NR")
-                                    Text("RSRP: $ssRsrp/$csiRsrp")
-                                    Text("RSRQ: $ssRsrq/$csiRsrq")
-                                    Text("SinR: $ssSinr/$csiSinr")
-                                    Text("CQI/Index: $csiCqiReport/$csiCqiTableIndex")
-                                }
-                            }
-                        }
-                    }
-                }
             }
 
             Spacer(Modifier.size(4.dp))
@@ -167,8 +93,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                                 voiceNetworkType
                             )
                         )
-                    }/" +
-                            ServiceState.rilRadioTechnologyToString(
+                    }/" + ServiceState.rilRadioTechnologyToString(
                                 ServiceState.networkTypeToRilRadioTechnology(
                                     dataNetworkType
                                 )
