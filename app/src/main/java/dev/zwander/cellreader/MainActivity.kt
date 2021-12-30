@@ -109,18 +109,20 @@ fun Content() {
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     val properInfo = telephony.serviceState
-                                        .getNetworkRegistrationInfoListForTransportType(
+                                        ?.getNetworkRegistrationInfoListForTransportType(
                                             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                                         )
-                                        .first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                                        ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
 
                                     FlowRow(
                                         modifier = Modifier.align(Alignment.CenterHorizontally),
                                         mainAxisSpacing = 16.dp,
                                         mainAxisAlignment = FlowMainAxisAlignment.Center
                                     ) {
-                                        Image(bitmap = subInfo.createIconBitmap(context).asImageBitmap(), contentDescription = null)
-                                        Text(text = "${subInfo.carrierName}")
+                                        subInfo?.createIconBitmap(context)?.asImageBitmap()?.let {
+                                            Image(bitmap = it, contentDescription = null)
+                                        }
+                                        Text(text = "${subInfo?.carrierName}")
                                     }
 
                                     FlowRow(
@@ -128,11 +130,11 @@ fun Content() {
                                         mainAxisSpacing = 16.dp,
                                         mainAxisAlignment = FlowMainAxisAlignment.Center
                                     ) {
-                                        Text(text = "R-PLMN: ${StringBuilder(properInfo.safeRegisteredPlmn).insert(3, "-")}")
+                                        Text(text = "R-PLMN: ${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
                                         Text(text = "Type: ${telephony.networkTypeName}")
-                                        Text(text = "CA: ${telephony.serviceState.isUsingCarrierAggregation}")
-                                        Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState.nrState)}/" +
-                                                ServiceState.frequencyRangeToString(telephony.serviceState.nrFrequencyRange)
+                                        Text(text = "CA: ${telephony.serviceState?.isUsingCarrierAggregation}")
+                                        Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
+                                                ServiceState.frequencyRangeToString(telephony.serviceState?.nrFrequencyRange ?: -100)
                                         )
                                     }
 

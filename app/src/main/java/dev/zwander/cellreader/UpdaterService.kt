@@ -99,7 +99,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
     private fun update(subId: Int, infos: List<CellInfo>) {
         launch(Dispatchers.Main) {
-            primaryCell = subs.defaultDataSubscriptionInfo.subscriptionId
+            primaryCell = subs.defaultDataSubscriptionInfo?.subscriptionId ?: 0
             cellInfos[subId] = infos.sortedWith(CellUtils.CellInfoComparator)
 //            PrefUtils.setCellInfos(this@UpdaterService, cellInfos, primaryCell)
             SignalWidget().updateAll(this@UpdaterService)
@@ -109,8 +109,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     private inner class TelephonyListener(private val subId: Int) : TelephonyCallback(),
         TelephonyCallback.CellInfoListener {
         @SuppressLint("MissingPermission")
-        override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>) {
-            update(subId, cellInfo)
+        override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
+            update(subId, cellInfo ?: listOf())
         }
     }
 }

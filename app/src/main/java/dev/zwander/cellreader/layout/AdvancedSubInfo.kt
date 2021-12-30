@@ -117,7 +117,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
             Divider()
             Spacer(Modifier.size(4.dp))
 
-            with(telephony.serviceState) {
+            telephony.serviceState?.apply {
                 Text(
                     text = "Service State",
                     modifier = Modifier.fillMaxWidth(),
