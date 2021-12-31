@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -72,6 +73,17 @@ fun SIMCard(
                     )
                     ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
 
+                FlowRow(
+                    mainAxisSpacing = 16.dp,
+                    mainAxisAlignment = FlowMainAxisAlignment.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    subInfo.createIconBitmap(context)?.asImageBitmap()?.let {
+                        Image(bitmap = it, contentDescription = null)
+                    }
+                    Text(text = "${subInfo.carrierName}")
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -91,28 +103,16 @@ fun SIMCard(
 
                     Spacer(Modifier.size(16.dp))
 
-                    Column {
-                        FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
-                        ) {
-                            subInfo.createIconBitmap(context)?.asImageBitmap()?.let {
-                                Image(bitmap = it, contentDescription = null)
-                            }
-                            Text(text = "${subInfo.carrierName}")
-                        }
-
-                        FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
-                        ) {
-                            FormatText(R.string.rplmn_format, "${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
-                            FormatText(R.string.network_type_format, telephony.networkTypeName)
-                            FormatText(R.string.carrier_aggregation_format, "${telephony.serviceState?.isUsingCarrierAggregation}")
-                            FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
-                                    ServiceState.frequencyRangeToString(telephony.serviceState?.nrFrequencyRange ?: -100)
-                            )
-                        }
+                    FlowRow(
+                        mainAxisSpacing = 16.dp,
+                        mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
+                    ) {
+                        FormatText(R.string.rplmn_format, "${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
+                        FormatText(R.string.network_type_format, telephony.networkTypeName)
+                        FormatText(R.string.carrier_aggregation_format, "${telephony.serviceState?.isUsingCarrierAggregation}")
+                        FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
+                                ServiceState.frequencyRangeToString(telephony.serviceState?.nrFrequencyRange ?: -100)
+                        )
                     }
                 }
 
