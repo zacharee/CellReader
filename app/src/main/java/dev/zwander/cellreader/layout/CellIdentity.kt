@@ -28,7 +28,7 @@ fun CellIdentity(
                 }
             ))
 
-            if (operatorAlphaLong != null || operatorAlphaShort != null) {
+            if (!operatorAlphaLong.isNullOrBlank() || !operatorAlphaShort.isNullOrBlank()) {
                 FormatText(
                     R.string.operator_format,
                     setOf(
@@ -71,7 +71,9 @@ fun CellIdentity(
                     FormatText(R.string.arfcn_format, "$arfcn")
                 }
                 mobileNetworkOperator?.apply {
-                    FormatText(R.string.operator_format, this)
+                    if (isNotBlank()) {
+                        FormatText(R.string.operator_format, this)
+                    }
                 }
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
@@ -114,7 +116,9 @@ fun CellIdentity(
                     FormatText(R.string.uarfcn_format, it.toString())
                 }
                 mobileNetworkOperator?.apply {
-                    FormatText(R.string.operator_format, this)
+                    if (isNotBlank()) {
+                        FormatText(R.string.operator_format, this)
+                    }
                 }
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
@@ -149,7 +153,9 @@ fun CellIdentity(
                     FormatText(R.string.uarfcn_format, it.toString())
                 }
                 mobileNetworkOperator?.apply {
-                    FormatText(R.string.operator_format, this)
+                    if (isNotBlank()) {
+                        FormatText(R.string.operator_format, this)
+                    }
                 }
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
@@ -193,7 +199,9 @@ fun CellIdentity(
                     FormatText(R.string.earfcn_format, it.toString())
                 }
                 mobileNetworkOperator?.apply {
-                    FormatText(R.string.operator_format, this)
+                    if (isNotBlank()) {
+                        FormatText(R.string.operator_format, this)
+                    }
                 }
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(

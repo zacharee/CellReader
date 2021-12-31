@@ -34,7 +34,7 @@
     <string name="cdma_roaming_indicator_format">CDMA Roaming Indicator %s</string>
     <string name="cdma_eri_icon_format">CDMA ERI Icon: %s</string>
     <string name="arfcn_rsrp_boost_format">ARFCN RSRP Boost: %s</string>
-    <string name="endc_available_format">ENDC Available: %s</string>
+    <string name="endc_available_format">ENDC: %s</string>
     <string name="nr_available_format">NR Available: %s</string>
     <string name="dcnr_restricted_format">DCNR Restricted: %s</string>
     <string name="vops_supported_format">VoPS: %s</string>

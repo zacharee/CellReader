@@ -39,21 +39,21 @@ fun LevelIndicator(level: Int, dBm: Int) {
 
         Spacer(Modifier.size(8.dp))
 
-//        Text(
-//            text = "$dBm dBm",
-//            modifier = Modifier.width(64.dp),
-//            maxLines = 1,
-//            textAlign = TextAlign.Center,
-//            fontSize = 14.sp,
-//            overflow = TextOverflow.Ellipsis
-//        )
-
-        AutoResizingText(
+        Text(
             text = "$dBm dBm",
             modifier = Modifier.width(64.dp),
             maxLines = 1,
             textAlign = TextAlign.Center,
-            fontSize = 16.sp
+            fontSize = 14.sp,
+            overflow = TextOverflow.Ellipsis
         )
+//
+//        AutoResizingText(
+//            text = "$dBm dBm",
+//            modifier = Modifier.width(64.dp),
+//            maxLines = 1,
+//            textAlign = TextAlign.Center,
+//            fontSize = 16.sp
+//        )
     }
 }
