@@ -1,31 +1,20 @@
 package dev.zwander.cellreader.layout
 
 import android.telephony.*
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -41,430 +30,325 @@ fun SignalCard(
     onExpand: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var size by remember {
-        mutableStateOf(IntSize.Zero)
-    }
-
-    Box(
+    ExpanderSignalCard(
+        isFinal = isFinal,
+        expanded = expanded,
+        onExpand = onExpand,
+        level = cellInfo.cellSignalStrength.level,
+        dBm = cellInfo.cellSignalStrength.dbm,
+        colors = listOf(
+            0.0f to colorResource(id = R.color.cell_info),
+            1.0f to colorResource(id = R.color.cell_info_1)
+        ),
         modifier = modifier,
-    ) {
-        Box(
-            modifier = Modifier
-                .height(size.height.asDp())
-                .width(16.dp)
-                .padding(start = 13.5.dp, bottom = if (isFinal) (size.height / 2f).asDp() else 0.dp)
-                .background(Color.White, RoundedCornerShape(1.25.dp))
-                .align(Alignment.CenterStart)
-        )
+        basicInfo = {
+            with(cellInfo) {
+                with(cellIdentity) {
+                    with(operatorAlphaLong) {
+                        if (!isNullOrBlank()) {
+                            Text(
+                                text = "Carrier: $this"
+                            )
+                        }
+                    }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.onSizeChanged {
-                size = it
+                    with(mccString) {
+                        if (!isNullOrBlank()) {
+                            Text(
+                                text = "PLMN: ${this}-${mncString}"
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "Type: ${
+                            when (type) {
+                                CellInfo.TYPE_GSM -> "GSM"
+                                CellInfo.TYPE_WCDMA -> "WCDMA"
+                                CellInfo.TYPE_CDMA -> "CDMA"
+                                CellInfo.TYPE_TDSCDMA -> "TDSCDMA"
+                                CellInfo.TYPE_LTE -> "LTE"
+                                CellInfo.TYPE_NR -> "5G NR"
+                                else -> "Unknown"
+                            }
+                        }"
+                    )
+
+                    cast<CellIdentityLte>()?.apply {
+                        Text(text = "Bands: ${bands.joinToString(", ")}")
+
+                        bandwidth.let {
+                            if (it != CellInfo.UNAVAILABLE) {
+                                Text(text = "Bandwidth: $it kHz")
+                            }
+                        }
+                    }
+
+                    cast<CellIdentityNr>()?.apply {
+                        Text(text = "Bands: ${bands.joinToString(", ")}")
+                    }
+                }
+
+                with(cellSignalStrength) {
+                    cast<CellSignalStrengthLte>()?.apply {
+                        Text(text = "RSRQ: $rsrq")
+
+                    }
+
+                    cast<CellSignalStrengthNr>()?.apply {
+                        Text(text = "RSRQ: ${csiRsrq}/${ssRsrq}")
+                    }
+                }
+
+                cast<CellInfoLte>()?.apply {
+                    Text(text = "ENDC: ${cellConfig.endcAvailable}")
+                }
             }
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.indent_arrow),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(40.dp)
-                    .height(32.dp)
-                    .padding(start = 8.dp)
-            )
+        },
+        expandedInfo = {
+            with(cellInfo) {
+                with(cellSignalStrength) {
+                    Text(text = "ASU: $asuLevel")
+                    Text(text = "Valid: $isValid")
 
-            Card(
-                backgroundColor = Color.Transparent,
-                elevation = 8.dp
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .angledGradient(
-                            listOf(
-                                0.0f to colorResource(id = R.color.cell_info),
-                                1.0f to colorResource(id = R.color.cell_info_1),
-                            ),
-                            87f
-                        )
-                ) {
-                    Box(
-                        contentAlignment = Alignment.CenterStart,
-                        modifier = Modifier
-                            .clickable {
-                                onExpand(!expanded)
-                            }
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                    ) {
-                        Column {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Image(
-                                        painter = painterResource(
-                                            when (cellInfo.cellSignalStrength.level) {
-                                                CellSignalStrength.SIGNAL_STRENGTH_POOR -> R.drawable.cell_1
-                                                CellSignalStrength.SIGNAL_STRENGTH_MODERATE -> R.drawable.cell_2
-                                                CellSignalStrength.SIGNAL_STRENGTH_GOOD -> R.drawable.cell_3
-                                                CellSignalStrength.SIGNAL_STRENGTH_GREAT -> R.drawable.cell_4
-                                                else -> R.drawable.cell_0
-                                            }
-                                        ),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .width(32.dp)
-                                            .height(32.dp),
-                                        contentScale = ContentScale.Fit
-                                    )
+                    cast<CellSignalStrengthGsm>()?.apply {
+                        rssi.onAvail {
+                            Text(text = "RSSI: $rssi")
+                        }
+                        bitErrorRate.onAvail {
+                            Text(text = "Bit Error Rate: $bitErrorRate")
+                        }
+                        timingAdvance.onAvail {
+                            Text(text = "Timing Advance: $timingAdvance")
+                        }
+                    }
 
-                                    Spacer(Modifier.size(8.dp))
+                    cast<CellSignalStrengthCdma>()?.apply {
+                        cdmaDbm.onAvail {
+                            Text(text = "CDMA dBm: $cdmaDbm")
+                        }
+                        cdmaEcio.onAvail {
+                            Text(text = "CDMA Ec/Io: $cdmaEcio")
+                        }
+                        evdoDbm.onAvail {
+                            Text(text = "EvDO dBm: $evdoDbm")
+                        }
+                        evdoEcio.onAvail {
+                            Text(text = "EvDO Ec/Io: $evdoEcio")
+                        }
+                        evdoSnr.onAvail {
+                            Text(text = "EvDO SnR: $evdoSnr")
+                        }
+                    }
 
-                                    AutoResizingText(
-                                        text = "${cellInfo.cellSignalStrength.dbm} dBm",
-                                        modifier = Modifier.width(64.dp),
-                                        maxLines = 1,
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 16.sp
-                                    )
-                                }
+                    cast<CellSignalStrengthTdscdma>()?.apply {
+                        rssi.onAvail {
+                            Text(text = "RSSI: $rssi")
+                        }
 
-                                Spacer(Modifier.size(16.dp))
+                        bitErrorRate.onAvail {
+                            Text(text = "Bit Error Rate: $bitErrorRate")
+                        }
 
-                                FlowRow(
-                                    mainAxisSpacing = 16.dp,
-                                    mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
-                                    mainAxisSize = SizeMode.Expand
-                                ) {
-                                    with (cellInfo) {
-                                        with (cellIdentity) {
-                                            with (operatorAlphaLong) {
-                                                if (!isNullOrBlank()) {
-                                                    Text(
-                                                        text = "Carrier: $this"
-                                                    )
-                                                }
-                                            }
+                        rscp.onAvail {
+                            Text(text = "RSCP: $rscp")
+                        }
+                    }
 
-                                            with (mccString) {
-                                                if (!isNullOrBlank()) {
-                                                    Text(
-                                                        text = "PLMN: ${this}-${mncString}"
-                                                    )
-                                                }
-                                            }
+                    cast<CellSignalStrengthWcdma>()?.apply {
+                        rssi.onAvail {
+                            Text(text = "RSSI: $rssi")
+                        }
 
-                                            Text(
-                                                text = "Type: ${
-                                                    when (type) {
-                                                        CellInfo.TYPE_GSM -> "GSM"
-                                                        CellInfo.TYPE_WCDMA -> "WCDMA"
-                                                        CellInfo.TYPE_CDMA -> "CDMA"
-                                                        CellInfo.TYPE_TDSCDMA -> "TDSCDMA"
-                                                        CellInfo.TYPE_LTE -> "LTE"
-                                                        CellInfo.TYPE_NR -> "5G NR"
-                                                        else -> "Unknown"
-                                                    }
-                                                }"
-                                            )
+                        bitErrorRate.onAvail {
+                            Text(text = "Bit Error Rate: $bitErrorRate")
+                        }
 
-                                            cast<CellIdentityLte>()?.apply {
-                                                Text(text = "Bands: ${bands.joinToString(", ")}")
+                        rscp.onAvail {
+                            Text(text = "RSCP: $rscp")
+                        }
 
-                                                bandwidth.let {
-                                                    if (it != CellInfo.UNAVAILABLE) {
-                                                        Text(text = "Bandwidth: $it kHz")
-                                                    }
-                                                }
-                                            }
+                        ecNo.onAvail {
+                            Text(text = "Ec/No: $ecNo")
+                        }
+                    }
 
-                                            cast<CellIdentityNr>()?.apply {
-                                                Text(text = "Bands: ${bands.joinToString(", ")}")
-                                            }
-                                        }
+                    cast<CellSignalStrengthLte>()?.apply {
+                        rssi.onAvail {
+                            Text(text = "RSSI: $rssi")
+                        }
+                        cqi.onAvail {
+                            Text(text = "CQI: $cqi")
+                        }
+                        cqiTableIndex.onAvail {
+                            Text(text = "CQI Table Index: $cqiTableIndex")
+                        }
+                        rssnr.onAvail {
+                            Text(text = "RSSnR: $rssnr")
+                        }
+                        timingAdvance.onAvail {
+                            Text(text = "Timing Advance: $timingAdvance")
+                        }
+                    }
 
-                                        with (cellSignalStrength) {
-                                            cast<CellSignalStrengthLte>()?.apply {
-                                                Text(text = "RSRQ: $rsrq")
+                    cast<CellSignalStrengthNr>()?.apply {
+                        if (csiCqiReport.isNotEmpty()) {
+                            Text(text = "CSI CQI Report: ${csiCqiReport.joinToString(", ")}")
+                        }
+                        csiCqiTableIndex.onAvail {
+                            Text(text = "CSI CQI Table Index: $csiCqiTableIndex")
+                        }
+                        ssSinr.onAvail {
+                            Text(text = "SSSinR: $ssSinr")
+                        }
+                    }
+                }
 
-                                            }
+                with(cellIdentity) {
+                    channelNumber.onAvail {
+                        Text("Channel: $channelNumber")
+                    }
 
-                                            cast<CellSignalStrengthNr>()?.apply {
-                                                Text(text = "RSRQ: ${csiRsrq}/${ssRsrq}")
-                                            }
-                                        }
+                    globalCellId?.let {
+                        Text(text = "GCI: $globalCellId")
+                    }
 
-                                        cast<CellInfoLte>()?.apply {
-                                            Text(text = "ENDC: ${cellConfig.endcAvailable}")
-                                        }
-                                    }
-                                }
-                            }
+                    cast<CellIdentityGsm>()?.apply {
+                        if (additionalPlmns.isNotEmpty()) {
+                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                        }
+                        arfcn.onAvail {
+                            Text("ARFCN: $arfcn")
+                        }
+                        bsic.onAvail {
+                            Text("BSIC: $bsic")
+                        }
+                        cid.onAvail {
+                            Text("CID: $cid")
+                        }
+                        lac.onAvail {
+                            Text("LAC: $lac")
+                        }
+                        if (mobileNetworkOperator != null) {
+                            Text("Operator: $mobileNetworkOperator")
+                        }
+                    }
 
-                            AnimatedVisibility(visible = expanded) {
-                                Column {
-                                    Spacer(Modifier.size(4.dp))
-                                    Divider()
-                                    Spacer(Modifier.size(4.dp))
+                    cast<CellIdentityCdma>()?.apply {
+                        basestationId.onAvail {
+                            Text("Basestation ID: $basestationId")
+                        }
+                        networkId.onAvail {
+                            Text("Network ID: $networkId")
+                        }
+                        systemId.onAvail {
+                            Text("System ID: $systemId")
+                        }
+                        latitude.onAvail {
+                            Text("Lat: $latitude")
+                        }
+                        longitude.onAvail {
+                            Text("Lon: $longitude")
+                        }
+                    }
 
-                                    FlowRow(
-                                        mainAxisSpacing = 16.dp,
-                                        mainAxisAlignment = MainAxisAlignment.SpaceBetween,
-                                        mainAxisSize = SizeMode.Expand
-                                    ) {
-                                        with (cellInfo) {
-                                            with (cellSignalStrength) {
-                                                Text(text = "ASU: $asuLevel")
-                                                Text(text = "Valid: $isValid")
+                    cast<CellIdentityTdscdma>()?.apply {
+                        cid.onAvail {
+                            Text("CID: $cid")
+                        }
+                        cpid.onAvail {
+                            Text("CPID: $cpid")
+                        }
+                        lac.onAvail {
+                            Text("LAC: $lac")
+                        }
+                        if (additionalPlmns.isNotEmpty()) {
+                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                        }
+                        closedSubscriberGroupInfo?.apply {
+                            Text("CSG Identity: $csgIdentity")
+                            Text("CSG Indicator: $csgIndicator")
+                            Text("Home Node-B Name: $homeNodebName")
+                        }
+                        if (mobileNetworkOperator != null) {
+                            Text("Operator: $mobileNetworkOperator")
+                        }
+                        uarfcn.onAvail {
+                            Text("UARFCN: $uarfcn")
+                        }
+                    }
 
-                                                cast<CellSignalStrengthGsm>()?.apply {
-                                                    rssi.onAvail {
-                                                        Text(text = "RSSI: $rssi")
-                                                    }
-                                                    bitErrorRate.onAvail {
-                                                        Text(text = "Bit Error Rate: $bitErrorRate")
-                                                    }
-                                                    timingAdvance.onAvail {
-                                                        Text(text = "Timing Advance: $timingAdvance")
-                                                    }
-                                                }
+                    cast<CellIdentityWcdma>()?.apply {
+                        cid.onAvail {
+                            Text("CID: $cid")
+                        }
+                        lac.onAvail {
+                            Text("LAC: $lac")
+                        }
+                        if (additionalPlmns.isNotEmpty()) {
+                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                        }
+                        closedSubscriberGroupInfo?.apply {
+                            Text("CSG Identity: $csgIdentity")
+                            Text("CSG Indicator: $csgIndicator")
+                            Text("Home Node-B Name: $homeNodebName")
+                        }
+                        if (mobileNetworkOperator != null) {
+                            Text("Operator: $mobileNetworkOperator")
+                        }
+                        psc.onAvail {
+                            Text("PSC: $psc")
+                        }
+                        uarfcn.onAvail {
+                            Text("UARFCN: $uarfcn")
+                        }
+                    }
 
-                                                cast<CellSignalStrengthCdma>()?.apply {
-                                                    cdmaDbm.onAvail {
-                                                        Text(text = "CDMA dBm: $cdmaDbm")
-                                                    }
-                                                    cdmaEcio.onAvail {
-                                                        Text(text = "CDMA Ec/Io: $cdmaEcio")
-                                                    }
-                                                    evdoDbm.onAvail {
-                                                        Text(text = "EvDO dBm: $evdoDbm")
-                                                    }
-                                                    evdoEcio.onAvail {
-                                                        Text(text = "EvDO Ec/Io: $evdoEcio")
-                                                    }
-                                                    evdoSnr.onAvail {
-                                                        Text(text = "EvDO SnR: $evdoSnr")
-                                                    }
-                                                }
+                    cast<CellIdentityLte>()?.apply {
+                        ci.onAvail {
+                            Text("CI: $ci")
+                        }
+                        pci.onAvail {
+                            Text("PCI: $pci")
+                        }
+                        tac.onAvail {
+                            Text("TAC: $tac")
+                        }
+                        if (additionalPlmns.isNotEmpty()) {
+                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                        }
+                        closedSubscriberGroupInfo?.apply {
+                            Text("CSG Identity: $csgIdentity")
+                            Text("CSG Indicator: $csgIndicator")
+                            Text("Home Node-B Name: $homeNodebName")
+                        }
+                        if (mobileNetworkOperator != null) {
+                            Text("Operator: $mobileNetworkOperator")
+                        }
+                        earfcn.onAvail {
+                            Text("EARFCN: $earfcn")
+                        }
+                    }
 
-                                                cast<CellSignalStrengthTdscdma>()?.apply {
-                                                    rssi.onAvail {
-                                                        Text(text = "RSSI: $rssi")
-                                                    }
-
-                                                    bitErrorRate.onAvail {
-                                                        Text(text = "Bit Error Rate: $bitErrorRate")
-                                                    }
-
-                                                    rscp.onAvail {
-                                                        Text(text = "RSCP: $rscp")
-                                                    }
-                                                }
-
-                                                cast<CellSignalStrengthWcdma>()?.apply {
-                                                    rssi.onAvail {
-                                                        Text(text = "RSSI: $rssi")
-                                                    }
-
-                                                    bitErrorRate.onAvail {
-                                                        Text(text = "Bit Error Rate: $bitErrorRate")
-                                                    }
-
-                                                    rscp.onAvail {
-                                                        Text(text = "RSCP: $rscp")
-                                                    }
-
-                                                    ecNo.onAvail {
-                                                        Text(text = "Ec/No: $ecNo")
-                                                    }
-                                                }
-
-                                                cast<CellSignalStrengthLte>()?.apply {
-                                                    rssi.onAvail {
-                                                        Text(text = "RSSI: $rssi")
-                                                    }
-                                                    cqi.onAvail {
-                                                        Text(text = "CQI: $cqi")
-                                                    }
-                                                    cqiTableIndex.onAvail {
-                                                        Text(text = "CQI Table Index: $cqiTableIndex")
-                                                    }
-                                                    rssnr.onAvail {
-                                                        Text(text = "RSSnR: $rssnr")
-                                                    }
-                                                    timingAdvance.onAvail {
-                                                        Text(text = "Timing Advance: $timingAdvance")
-                                                    }
-                                                }
-
-                                                cast<CellSignalStrengthNr>()?.apply {
-                                                    if (csiCqiReport.isNotEmpty()) {
-                                                        Text(text = "CSI CQI Report: ${csiCqiReport.joinToString(", ")}")
-                                                    }
-                                                    csiCqiTableIndex.onAvail {
-                                                        Text(text = "CSI CQI Table Index: $csiCqiTableIndex")
-                                                    }
-                                                    ssSinr.onAvail {
-                                                        Text(text = "SSSinR: $ssSinr")
-                                                    }
-                                                }
-                                            }
-
-                                            with (cellIdentity) {
-                                                channelNumber.onAvail {
-                                                    Text("Channel: $channelNumber")
-                                                }
-
-                                                globalCellId?.let {
-                                                    Text(text = "GCI: $globalCellId")
-                                                }
-
-                                                cast<CellIdentityGsm>()?.apply {
-                                                    if (additionalPlmns.isNotEmpty()) {
-                                                        Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
-                                                    }
-                                                    arfcn.onAvail {
-                                                        Text("ARFCN: $arfcn")
-                                                    }
-                                                    bsic.onAvail {
-                                                        Text("BSIC: $bsic")
-                                                    }
-                                                    cid.onAvail {
-                                                        Text("CID: $cid")
-                                                    }
-                                                    lac.onAvail {
-                                                        Text("LAC: $lac")
-                                                    }
-                                                    if (mobileNetworkOperator != null) {
-                                                        Text("Operator: $mobileNetworkOperator")
-                                                    }
-                                                }
-
-                                                cast<CellIdentityCdma>()?.apply {
-                                                    basestationId.onAvail {
-                                                        Text("Basestation ID: $basestationId")
-                                                    }
-                                                    networkId.onAvail {
-                                                        Text("Network ID: $networkId")
-                                                    }
-                                                    systemId.onAvail {
-                                                        Text("System ID: $systemId")
-                                                    }
-                                                    latitude.onAvail {
-                                                        Text("Lat: $latitude")
-                                                    }
-                                                    longitude.onAvail {
-                                                        Text("Lon: $longitude")
-                                                    }
-                                                }
-
-                                                cast<CellIdentityTdscdma>()?.apply {
-                                                    cid.onAvail {
-                                                        Text("CID: $cid")
-                                                    }
-                                                    cpid.onAvail {
-                                                        Text("CPID: $cpid")
-                                                    }
-                                                    lac.onAvail {
-                                                        Text("LAC: $lac")
-                                                    }
-                                                    if (additionalPlmns.isNotEmpty()) {
-                                                        Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
-                                                    }
-                                                    closedSubscriberGroupInfo?.apply {
-                                                        Text("CSG Identity: $csgIdentity")
-                                                        Text("CSG Indicator: $csgIndicator")
-                                                        Text("Home Node-B Name: $homeNodebName")
-                                                    }
-                                                    if (mobileNetworkOperator != null) {
-                                                        Text("Operator: $mobileNetworkOperator")
-                                                    }
-                                                    uarfcn.onAvail {
-                                                        Text("UARFCN: $uarfcn")
-                                                    }
-                                                }
-
-                                                cast<CellIdentityWcdma>()?.apply {
-                                                    cid.onAvail {
-                                                        Text("CID: $cid")
-                                                    }
-                                                    lac.onAvail {
-                                                        Text("LAC: $lac")
-                                                    }
-                                                    if (additionalPlmns.isNotEmpty()) {
-                                                        Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
-                                                    }
-                                                    closedSubscriberGroupInfo?.apply {
-                                                        Text("CSG Identity: $csgIdentity")
-                                                        Text("CSG Indicator: $csgIndicator")
-                                                        Text("Home Node-B Name: $homeNodebName")
-                                                    }
-                                                    if (mobileNetworkOperator != null) {
-                                                        Text("Operator: $mobileNetworkOperator")
-                                                    }
-                                                    psc.onAvail {
-                                                        Text("PSC: $psc")
-                                                    }
-                                                    uarfcn.onAvail {
-                                                        Text("UARFCN: $uarfcn")
-                                                    }
-                                                }
-
-                                                cast<CellIdentityLte>()?.apply {
-                                                    ci.onAvail {
-                                                        Text("CI: $ci")
-                                                    }
-                                                    pci.onAvail {
-                                                        Text("PCI: $pci")
-                                                    }
-                                                    tac.onAvail {
-                                                        Text("TAC: $tac")
-                                                    }
-                                                    if (additionalPlmns.isNotEmpty()) {
-                                                        Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
-                                                    }
-                                                    closedSubscriberGroupInfo?.apply {
-                                                        Text("CSG Identity: $csgIdentity")
-                                                        Text("CSG Indicator: $csgIndicator")
-                                                        Text("Home Node-B Name: $homeNodebName")
-                                                    }
-                                                    if (mobileNetworkOperator != null) {
-                                                        Text("Operator: $mobileNetworkOperator")
-                                                    }
-                                                    earfcn.onAvail {
-                                                        Text("EARFCN: $earfcn")
-                                                    }
-                                                }
-
-                                                cast<CellIdentityNr>()?.apply {
-                                                    nci.onAvail {
-                                                        Text("NCI: $nci")
-                                                    }
-                                                    pci.onAvail {
-                                                        Text("PCI: $pci")
-                                                    }
-                                                    tac.onAvail {
-                                                        Text("TAC: $tac")
-                                                    }
-                                                    if (additionalPlmns.isNotEmpty()) {
-                                                        Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
-                                                    }
-                                                    nrarfcn.onAvail {
-                                                        Text("NRARFCN: $nrarfcn")
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    cast<CellIdentityNr>()?.apply {
+                        nci.onAvail {
+                            Text("NCI: $nci")
+                        }
+                        pci.onAvail {
+                            Text("PCI: $pci")
+                        }
+                        tac.onAvail {
+                            Text("TAC: $tac")
+                        }
+                        if (additionalPlmns.isNotEmpty()) {
+                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                        }
+                        nrarfcn.onAvail {
+                            Text("NRARFCN: $nrarfcn")
                         }
                     }
                 }
             }
         }
-    }
+    )
 }
