@@ -64,7 +64,7 @@ fun SIMCard(
             FlowRow(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 mainAxisSpacing = 16.dp,
-                mainAxisAlignment = FlowMainAxisAlignment.Center
+                mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
             ) {
                 subInfo.createIconBitmap(context)?.asImageBitmap()?.let {
                     Image(bitmap = it, contentDescription = null)
@@ -75,7 +75,7 @@ fun SIMCard(
             FlowRow(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 mainAxisSpacing = 16.dp,
-                mainAxisAlignment = FlowMainAxisAlignment.Center
+                mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
             ) {
                 FormatText(R.string.rplmn_format, "${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
                 FormatText(R.string.network_type_format, telephony.networkTypeName)

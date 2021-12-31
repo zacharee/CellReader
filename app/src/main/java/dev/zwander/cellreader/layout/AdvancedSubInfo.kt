@@ -23,7 +23,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
     ProvideTextStyle(value = LocalTextStyle.current.copy(textAlign = TextAlign.Center)) {
         FlowRow(
             mainAxisSpacing = 16.dp,
-            mainAxisAlignment = MainAxisAlignment.Center,
+            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
             mainAxisSize = SizeMode.Expand
         ) {
             with(telephony.signalStrength) {
@@ -265,7 +265,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
 
                     FlowRow(
                         mainAxisSpacing = 16.dp,
-                        mainAxisAlignment = MainAxisAlignment.Center,
+                        mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
                         mainAxisSize = SizeMode.Expand,
                         modifier = Modifier.padding(8.dp)
                     ) {
