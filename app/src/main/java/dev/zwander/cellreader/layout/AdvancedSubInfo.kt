@@ -39,9 +39,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                 Text("Timestamp: $timestampMillis")
             }
 
-            Spacer(Modifier.size(4.dp))
-            Divider()
-            Spacer(Modifier.size(4.dp))
+            PaddedDivider(modifier = Modifier.fillMaxWidth())
 
             telephony.serviceState?.apply {
                 Text(
@@ -124,9 +122,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                 }
                 Text("ARFCN RSRP Boost: $arfcnRsrpBoost")
 
-                Spacer(Modifier.size(4.dp))
-                Divider(modifier = Modifier.padding(start = 32.dp, end = 32.dp))
-                Spacer(Modifier.size(4.dp))
+                PaddedDivider(modifier = Modifier.fillMaxWidth())
 
                 Text(
                     text = "Network Registrations",
@@ -394,9 +390,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
 
             subs.allSubscriptionInfoList.find { it.subscriptionId == telephony.subscriptionId }
                 ?.apply {
-                    Spacer(Modifier.size(4.dp))
-                    Divider()
-                    Spacer(Modifier.size(4.dp))
+                    PaddedDivider(modifier = Modifier.fillMaxWidth())
 
                     Text(
                         text = "Subscription Info",

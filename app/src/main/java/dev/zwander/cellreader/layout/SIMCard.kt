@@ -89,11 +89,7 @@ fun SIMCard(
                 visible = expanded
             ) {
                 Column {
-                    Spacer(Modifier.size(4.dp))
-
-                    Divider()
-
-                    Spacer(Modifier.size(4.dp))
+                    PaddedDivider()
 
                     AdvancedSubInfo(telephony = telephony, subs = subs)
                 }
