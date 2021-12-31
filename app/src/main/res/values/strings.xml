@@ -35,7 +35,7 @@
     <string name="cdma_eri_icon_format">CDMA ERI Icon: %s</string>
     <string name="arfcn_rsrp_boost_format">ARFCN RSRP Boost: %s</string>
     <string name="endc_available_format">ENDC Available: %s</string>
-    <string name="nr_available_format">NR Available Format: %s</string>
+    <string name="nr_available_format">NR Available: %s</string>
     <string name="dcnr_restricted_format">DCNR Restricted: %s</string>
     <string name="vops_supported_format">VoPS: %s</string>
     <string name="vops_emergency_service_supported_format">VoPS Emergency: %s</string>
@@ -44,7 +44,7 @@
     <string name="roaming_indicator_format">Roaming Indicator: %s</string>
     <string name="css_format">CSS: %s</string>
     <string name="transport_format">Transport: %s</string>
-    <string name="access_format">Access %s</string>
+    <string name="access_format">Access: %s</string>
     <string name="registered_format">Registered: %s</string>
     <string name="in_service_format">In Service: %s</string>
     <string name="emergency_enabled_format">Emergency Enabled: %s</string>

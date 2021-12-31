@@ -2,10 +2,12 @@ package dev.zwander.cellreader.layout
 
 import android.annotation.SuppressLint
 import android.telephony.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -120,7 +122,10 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                     )
                 }
                 cdmaEriIconMode.onNegAvail {
-                    FormatText(R.string.cdma_eri_icon_format, "${cdmaEriIconMode}/${cdmaEriIconIndex}")
+                    FormatText(
+                        R.string.cdma_eri_icon_format,
+                        "${cdmaEriIconMode}/${cdmaEriIconIndex}"
+                    )
                 }
                 FormatText(R.string.arfcn_rsrp_boost_format, "$arfcnRsrpBoost")
 
@@ -132,16 +137,19 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                     textAlign = TextAlign.Center
                 )
 
-                Card(
-                    elevation = 8.dp
-                ) {
-                    FlowRow(
-                        mainAxisSize = SizeMode.Expand,
-                        mainAxisAlignment = MainAxisAlignment.Center,
-                        mainAxisSpacing = 16.dp,
-                        modifier = Modifier.padding(8.dp)
+                networkRegistrationInfoList.forEach { networkRegistrationInfo ->
+                    Card(
+                        elevation = 0.dp,
+                        backgroundColor = Color.Transparent,
+                        border = BorderStroke(1.dp, Color.White),
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                     ) {
-                        networkRegistrationInfoList.forEach { networkRegistrationInfo ->
+                        FlowRow(
+                            mainAxisSize = SizeMode.Expand,
+                            mainAxisAlignment = MainAxisAlignment.SpaceBetween,
+                            mainAxisSpacing = 16.dp,
+                            modifier = Modifier.padding(8.dp)
+                        ) {
                             with(networkRegistrationInfo) {
                                 this.dataSpecificInfo?.apply {
                                     FormatText(R.string.endc_available_format, "$isEnDcAvailable")
@@ -149,7 +157,10 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                                     FormatText(R.string.dcnr_restricted_format, "$isDcNrRestricted")
 
                                     vopsSupportInfo?.apply {
-                                        FormatText(R.string.vops_supported_format, "$isVopsSupported")
+                                        FormatText(
+                                            R.string.vops_supported_format,
+                                            "$isVopsSupported"
+                                        )
                                         FormatText(
                                             R.string.vops_emergency_service_supported_format,
                                             "$isEmergencyServiceSupported"
@@ -263,11 +274,13 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                         FormatText(R.string.display_name_format, "$displayName")
                         FormatText(R.string.carrier_name_format, "$carrierName")
                         FormatText(R.string.carrier_id_format, "$carrierId")
-                        FormatText(R.string.subscription_type_format,
+                        FormatText(
+                            R.string.subscription_type_format,
                             subscriptionTypeToString(subscriptionType)
                         )
                         FormatText(R.string.subscription_id_format, "$subscriptionId")
-                        FormatText(R.string.profile_class_format,
+                        FormatText(
+                            R.string.profile_class_format,
                             profileClassToString(profileClass)
                         )
                         FormatText(R.string.name_source_format, nameSourceToString(nameSource))
