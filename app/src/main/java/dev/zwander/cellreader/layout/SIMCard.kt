@@ -31,7 +31,7 @@ fun SIMCard(
     subInfo: SubscriptionInfo,
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 

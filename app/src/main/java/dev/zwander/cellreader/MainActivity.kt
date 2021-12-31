@@ -96,14 +96,17 @@ fun Content() {
                                 mutableStateOf(false)
                             }
 
-                            SIMCard(
-                                telephony = telephony,
-                                subs = subs,
-                                subInfo = subInfo,
-                                expanded = expanded,
-                                onExpand = { expanded = it },
+                            Box(
                                 modifier = Modifier.animateItemPlacement()
-                            )
+                            ) {
+                                SIMCard(
+                                    telephony = telephony,
+                                    subs = subs,
+                                    subInfo = subInfo,
+                                    expanded = expanded,
+                                    onExpand = { expanded = it },
+                                )
+                            }
                         }
 
                         items(cellInfos.size, { "$t:${cellInfos[it].cellIdentity}" }) {
@@ -112,27 +115,33 @@ fun Content() {
                             }
                             val info = cellInfos[it]
 
-                            SignalCard(
-                                cellInfo = info,
-                                expanded = expanded,
-                                isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
-                                onExpand = { expanded = it },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItemPlacement()
-                            )
+                            Box(
+                                modifier = Modifier.animateItemPlacement()
+                            ) {
+                                SignalCard(
+                                    cellInfo = info,
+                                    expanded = expanded,
+                                    isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
+                                    onExpand = { expanded = it },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
+                            }
                         }
 
                         items(signalStrengths.size, { "$t:$it" }) {
                             val info = signalStrengths[it]
 
-                            SignalStrength(
-                                cellSignalStrength = info,
-                                isFinal = it == signalStrengths.lastIndex,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItemPlacement()
-                            )
+                            Box(
+                                modifier = Modifier.animateItemPlacement()
+                            ) {
+                                SignalStrength(
+                                    cellSignalStrength = info,
+                                    isFinal = it == signalStrengths.lastIndex,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 }
