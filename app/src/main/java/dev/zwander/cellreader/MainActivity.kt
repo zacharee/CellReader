@@ -5,30 +5,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.telephony.*
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.layout.*
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.*
@@ -85,7 +74,7 @@ fun Content() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     sortedInfos.forEach { (t, u) ->
-                        val (signalStrengths, cellInfos) = u
+                        val (cellInfos, signalStrengths) = u
 
                         val subInfo = subs.getActiveSubscriptionInfo(t)
                         val telephony =

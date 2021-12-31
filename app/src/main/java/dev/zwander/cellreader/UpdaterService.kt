@@ -11,8 +11,11 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
+import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.utils.CellUtils
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.collections.HashMap
 
 class UpdaterService : Service(), CoroutineScope by MainScope() {
@@ -25,6 +28,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
     private val telephonies = arrayListOf<TelephonyManager>()
     private val callbacks = HashMap<Int, TelephonyCallback>()
+    private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_EXIT) {
@@ -64,7 +68,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
         startForeground(100, n)
 
-        init()
+        subs.addOnSubscriptionsChangedListener(Dispatchers.Main.asExecutor(), subsListener)
+//        init()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -75,47 +80,65 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         super.onDestroy()
 
         cancel()
+        deinit()
+        subs.removeOnSubscriptionsChangedListener(subsListener)
+    }
 
-        telephonies.forEach { telephony ->
-            telephony.unregisterTelephonyCallback(callbacks[telephony.subscriptionId])
+    private fun deinit() {
+        telephonies.forEach {
+            it.unregisterTelephonyCallback(callbacks[it.subscriptionId])
         }
+
+        telephonies.clear()
+        callbacks.clear()
     }
 
     @SuppressLint("MissingPermission")
     private fun init() {
+        cellInfos.clear()
+
         telephonies.addAll(
             subs.allSubscriptionInfoList.map { telephony.createForSubscriptionId(it.subscriptionId) }
         )
 
         telephonies.forEach { telephony ->
+            cellInfos[telephony.subscriptionId] = CellModel()
+
             val callback = callbacks[telephony.subscriptionId] ?: TelephonyListener(telephony.subscriptionId).apply {
                 callbacks[telephony.subscriptionId] = this
             }
 
-            updateSignal(telephony.subscriptionId, telephony.signalStrength)
-            update(telephony.subscriptionId, telephony.allCellInfo)
+//            updateSignal(telephony.subscriptionId, telephony.signalStrength)
+//            update(telephony.subscriptionId, telephony.allCellInfo)
             telephony.registerTelephonyCallback(Dispatchers.Main.asExecutor(), callback)
         }
     }
 
     private fun update(subId: Int, infos: MutableList<CellInfo>) {
-        launch(Dispatchers.Main) {
+        launch(Dispatchers.IO) {
             primaryCell = subs.defaultDataSubscriptionInfo?.subscriptionId ?: 0
             infos.sortWith(CellUtils.CellInfoComparator)
 
             val foundIDs = mutableListOf<String>()
+            val model = cellInfos[subId]!!
+            val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
-            val (strengths, _) = cellInfos[subId] ?: (listOf<CellSignalStrength>() to listOf())
-            cellInfos[subId] = strengths to infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
-            SignalWidget().updateAll(this@UpdaterService)
+            launch(Dispatchers.Main) {
+                model.cellInfos = newInfo
+                SignalWidget().updateAll(this@UpdaterService)
+            }
         }
     }
 
     private fun updateSignal(subId: Int, strength: SignalStrength?) {
-        launch(Dispatchers.Main) {
-            val (_, infos) = cellInfos[subId] ?: (listOf<CellSignalStrength>() to listOf())
-            cellInfos[subId] = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf()) to infos
-            SignalWidget().updateAll(this@UpdaterService)
+        launch(Dispatchers.IO) {
+            val model = cellInfos[subId]!!
+            val newInfo = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
+
+            launch(Dispatchers.Main) {
+                model.strengths = newInfo
+                SignalWidget().updateAll(this@UpdaterService)
+            }
         }
     }
 
@@ -128,6 +151,22 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
         override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
             updateSignal(subId, signalStrength)
+        }
+    }
+
+    private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) :  SubscriptionManager.OnSubscriptionsChangedListener() {
+        override fun onSubscriptionsChanged() {
+            val newList = subs.allSubscriptionInfoList
+            val newIds = newList.map { it.subscriptionId }
+            val currentIds = currentList.map { it.subscriptionId }
+
+            if (newList.size != currentList.size || !newIds.containsAll(currentIds) || !currentIds.containsAll(newIds)) {
+                currentList.clear()
+                currentList.addAll(newList)
+
+                deinit()
+                init()
+            }
         }
     }
 }

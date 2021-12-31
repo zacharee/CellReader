@@ -59,7 +59,7 @@ class SignalWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.fillMaxSize()
             ) {
                 sortedInfos.forEach { (t, u) ->
-                    val (_, cellInfos) = u
+                    val (cellInfos, _) = u
 
                     item {
                         Box(

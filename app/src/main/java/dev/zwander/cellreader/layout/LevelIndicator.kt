@@ -3,12 +3,14 @@ package dev.zwander.cellreader.layout
 import android.telephony.CellSignalStrength
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.zwander.cellreader.R
@@ -36,6 +38,15 @@ fun LevelIndicator(level: Int, dBm: Int) {
         )
 
         Spacer(Modifier.size(8.dp))
+
+//        Text(
+//            text = "$dBm dBm",
+//            modifier = Modifier.width(64.dp),
+//            maxLines = 1,
+//            textAlign = TextAlign.Center,
+//            fontSize = 14.sp,
+//            overflow = TextOverflow.Ellipsis
+//        )
 
         AutoResizingText(
             text = "$dBm dBm",
