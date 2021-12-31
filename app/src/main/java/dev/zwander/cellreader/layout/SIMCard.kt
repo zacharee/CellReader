@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.angledGradient
 import dev.zwander.cellreader.utils.safeRegisteredPlmn
 
@@ -66,10 +66,10 @@ fun SIMCard(
                 mainAxisSpacing = 16.dp,
                 mainAxisAlignment = FlowMainAxisAlignment.Center
             ) {
-                subInfo?.createIconBitmap(context)?.asImageBitmap()?.let {
+                subInfo.createIconBitmap(context)?.asImageBitmap()?.let {
                     Image(bitmap = it, contentDescription = null)
                 }
-                Text(text = "${subInfo?.carrierName}")
+                Text(text = "${subInfo.carrierName}")
             }
 
             FlowRow(
@@ -77,10 +77,10 @@ fun SIMCard(
                 mainAxisSpacing = 16.dp,
                 mainAxisAlignment = FlowMainAxisAlignment.Center
             ) {
-                Text(text = "R-PLMN: ${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
-                Text(text = "Type: ${telephony.networkTypeName}")
-                Text(text = "CA: ${telephony.serviceState?.isUsingCarrierAggregation}")
-                Text(text = "NR: ${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
+                FormatText(R.string.rplmn_format, "${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
+                FormatText(R.string.network_type_format, telephony.networkTypeName)
+                FormatText(R.string.carrier_aggregation_format, "${telephony.serviceState?.isUsingCarrierAggregation}")
+                FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
                         ServiceState.frequencyRangeToString(telephony.serviceState?.nrFrequencyRange ?: -100)
                 )
             }

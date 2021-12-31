@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
@@ -46,305 +47,314 @@ fun SignalCard(
                 with(cellIdentity) {
                     with(operatorAlphaLong) {
                         if (!isNullOrBlank()) {
-                            Text(
-                                text = "Carrier: $this"
-                            )
+                            FormatText(R.string.carrier_format, this)
                         }
                     }
 
                     with(mccString) {
                         if (!isNullOrBlank()) {
-                            Text(
-                                text = "PLMN: ${this}-${mncString}"
-                            )
+                            FormatText(R.string.plmn_format, "${this}-${mncString}")
                         }
                     }
 
-                    Text(
-                        text = "Type: ${
-                            when (type) {
-                                CellInfo.TYPE_GSM -> "GSM"
-                                CellInfo.TYPE_WCDMA -> "WCDMA"
-                                CellInfo.TYPE_CDMA -> "CDMA"
-                                CellInfo.TYPE_TDSCDMA -> "TDSCDMA"
-                                CellInfo.TYPE_LTE -> "LTE"
-                                CellInfo.TYPE_NR -> "5G NR"
-                                else -> "Unknown"
-                            }
-                        }"
-                    )
+                    FormatText(R.string.type_format, stringResource(
+                        when (type) {
+                            CellInfo.TYPE_GSM -> R.string.gsm
+                            CellInfo.TYPE_WCDMA -> R.string.wcdma
+                            CellInfo.TYPE_CDMA -> R.string.cdma
+                            CellInfo.TYPE_TDSCDMA -> R.string.tdscdma
+                            CellInfo.TYPE_LTE -> R.string.lte
+                            CellInfo.TYPE_NR -> R.string.nr
+                            else -> R.string.unknown
+                        }
+                    ))
 
                     cast<CellIdentityLte>()?.apply {
-                        Text(text = "Bands: ${bands.joinToString(", ")}")
+                        FormatText(R.string.bands_format, bands.joinToString(", "))
 
                         bandwidth.let {
                             if (it != CellInfo.UNAVAILABLE) {
-                                Text(text = "Bandwidth: $it kHz")
+                                FormatText(R.string.bandwidth_format, "$it kHz")
                             }
                         }
                     }
 
                     cast<CellIdentityNr>()?.apply {
-                        Text(text = "Bands: ${bands.joinToString(", ")}")
+                        FormatText(R.string.bands_format, bands.joinToString(", "))
                     }
                 }
 
                 with(cellSignalStrength) {
                     cast<CellSignalStrengthLte>()?.apply {
-                        Text(text = "RSRQ: $rsrq")
+                        FormatText(R.string.rsrq_format, "$rsrq")
 
                     }
 
                     cast<CellSignalStrengthNr>()?.apply {
-                        Text(text = "RSRQ: ${csiRsrq}/${ssRsrq}")
+                        ssRsrq.onAvail {
+                            FormatText(R.string.ss_rsrq_format, it.toString())
+                        }
+                        csiRsrq.onAvail {
+                            FormatText(R.string.csi_rsrq_format, it.toString())
+                        }
                     }
                 }
 
                 cast<CellInfoLte>()?.apply {
-                    Text(text = "ENDC: ${cellConfig.endcAvailable}")
+                    FormatText(R.string.endc_available_format, "${cellConfig.endcAvailable}")
                 }
             }
         },
         expandedInfo = {
             with(cellInfo) {
                 with(cellSignalStrength) {
-                    Text(text = "ASU: $asuLevel")
-                    Text(text = "Valid: $isValid")
+                    FormatText(R.string.asu_format, "$asuLevel")
+                    FormatText(R.string.valid_format, "$isValid")
 
                     cast<CellSignalStrengthGsm>()?.apply {
                         rssi.onAvail {
-                            Text(text = "RSSI: $rssi")
+                            FormatText(R.string.rssi_format, "$rssi")
                         }
                         bitErrorRate.onAvail {
-                            Text(text = "Bit Error Rate: $bitErrorRate")
+                            FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                         }
                         timingAdvance.onAvail {
-                            Text(text = "Timing Advance: $timingAdvance")
+                            FormatText(R.string.timing_advance_format, "$timingAdvance")
                         }
                     }
 
                     cast<CellSignalStrengthCdma>()?.apply {
                         cdmaDbm.onAvail {
-                            Text(text = "CDMA dBm: $cdmaDbm")
-                        }
-                        cdmaEcio.onAvail {
-                            Text(text = "CDMA Ec/Io: $cdmaEcio")
+                            FormatText(R.string.cdma_dbm_format, "$cdmaDbm")
                         }
                         evdoDbm.onAvail {
-                            Text(text = "EvDO dBm: $evdoDbm")
+                            FormatText(R.string.evdo_dbm_format, "$evdoDbm")
+                        }
+                        cdmaEcio.onAvail {
+                            FormatText(R.string.cdma_ecio_format, "$cdmaEcio")
                         }
                         evdoEcio.onAvail {
-                            Text(text = "EvDO Ec/Io: $evdoEcio")
+                            FormatText(R.string.evdo_ecio_format, "$evdoEcio")
                         }
                         evdoSnr.onAvail {
-                            Text(text = "EvDO SnR: $evdoSnr")
+                            FormatText(R.string.snr_format, "$evdoSnr")
+                        }
+                        evdoAsuLevel.onAvail {
+                            FormatText(R.string.evdo_asu_format, "$evdoAsuLevel")
                         }
                     }
 
                     cast<CellSignalStrengthTdscdma>()?.apply {
                         rssi.onAvail {
-                            Text(text = "RSSI: $rssi")
+                            FormatText(R.string.rssi_format, "$rssi")
                         }
 
                         bitErrorRate.onAvail {
-                            Text(text = "Bit Error Rate: $bitErrorRate")
+                            FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                         }
 
                         rscp.onAvail {
-                            Text(text = "RSCP: $rscp")
+                            FormatText(R.string.rscp_format, "$rscp")
                         }
                     }
 
                     cast<CellSignalStrengthWcdma>()?.apply {
                         rssi.onAvail {
-                            Text(text = "RSSI: $rssi")
+                            FormatText(R.string.rssi_format, "$rssi")
                         }
 
                         bitErrorRate.onAvail {
-                            Text(text = "Bit Error Rate: $bitErrorRate")
+                            FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                         }
 
                         rscp.onAvail {
-                            Text(text = "RSCP: $rscp")
+                            FormatText(R.string.rscp_format, "$rscp")
                         }
 
                         ecNo.onAvail {
-                            Text(text = "Ec/No: $ecNo")
+                            FormatText(R.string.ecno_format, "$ecNo")
                         }
                     }
 
                     cast<CellSignalStrengthLte>()?.apply {
                         rssi.onAvail {
-                            Text(text = "RSSI: $rssi")
+                            FormatText(R.string.rssi_format, "$rssi")
                         }
                         cqi.onAvail {
-                            Text(text = "CQI: $cqi")
+                            FormatText(R.string.cqi_format, "$cqi")
                         }
                         cqiTableIndex.onAvail {
-                            Text(text = "CQI Table Index: $cqiTableIndex")
+                            FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
                         }
                         rssnr.onAvail {
-                            Text(text = "RSSnR: $rssnr")
+                            FormatText(R.string.rssnr_format, "$rssnr")
                         }
                         timingAdvance.onAvail {
-                            Text(text = "Timing Advance: $timingAdvance")
+                            FormatText(R.string.timing_advance_format, "$timingAdvance")
                         }
                     }
 
                     cast<CellSignalStrengthNr>()?.apply {
                         if (csiCqiReport.isNotEmpty()) {
-                            Text(text = "CSI CQI Report: ${csiCqiReport.joinToString(", ")}")
+                            FormatText(R.string.csi_cqi_report_format, csiCqiReport.joinToString(", "))
                         }
                         csiCqiTableIndex.onAvail {
-                            Text(text = "CSI CQI Table Index: $csiCqiTableIndex")
+                            FormatText(R.string.csi_cqi_table_index_format, "$csiCqiTableIndex")
                         }
                         ssSinr.onAvail {
-                            Text(text = "SSSinR: $ssSinr")
+                            FormatText(R.string.ss_sinr_format, "$ssSinr")
                         }
                     }
                 }
 
                 with(cellIdentity) {
                     channelNumber.onAvail {
-                        Text("Channel: $channelNumber")
+                        FormatText(R.string.channel_format, "$channelNumber")
                     }
 
                     globalCellId?.let {
-                        Text(text = "GCI: $globalCellId")
+                        FormatText(R.string.gci_format, globalCellId)
                     }
 
                     cast<CellIdentityGsm>()?.apply {
                         if (additionalPlmns.isNotEmpty()) {
-                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                            FormatText(R.string.additional_plmns_format,
+                                additionalPlmns.joinToString(", ")
+                            )
                         }
                         arfcn.onAvail {
-                            Text("ARFCN: $arfcn")
+                            FormatText(R.string.arfcn_format, "$arfcn")
                         }
                         bsic.onAvail {
-                            Text("BSIC: $bsic")
+                            FormatText(R.string.bsic_format, "$bsic")
                         }
                         cid.onAvail {
-                            Text("CID: $cid")
+                            FormatText(R.string.csg_id_format, "$cid")
                         }
                         lac.onAvail {
-                            Text("LAC: $lac")
+                            FormatText(R.string.lac_format, "$lac")
                         }
                         if (mobileNetworkOperator != null) {
-                            Text("Operator: $mobileNetworkOperator")
+                            FormatText(R.string.operator_format, mobileNetworkOperator)
                         }
                     }
 
                     cast<CellIdentityCdma>()?.apply {
                         basestationId.onAvail {
-                            Text("Basestation ID: $basestationId")
+                            FormatText(R.string.basestation_id_format, "$basestationId")
                         }
                         networkId.onAvail {
-                            Text("Network ID: $networkId")
+                            FormatText(R.string.cdma_network_id_format, "$networkId")
                         }
                         systemId.onAvail {
-                            Text("System ID: $systemId")
+                            FormatText(R.string.cdma_system_id_format, "$systemId")
                         }
                         latitude.onAvail {
-                            Text("Lat: $latitude")
-                        }
-                        longitude.onAvail {
-                            Text("Lon: $longitude")
+                            FormatText(R.string.lat_lon_format, "$latitude/$longitude")
                         }
                     }
 
                     cast<CellIdentityTdscdma>()?.apply {
                         cid.onAvail {
-                            Text("CID: $cid")
+                            FormatText(R.string.csg_id_format, "$cid")
                         }
                         cpid.onAvail {
-                            Text("CPID: $cpid")
+                            FormatText(R.string.cpid_format, "$cpid")
                         }
                         lac.onAvail {
-                            Text("LAC: $lac")
+                            FormatText(R.string.lac_format, "$lac")
                         }
                         if (additionalPlmns.isNotEmpty()) {
-                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                            FormatText(R.string.additional_plmns_format,
+                                additionalPlmns.joinToString(", ")
+                            )
                         }
                         closedSubscriberGroupInfo?.apply {
-                            Text("CSG Identity: $csgIdentity")
-                            Text("CSG Indicator: $csgIndicator")
-                            Text("Home Node-B Name: $homeNodebName")
+                            FormatText(R.string.csg_id_format, "$csgIdentity")
+                            FormatText(R.string.csg_indicator_format, "$csgIndicator")
+                            FormatText(R.string.home_node_b_name_format, homeNodebName)
                         }
                         if (mobileNetworkOperator != null) {
-                            Text("Operator: $mobileNetworkOperator")
+                            FormatText(R.string.operator_format, mobileNetworkOperator)
                         }
                         uarfcn.onAvail {
-                            Text("UARFCN: $uarfcn")
+                            FormatText(R.string.uarfcn_format, "$uarfcn")
                         }
                     }
 
                     cast<CellIdentityWcdma>()?.apply {
                         cid.onAvail {
-                            Text("CID: $cid")
+                            FormatText(R.string.cid_format, "$cid")
                         }
                         lac.onAvail {
-                            Text("LAC: $lac")
+                            FormatText(R.string.lac_format, "$lac")
                         }
                         if (additionalPlmns.isNotEmpty()) {
-                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                            FormatText(R.string.additional_plmns_format,
+                                additionalPlmns.joinToString(", ")
+                            )
                         }
                         closedSubscriberGroupInfo?.apply {
-                            Text("CSG Identity: $csgIdentity")
-                            Text("CSG Indicator: $csgIndicator")
-                            Text("Home Node-B Name: $homeNodebName")
+                            FormatText(R.string.csg_id_format, "$csgIdentity")
+                            FormatText(R.string.csg_indicator_format, "$csgIndicator")
+                            FormatText(R.string.home_node_b_name_format, homeNodebName)
                         }
                         if (mobileNetworkOperator != null) {
-                            Text("Operator: $mobileNetworkOperator")
+                            FormatText(R.string.operator_format, mobileNetworkOperator)
                         }
                         psc.onAvail {
-                            Text("PSC: $psc")
+                            FormatText(R.string.psc_format, "$psc")
                         }
                         uarfcn.onAvail {
-                            Text("UARFCN: $uarfcn")
+                            FormatText(R.string.uarfcn_format, "$uarfcn")
                         }
                     }
 
                     cast<CellIdentityLte>()?.apply {
                         ci.onAvail {
-                            Text("CI: $ci")
+                            FormatText(R.string.ci_format, "$ci")
                         }
                         pci.onAvail {
-                            Text("PCI: $pci")
+                            FormatText(R.string.pci_format, "$pci")
                         }
                         tac.onAvail {
-                            Text("TAC: $tac")
+                            FormatText(R.string.tac_format, "$tac")
                         }
                         if (additionalPlmns.isNotEmpty()) {
-                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                            FormatText(R.string.additional_plmns_format,
+                                additionalPlmns.joinToString(", ")
+                            )
                         }
                         closedSubscriberGroupInfo?.apply {
-                            Text("CSG Identity: $csgIdentity")
-                            Text("CSG Indicator: $csgIndicator")
-                            Text("Home Node-B Name: $homeNodebName")
+                            FormatText(R.string.csg_id_format, "$csgIdentity")
+                            FormatText(R.string.csg_indicator_format, "$csgIndicator")
+                            FormatText(R.string.home_node_b_name_format, homeNodebName)
                         }
                         if (mobileNetworkOperator != null) {
-                            Text("Operator: $mobileNetworkOperator")
+                            FormatText(R.string.operator_format, mobileNetworkOperator)
                         }
                         earfcn.onAvail {
-                            Text("EARFCN: $earfcn")
+                            FormatText(R.string.earfcn_format, "$earfcn")
                         }
                     }
 
                     cast<CellIdentityNr>()?.apply {
                         nci.onAvail {
-                            Text("NCI: $nci")
+                            FormatText(R.string.nci_format, "$nci")
                         }
                         pci.onAvail {
-                            Text("PCI: $pci")
+                            FormatText(R.string.pci_format, "$pci")
                         }
                         tac.onAvail {
-                            Text("TAC: $tac")
+                            FormatText(R.string.tac_format, "$tac")
                         }
                         if (additionalPlmns.isNotEmpty()) {
-                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                            FormatText(R.string.additional_plmns_format,
+                                additionalPlmns.joinToString(", ")
+                            )
                         }
                         nrarfcn.onAvail {
-                            Text("NRARFCN: $nrarfcn")
+                            FormatText(R.string.nrarfcn_format, "$nrarfcn")
                         }
                     }
                 }

@@ -2,17 +2,13 @@ package dev.zwander.cellreader.layout
 
 import android.annotation.SuppressLint
 import android.telephony.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
@@ -30,102 +26,108 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
         ) {
             with(telephony.signalStrength) {
                 Text(
-                    text = "Signal Strength",
+                    text = stringResource(id = R.string.signal_strength),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
 
-                Text("Level: $level")
-                Text("Timestamp: $timestampMillis")
+                FormatText(R.string.level_format, "$level")
+                FormatText(R.string.timestamp_format, "$timestampMillis")
             }
 
             PaddedDivider(modifier = Modifier.fillMaxWidth())
 
             telephony.serviceState?.apply {
                 Text(
-                    text = "Service State",
+                    text = stringResource(id = R.string.service_state),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
 
-                Text(
-                    "Operator: " +
-                            setOf(
-                                operatorAlphaShort,
-                                operatorAlpha,
-                                operatorAlphaLong,
-                                operatorAlphaShortRaw,
-                                operatorAlphaLongRaw,
-                                operatorNumeric,
-                                dataOperatorAlphaShort,
-                                dataOperatorNumeric,
-                                voiceOperatorAlphaLong,
-                                voiceOperatorAlphaShort,
-                                voiceOperatorNumeric
-                            ).joinToString("/")
+                FormatText(
+                    R.string.operator_format,
+                    setOf(
+                        operatorAlphaShort,
+                        operatorAlpha,
+                        operatorAlphaLong,
+                        operatorAlphaShortRaw,
+                        operatorAlphaLongRaw,
+                        operatorNumeric,
+                        dataOperatorAlphaShort,
+                        dataOperatorNumeric,
+                        voiceOperatorAlphaLong,
+                        voiceOperatorAlphaShort,
+                        voiceOperatorNumeric
+                    ).joinToString("/")
                 )
 
-                Text("Roaming: ${roaming}/${dataRoaming}/${voiceRoaming}")
-                Text(
-                    "Roaming Type: ${ServiceState.roamingTypeToString(dataRoamingType)}/${
+                FormatText(R.string.roaming_format, "${roaming}/${dataRoaming}/${voiceRoaming}")
+                FormatText(
+                    R.string.roaming_type_format,
+                    "${ServiceState.roamingTypeToString(dataRoamingType)}/${
                         ServiceState.roamingTypeToString(
                             voiceRoamingType
                         )
                     }"
                 )
-                Text("Data Roaming From Reg: $dataRoamingFromRegistration")
+                FormatText(R.string.data_roaming_from_reg_format, "$dataRoamingFromRegistration")
 
-                Text(
-                    "State: ${ServiceState.rilServiceStateToString(dataRegState)}/${
+                FormatText(
+                    R.string.state_format,
+                    "${ServiceState.rilServiceStateToString(dataRegState)}/${
                         ServiceState.rilServiceStateToString(
                             voiceRegState
                         )
                     }"
                 )
-                Text("Emergency Only: $isEmergencyOnly")
+                FormatText(R.string.emergency_only_format, "$isEmergencyOnly")
 
-                Text(
-                    "Network Type: ${
+                FormatText(
+                    R.string.network_type_format,
+                    "${
                         ServiceState.rilRadioTechnologyToString(
                             ServiceState.networkTypeToRilRadioTechnology(
                                 voiceNetworkType
                             )
                         )
                     }/" + ServiceState.rilRadioTechnologyToString(
-                                ServiceState.networkTypeToRilRadioTechnology(
-                                    dataNetworkType
-                                )
-                            )
+                        ServiceState.networkTypeToRilRadioTechnology(
+                            dataNetworkType
+                        )
+                    )
                 )
 
-                Text("Bandwidths: ${cellBandwidths.joinToString(", ")}")
-                Text("Duplex: ${duplexModeToString(duplexMode)}")
-                Text("Channel: $channelNumber")
+                FormatText(R.string.bandwidths_format,"${cellBandwidths.joinToString(", ")}")
+                FormatText(R.string.duplex_format, "${duplexModeToString(duplexMode)}")
+                FormatText(R.string.channel_format, "$channelNumber")
 
-                Text("Searching: $isSearching")
-                Text("Manual: $isManualSelection")
+                FormatText(R.string.searching_format, "$isSearching")
+                FormatText(R.string.manual_format, "$isManualSelection")
 
-                Text("IWLAN Preferred: $isIwlanPreferred")
-                Text("CSSI: $cssIndicator")
+                FormatText(R.string.iwlan_preferred_format, "$isIwlanPreferred")
+                FormatText(R.string.cssi_format, "$cssIndicator")
 
                 cdmaSystemId.onNegAvail {
-                    Text("CDMA Sys ID: $cdmaSystemId")
+                    FormatText(R.string.cdma_system_id_format, "$cdmaSystemId")
                 }
                 cdmaNetworkId.onNegAvail {
-                    Text("CDMA Net ID: $cdmaNetworkId")
+                    FormatText(R.string.cdma_network_id_format, "$cdmaNetworkId")
                 }
                 cdmaRoamingIndicator.onNegAvail {
-                    Text("CDMA Roaming Indicator: ${cdmaRoamingIndicator}/${cdmaDefaultRoamingIndicator}")
+                    FormatText(
+                        R.string.cdma_roaming_indicator_format,
+                        "${cdmaRoamingIndicator}/${cdmaDefaultRoamingIndicator}"
+                    )
                 }
                 cdmaEriIconMode.onNegAvail {
-                    Text("CDMA ERI Icon: ${cdmaEriIconMode}/${cdmaEriIconIndex}")
+                    FormatText(R.string.cdma_eri_icon_format, "${cdmaEriIconMode}/${cdmaEriIconIndex}")
                 }
-                Text("ARFCN RSRP Boost: $arfcnRsrpBoost")
+                FormatText(R.string.arfcn_rsrp_boost_format, "$arfcnRsrpBoost")
 
                 PaddedDivider(modifier = Modifier.fillMaxWidth())
 
                 Text(
-                    text = "Network Registrations",
+                    text = stringResource(id = R.string.network_registrations),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
@@ -142,104 +144,116 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                         networkRegistrationInfoList.forEach { networkRegistrationInfo ->
                             with(networkRegistrationInfo) {
                                 this.dataSpecificInfo?.apply {
-                                    Text("ENDC Available: $isEnDcAvailable")
-                                    Text("NR Available: $isNrAvailable")
-                                    Text("DCNR Restricted: $isDcNrRestricted")
+                                    FormatText(R.string.endc_available_format, "$isEnDcAvailable")
+                                    FormatText(R.string.nr_available_format, "$isNrAvailable")
+                                    FormatText(R.string.dcnr_restricted_format, "$isDcNrRestricted")
 
                                     vopsSupportInfo?.apply {
-                                        Text("VoPS: $isVopsSupported")
-                                        Text("VoPS Emergency: $isEmergencyServiceSupported")
-                                        Text("VoPS Fallback: $isEmergencyServiceFallbackSupported")
+                                        FormatText(R.string.vops_supported_format, "$isVopsSupported")
+                                        FormatText(
+                                            R.string.vops_emergency_service_supported_format,
+                                            "$isEmergencyServiceSupported"
+                                        )
+                                        FormatText(
+                                            R.string.vops_emergency_service_fallback_supported_format,
+                                            "$isEmergencyServiceFallbackSupported"
+                                        )
                                     }
                                 }
 
                                 this.voiceSpecificInfo?.apply {
-                                    Text("PRL: $systemIsInPrl")
+                                    FormatText(R.string.prl_format, "$systemIsInPrl")
 
                                     roamingIndicator.onNegAvail {
-                                        Text("Roaming Indicator: $roamingIndicator/$defaultRoamingIndicator")
+                                        FormatText(
+                                            R.string.roaming_indicator_format,
+                                            "$roamingIndicator/$defaultRoamingIndicator"
+                                        )
                                     }
 
-                                    Text("CSS: $cssSupported")
+                                    FormatText(R.string.css_format, "$cssSupported")
                                 }
 
-                                Text(
-                                    "Transport: ${
-                                        AccessNetworkConstants.transportTypeToString(
-                                            transportType
-                                        )
-                                    }"
+                                FormatText(
+                                    R.string.transport_format,
+                                    AccessNetworkConstants.transportTypeToString(
+                                        transportType
+                                    )
                                 )
-                                Text(
-                                    "Access: ${
-                                        ServiceState.rilRadioTechnologyToString(
-                                            ServiceState.networkTypeToRilRadioTechnology(
-                                                accessNetworkTechnology
-                                            )
+                                FormatText(
+                                    R.string.access_format,
+                                    ServiceState.rilRadioTechnologyToString(
+                                        ServiceState.networkTypeToRilRadioTechnology(
+                                            accessNetworkTechnology
                                         )
-                                    }"
+                                    )
                                 )
 
-                                Text("Registered: $isRegistered")
-                                Text("In Service: $isInService")
-                                Text("Emergency Enabled: $isEmergencyEnabled")
-                                Text("Searching: $isSearching")
-                                Text(
-                                    "Roaming: $isRoaming/${
+                                FormatText(R.string.registered_format, "$isRegistered")
+                                FormatText(R.string.in_service_format, "$isInService")
+                                FormatText(R.string.emergency_enabled_format, "$isEmergencyEnabled")
+                                FormatText(R.string.searching_format, "$isSearching")
+                                FormatText(
+                                    R.string.roaming_format,
+                                    "$isRoaming/${
                                         ServiceState.roamingTypeToString(
                                             roamingType
                                         )
                                     }"
                                 )
 
-                                Text(
-                                    "Registration State: ${
-                                        NetworkRegistrationInfo.registrationStateToString(
-                                            registrationState
-                                        )
-                                    }"
+                                FormatText(
+                                    R.string.registration_state_format,
+                                    NetworkRegistrationInfo.registrationStateToString(
+                                        registrationState
+                                    )
                                 )
-                                Text("Reject Cause: $rejectCause")
+                                FormatText(R.string.reject_cause_format, "$rejectCause")
 
-                                Text("R-PLMN: $registeredPlmn")
+                                FormatText(R.string.rplmn_format, registeredPlmn)
 
-                                Text("Services: ${
+                                FormatText(
+                                    R.string.services_format,
                                     availableServices.joinToString(", ") {
                                         NetworkRegistrationInfo.serviceTypeToString(
                                             it
                                         )
-                                    }
-                                }")
-                                Text("Domain: ${domainToString(domain)}")
-                                Text("CA: $isUsingCarrierAggregation")
-                                Text("NR: ${NetworkRegistrationInfo.nrStateToString(nrState)}")
+                                    })
+                                FormatText(R.string.domain_format, domainToString(domain))
+                                FormatText(
+                                    R.string.carrier_aggregation_format,
+                                    isUsingCarrierAggregation.toString()
+                                )
+                                FormatText(
+                                    R.string.nr_state_format,
+                                    NetworkRegistrationInfo.nrStateToString(nrState).toString()
+                                )
 
                                 cellIdentity?.apply {
                                     channelNumber.onAvail {
-                                        Text("Channel: $channelNumber")
+                                        FormatText(R.string.channel_format, it.toString())
                                     }
 
                                     if (operatorAlphaLong != null || operatorAlphaShort != null) {
-                                        Text(
-                                            "Operator: ${
-                                                setOf(
-                                                    operatorAlphaLong,
-                                                    operatorAlphaShort
-                                                ).joinToString("/")
-                                            }"
+                                        FormatText(
+                                            R.string.operator_format,
+                                            setOf(
+                                                operatorAlphaLong,
+                                                operatorAlphaShort
+                                            ).joinToString("/")
                                         )
                                     }
 
                                     globalCellId?.apply {
-                                        Text("GCI: $globalCellId")
+                                        FormatText(R.string.gci_format, this)
                                     }
                                     mccString?.apply {
-                                        Text("MCC-MNC: ${mccString}-${mncString}")
+                                        FormatText(R.string.mcc_mnc_format, "${mccString}-${mncString}")
                                     }
                                     plmn?.apply {
-                                        Text("PLMN: $plmn")
+                                        FormatText(R.string.plmn_format, this)
                                     }
-                                    Text("Type: ${typeToString(type)}")
+                                    FormatText(R.string.type_format, type.toString())
 
                                     cast<CellIdentityGsm>()?.apply {
                                         lac.onAvail {
@@ -255,130 +269,166 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                                             Text("ARFCN: $arfcn")
                                         }
                                         mobileNetworkOperator?.apply {
-                                            Text("Operator: $mobileNetworkOperator")
+                                            FormatText(R.string.operator_format, this)
                                         }
                                         if (!additionalPlmns.isNullOrEmpty()) {
-                                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                                            FormatText(
+                                                R.string.additional_plmns_format,
+                                                additionalPlmns.joinToString(", ")
+                                            )
                                         }
                                     }
 
                                     cast<CellIdentityCdma>()?.apply {
                                         longitude.onAvail {
-                                            Text("Lat/Lon: ${latitude}/${longitude}")
+                                            FormatText(
+                                                R.string.lat_lon_format,
+                                                "${latitude}/${longitude}"
+                                            )
                                         }
                                         networkId.onAvail {
-                                            Text("Net ID: $it")
+                                            FormatText(R.string.cdma_network_id_format, it.toString())
                                         }
                                         basestationId.onAvail {
-                                            Text("Basestation ID: $it")
+                                            FormatText(R.string.basestation_id_format, it.toString())
                                         }
                                         systemId.onAvail {
-                                            Text("System ID: $it")
+                                            FormatText(R.string.cdma_system_id_format, it.toString())
                                         }
                                     }
 
                                     cast<CellIdentityWcdma>()?.apply {
                                         lac.onAvail {
-                                            Text("LAC: $it")
+                                            FormatText(R.string.lac_format, it.toString())
                                         }
                                         cid.onAvail {
-                                            Text("CID: $it")
+                                            FormatText(R.string.cid_format, it.toString())
                                         }
                                         uarfcn.onAvail {
-                                            Text("UARFCN: $it")
+                                            FormatText(R.string.uarfcn_format, it.toString())
                                         }
                                         mobileNetworkOperator?.apply {
-                                            Text("Operator: $this")
+                                            FormatText(R.string.operator_format, this)
                                         }
                                         if (!additionalPlmns.isNullOrEmpty()) {
-                                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                                            FormatText(
+                                                R.string.additional_plmns_format,
+                                                additionalPlmns.joinToString(", ")
+                                            )
                                         }
 
                                         this.closedSubscriberGroupInfo?.apply {
-                                            Text("CSG ID: $csgIdentity")
-                                            Text("CSG Indicator: $csgIndicator")
-                                            Text("Home Node-B Name: $homeNodebName")
+                                            FormatText(R.string.csg_id_format, csgIdentity.toString())
+                                            FormatText(
+                                                R.string.csg_indicator_format,
+                                                csgIndicator.toString()
+                                            )
+                                            FormatText(R.string.home_node_b_name_format, homeNodebName)
                                         }
                                     }
 
                                     cast<CellIdentityTdscdma>()?.apply {
                                         lac.onAvail {
-                                            Text("LAC: $it")
+                                            FormatText(R.string.lac_format, it.toString())
                                         }
                                         cid.onAvail {
-                                            Text("CID: $it")
+                                            FormatText(R.string.cid_format, it.toString())
                                         }
                                         cpid.onAvail {
-                                            Text("CPID: $it")
+                                            FormatText(R.string.cpid_format, it.toString())
                                         }
                                         uarfcn.onAvail {
-                                            Text("UARFCN: $it")
+                                            FormatText(R.string.uarfcn_format, it.toString())
                                         }
                                         mobileNetworkOperator?.apply {
-                                            Text("Operator: $this")
+                                            FormatText(R.string.operator_format, this)
                                         }
                                         if (!additionalPlmns.isNullOrEmpty()) {
-                                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                                            FormatText(
+                                                R.string.additional_plmns_format,
+                                                additionalPlmns.joinToString(", ")
+                                            )
                                         }
 
                                         this.closedSubscriberGroupInfo?.apply {
-                                            Text("CSG ID: $csgIdentity")
-                                            Text("CSG Indicator: $csgIndicator")
-                                            Text("Home Node-B Name: $homeNodebName")
+                                            FormatText(R.string.csg_id_format, csgIdentity.toString())
+                                            FormatText(
+                                                R.string.csg_indicator_format,
+                                                csgIndicator.toString()
+                                            )
+                                            FormatText(R.string.home_node_b_name_format, homeNodebName)
                                         }
                                     }
 
                                     cast<CellIdentityLte>()?.apply {
                                         tac.onAvail {
-                                            Text("TAC: $it")
+                                            FormatText(R.string.tac_format, it.toString())
                                         }
                                         ci.onAvail {
-                                            Text("CI: $it")
+                                            FormatText(R.string.ci_format, it.toString())
                                         }
                                         pci.onAvail {
-                                            Text("PCI: $it")
+                                            FormatText(R.string.pci_format, it.toString())
                                         }
                                         earfcn.onAvail {
-                                            Text("EARFCN: $it")
+                                            FormatText(R.string.earfcn_format, it.toString())
                                         }
                                         mobileNetworkOperator?.apply {
-                                            Text("Operator: $this")
+                                            FormatText(R.string.operator_format, this)
                                         }
                                         bandwidth.onAvail {
-                                            Text("Bandwidth: $it")
+                                            FormatText(R.string.bandwidth_format, it.toString())
                                         }
                                         if (bands.isNotEmpty()) {
-                                            Text("Bands: ${bands.joinToString(", ")}")
+                                            FormatText(R.string.bands_format, bands.joinToString(", "))
                                         }
                                         if (!additionalPlmns.isNullOrEmpty()) {
-                                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                                            FormatText(
+                                                R.string.additional_plmns_format,
+                                                additionalPlmns.joinToString(", ")
+                                            )
                                         }
 
                                         this.closedSubscriberGroupInfo?.apply {
-                                            Text("CSG ID: $csgIdentity")
-                                            Text("CSG Indicator: $csgIndicator")
-                                            Text("Home Node-B Name: $homeNodebName")
+                                            FormatText(R.string.csg_id_format, csgIdentity.toString())
+                                            FormatText(
+                                                R.string.csg_indicator_format,
+                                                csgIndicator.toString()
+                                            )
+                                            FormatText(R.string.home_node_b_name_format, homeNodebName)
                                         }
                                     }
 
                                     cast<CellIdentityNr>()?.apply {
                                         tac.onAvail {
-                                            Text("TAC: $it")
+                                            FormatText(R.string.tac_format, it.toString())
                                         }
                                         nci.onAvail {
-                                            Text("NCI: $it")
+                                            FormatText(R.string.nci_format, it.toString())
                                         }
                                         pci.onAvail {
-                                            Text("PCI: $it")
+                                            FormatText(
+                                                textId = R.string.pci_format,
+                                                it.toString()
+                                            )
                                         }
                                         nrarfcn.onAvail {
-                                            Text("NRARFCN: $it")
+                                            FormatText(
+                                                textId = R.string.nrarfcn_format,
+                                                it.toString()
+                                            )
                                         }
                                         if (bands.isNotEmpty()) {
-                                            Text("Bands: ${bands.joinToString(", ")}")
+                                            FormatText(
+                                                textId = R.string.bands_format,
+                                                bands.joinToString(", ")
+                                            )
                                         }
                                         if (!additionalPlmns.isNullOrEmpty()) {
-                                            Text("Additional PLMNs: ${additionalPlmns.joinToString(", ")}")
+                                            FormatText(
+                                                textId = R.string.additional_plmns_format,
+                                                additionalPlmns.joinToString(", ")
+                                            )
                                         }
                                     }
                                 }

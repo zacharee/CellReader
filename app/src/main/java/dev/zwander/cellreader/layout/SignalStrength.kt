@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -26,10 +27,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.utils.angledGradient
-import dev.zwander.cellreader.utils.asDp
-import dev.zwander.cellreader.utils.cast
-import dev.zwander.cellreader.utils.onAvail
+import dev.zwander.cellreader.utils.*
 
 @Composable
 fun SignalStrength(
@@ -51,90 +49,103 @@ fun SignalStrength(
         basicInfo = {
             with(cellSignalStrength) {
                 cast<CellSignalStrengthGsm>()?.apply {
-                    Text("Type: GSM")
+                    FormatText(R.string.type_format, stringResource(id = R.string.gsm))
                     timingAdvance.onAvail {
-                        Text("Timing Advance: $timingAdvance")
+                        FormatText(R.string.timing_advance_format, "$timingAdvance")
                     }
                     bitErrorRate.onAvail {
-                        Text("Bit Error Rate: $bitErrorRate")
+                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                     }
                 }
 
                 cast<CellSignalStrengthCdma>()?.apply {
-                    Text("Type: CDMA")
-                    Text("dBm: $cdmaDbm/$evdoDbm")
-                    Text("SnR: $evdoSnr")
-                    Text("Ec/Io: $cdmaEcio/$evdoEcio")
-                    Text("EvDO ASU Level: $evdoAsuLevel")
+                    cdmaDbm.onAvail {
+                        FormatText(R.string.cdma_dbm_format, "$cdmaDbm")
+                    }
+                    evdoDbm.onAvail {
+                        FormatText(R.string.evdo_dbm_format, "$evdoDbm")
+                    }
+                    cdmaEcio.onAvail {
+                        FormatText(R.string.cdma_ecio_format, "$cdmaEcio")
+                    }
+                    evdoEcio.onAvail {
+                        FormatText(R.string.evdo_ecio_format, "$evdoEcio")
+                    }
+                    evdoSnr.onAvail {
+                        FormatText(R.string.snr_format, "$evdoSnr")
+                    }
+                    evdoAsuLevel.onAvail {
+                        FormatText(R.string.evdo_asu_format, "$evdoAsuLevel")
+                    }
                 }
 
                 cast<CellSignalStrengthWcdma>()?.apply {
-                    Text("Type: WCDMA")
-                    Text("RSCP: $rscp")
+                    FormatText(R.string.type_format, stringResource(id = R.string.wcdma))
+                    FormatText(R.string.rscp_format, "$rscp")
                     bitErrorRate.onAvail {
-                        Text("Bit Error Rate: $bitErrorRate")
+                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                     }
                     ecNo.onAvail {
-                        Text("EcNo: $ecNo")
+                        FormatText(R.string.ecno_format, "$ecNo")
                     }
                 }
 
                 cast<CellSignalStrengthTdscdma>()?.apply {
-                    Text("Type: TDSCDMA")
-                    Text("RSCP: $rscp")
+                    FormatText(R.string.type_format, stringResource(id = R.string.tdscdma))
+                    FormatText(R.string.rscp_format, "$rscp")
                     bitErrorRate.onAvail {
-                        Text("Bit Error Rate: $bitErrorRate")
+                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                     }
                 }
 
                 cast<CellSignalStrengthLte>()?.apply {
-                    Text("Type: LTE")
-                    Text("RSRQ: $rsrq")
-                    Text("RSSI: $rssi")
+                    FormatText(R.string.type_format, stringResource(id = R.string.lte))
+                    FormatText(R.string.rsrq_format, "$rsrq")
+                    FormatText(R.string.rssi_format, "$rssi")
                     timingAdvance.onAvail {
-                        Text("Timing Advance: $timingAdvance")
+                        FormatText(R.string.timing_advance_format, "$timingAdvance")
                     }
                     rssnr.onAvail {
-                        Text("RSSnR: $rssnr")
+                        FormatText(R.string.rssnr_format, "$rssnr")
                     }
                     cqi.onAvail {
-                        Text("CQI: $cqi")
+                        FormatText(R.string.cqi_format, "$cqi")
                     }
                     cqiTableIndex.onAvail {
-                        Text("CQI Index: $cqiTableIndex")
+                        FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
                     }
                 }
 
                 cast<CellSignalStrengthNr>()?.apply {
-                    Text("Type: NR")
+                    FormatText(R.string.type_format, stringResource(id = R.string.nr))
                     ssRsrp.onAvail {
-                        Text("SS RSRP: $ssRsrp")
+                        FormatText(R.string.ss_rsrp_format, "$ssRsrp")
                     }
                     csiRsrp.onAvail {
-                        Text("CSI RSRP: $csiRsrp")
+                        FormatText(R.string.csi_rsrp_format, "$csiRsrp")
                     }
                     ssRsrq.onAvail {
-                        Text("SS RSRQ: $ssRsrq")
+                        FormatText(R.string.ss_rsrq_format, "$ssRsrq")
                     }
                     csiRsrq.onAvail {
-                        Text("CSI RSRQ: $csiRsrq")
+                        FormatText(R.string.csi_rsrq_format, "$csiRsrq")
                     }
                     ssSinr.onAvail {
-                        Text("SS SinR: $ssSinr")
+                        FormatText(R.string.ss_sinr_format, "$ssSinr")
                     }
                     csiSinr.onAvail {
-                        Text("CSI SinR: $csiSinr")
+                        FormatText(R.string.csi_sinr_format, "$csiSinr")
                     }
                     if (csiCqiReport.isNotEmpty()) {
-                        Text("CQI Report: ${csiCqiReport.joinToString(", ")}")
+                        FormatText(R.string.csi_cqi_report_format, csiCqiReport.joinToString(", "))
                     }
                     csiCqiTableIndex.onAvail {
-                        Text("CQI Index: $it")
+                        FormatText(R.string.csi_cqi_table_index_format, "$it")
                     }
                 }
 
-                Text("Valid: $isValid")
-                Text("ASU: $asuLevel")
+                FormatText(R.string.valid_format, "$isValid")
+                FormatText(R.string.asu_format, "$asuLevel")
             }
         }
     )
