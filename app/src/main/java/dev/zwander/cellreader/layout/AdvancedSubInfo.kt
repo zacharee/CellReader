@@ -97,8 +97,8 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                     )
                 )
 
-                FormatText(R.string.bandwidths_format,"${cellBandwidths.joinToString(", ")}")
-                FormatText(R.string.duplex_format, "${duplexModeToString(duplexMode)}")
+                FormatText(R.string.bandwidths_format, cellBandwidths.joinToString(", "))
+                FormatText(R.string.duplex_format, duplexModeToString(duplexMode))
                 FormatText(R.string.channel_format, "$channelNumber")
 
                 FormatText(R.string.searching_format, "$isSearching")
@@ -230,207 +230,11 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                                 )
 
                                 cellIdentity?.apply {
-                                    channelNumber.onAvail {
-                                        FormatText(R.string.channel_format, it.toString())
-                                    }
-
-                                    if (operatorAlphaLong != null || operatorAlphaShort != null) {
-                                        FormatText(
-                                            R.string.operator_format,
-                                            setOf(
-                                                operatorAlphaLong,
-                                                operatorAlphaShort
-                                            ).joinToString("/")
-                                        )
-                                    }
-
-                                    globalCellId?.apply {
-                                        FormatText(R.string.gci_format, this)
-                                    }
-                                    mccString?.apply {
-                                        FormatText(R.string.mcc_mnc_format, "${mccString}-${mncString}")
-                                    }
-                                    plmn?.apply {
-                                        FormatText(R.string.plmn_format, this)
-                                    }
-                                    FormatText(R.string.type_format, type.toString())
-
-                                    cast<CellIdentityGsm>()?.apply {
-                                        lac.onAvail {
-                                            Text("LAC: $it")
-                                        }
-                                        cid.onAvail {
-                                            Text("CID: $it")
-                                        }
-                                        bsic.onAvail {
-                                            Text("BSIC: $bsic")
-                                        }
-                                        arfcn.onAvail {
-                                            Text("ARFCN: $arfcn")
-                                        }
-                                        mobileNetworkOperator?.apply {
-                                            FormatText(R.string.operator_format, this)
-                                        }
-                                        if (!additionalPlmns.isNullOrEmpty()) {
-                                            FormatText(
-                                                R.string.additional_plmns_format,
-                                                additionalPlmns.joinToString(", ")
-                                            )
-                                        }
-                                    }
-
-                                    cast<CellIdentityCdma>()?.apply {
-                                        longitude.onAvail {
-                                            FormatText(
-                                                R.string.lat_lon_format,
-                                                "${latitude}/${longitude}"
-                                            )
-                                        }
-                                        networkId.onAvail {
-                                            FormatText(R.string.cdma_network_id_format, it.toString())
-                                        }
-                                        basestationId.onAvail {
-                                            FormatText(R.string.basestation_id_format, it.toString())
-                                        }
-                                        systemId.onAvail {
-                                            FormatText(R.string.cdma_system_id_format, it.toString())
-                                        }
-                                    }
-
-                                    cast<CellIdentityWcdma>()?.apply {
-                                        lac.onAvail {
-                                            FormatText(R.string.lac_format, it.toString())
-                                        }
-                                        cid.onAvail {
-                                            FormatText(R.string.cid_format, it.toString())
-                                        }
-                                        uarfcn.onAvail {
-                                            FormatText(R.string.uarfcn_format, it.toString())
-                                        }
-                                        mobileNetworkOperator?.apply {
-                                            FormatText(R.string.operator_format, this)
-                                        }
-                                        if (!additionalPlmns.isNullOrEmpty()) {
-                                            FormatText(
-                                                R.string.additional_plmns_format,
-                                                additionalPlmns.joinToString(", ")
-                                            )
-                                        }
-
-                                        this.closedSubscriberGroupInfo?.apply {
-                                            FormatText(R.string.csg_id_format, csgIdentity.toString())
-                                            FormatText(
-                                                R.string.csg_indicator_format,
-                                                csgIndicator.toString()
-                                            )
-                                            FormatText(R.string.home_node_b_name_format, homeNodebName)
-                                        }
-                                    }
-
-                                    cast<CellIdentityTdscdma>()?.apply {
-                                        lac.onAvail {
-                                            FormatText(R.string.lac_format, it.toString())
-                                        }
-                                        cid.onAvail {
-                                            FormatText(R.string.cid_format, it.toString())
-                                        }
-                                        cpid.onAvail {
-                                            FormatText(R.string.cpid_format, it.toString())
-                                        }
-                                        uarfcn.onAvail {
-                                            FormatText(R.string.uarfcn_format, it.toString())
-                                        }
-                                        mobileNetworkOperator?.apply {
-                                            FormatText(R.string.operator_format, this)
-                                        }
-                                        if (!additionalPlmns.isNullOrEmpty()) {
-                                            FormatText(
-                                                R.string.additional_plmns_format,
-                                                additionalPlmns.joinToString(", ")
-                                            )
-                                        }
-
-                                        this.closedSubscriberGroupInfo?.apply {
-                                            FormatText(R.string.csg_id_format, csgIdentity.toString())
-                                            FormatText(
-                                                R.string.csg_indicator_format,
-                                                csgIndicator.toString()
-                                            )
-                                            FormatText(R.string.home_node_b_name_format, homeNodebName)
-                                        }
-                                    }
-
-                                    cast<CellIdentityLte>()?.apply {
-                                        tac.onAvail {
-                                            FormatText(R.string.tac_format, it.toString())
-                                        }
-                                        ci.onAvail {
-                                            FormatText(R.string.ci_format, it.toString())
-                                        }
-                                        pci.onAvail {
-                                            FormatText(R.string.pci_format, it.toString())
-                                        }
-                                        earfcn.onAvail {
-                                            FormatText(R.string.earfcn_format, it.toString())
-                                        }
-                                        mobileNetworkOperator?.apply {
-                                            FormatText(R.string.operator_format, this)
-                                        }
-                                        bandwidth.onAvail {
-                                            FormatText(R.string.bandwidth_format, it.toString())
-                                        }
-                                        if (bands.isNotEmpty()) {
-                                            FormatText(R.string.bands_format, bands.joinToString(", "))
-                                        }
-                                        if (!additionalPlmns.isNullOrEmpty()) {
-                                            FormatText(
-                                                R.string.additional_plmns_format,
-                                                additionalPlmns.joinToString(", ")
-                                            )
-                                        }
-
-                                        this.closedSubscriberGroupInfo?.apply {
-                                            FormatText(R.string.csg_id_format, csgIdentity.toString())
-                                            FormatText(
-                                                R.string.csg_indicator_format,
-                                                csgIndicator.toString()
-                                            )
-                                            FormatText(R.string.home_node_b_name_format, homeNodebName)
-                                        }
-                                    }
-
-                                    cast<CellIdentityNr>()?.apply {
-                                        tac.onAvail {
-                                            FormatText(R.string.tac_format, it.toString())
-                                        }
-                                        nci.onAvail {
-                                            FormatText(R.string.nci_format, it.toString())
-                                        }
-                                        pci.onAvail {
-                                            FormatText(
-                                                textId = R.string.pci_format,
-                                                it.toString()
-                                            )
-                                        }
-                                        nrarfcn.onAvail {
-                                            FormatText(
-                                                textId = R.string.nrarfcn_format,
-                                                it.toString()
-                                            )
-                                        }
-                                        if (bands.isNotEmpty()) {
-                                            FormatText(
-                                                textId = R.string.bands_format,
-                                                bands.joinToString(", ")
-                                            )
-                                        }
-                                        if (!additionalPlmns.isNullOrEmpty()) {
-                                            FormatText(
-                                                textId = R.string.additional_plmns_format,
-                                                additionalPlmns.joinToString(", ")
-                                            )
-                                        }
-                                    }
+                                    CellIdentity(
+                                        cellIdentity = this,
+                                        simple = true,
+                                        advanced = true
+                                    )
                                 }
                             }
                         }
@@ -443,7 +247,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                     PaddedDivider(modifier = Modifier.fillMaxWidth())
 
                     Text(
-                        text = "Subscription Info",
+                        text = stringResource(id = R.string.subscription_info),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
@@ -454,42 +258,46 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                         mainAxisSize = SizeMode.Expand,
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        Text("SIM Slot: $simSlotIndex")
-                        Text("Number: $number")
-                        Text("Display Name: $displayName")
-                        Text("Carrier Name: $carrierName")
-                        Text("Carrier ID: $carrierId")
-                        Text("Type: ${subscriptionTypeToString(subscriptionType)}")
-                        Text("Sub ID: $subscriptionId")
-                        Text("Profile Class: ${profileClassToString(profileClass)}")
-                        Text("Name Source: ${nameSourceToString(nameSource)}")
-                        Text("Opportunistic: $isOpportunistic")
-                        Text("Embedded: $isEmbedded")
+                        FormatText(R.string.sim_slot_format, "$simSlotIndex")
+                        FormatText(R.string.number_format, number)
+                        FormatText(R.string.display_name_format, "$displayName")
+                        FormatText(R.string.carrier_name_format, "$carrierName")
+                        FormatText(R.string.carrier_id_format, "$carrierId")
+                        FormatText(R.string.subscription_type_format,
+                            subscriptionTypeToString(subscriptionType)
+                        )
+                        FormatText(R.string.subscription_id_format, "$subscriptionId")
+                        FormatText(R.string.profile_class_format,
+                            profileClassToString(profileClass)
+                        )
+                        FormatText(R.string.name_source_format, nameSourceToString(nameSource))
+                        FormatText(R.string.opportunistic_format, "$isOpportunistic")
+                        FormatText(R.string.embedded_format, "$isEmbedded")
                         if (iccId.isNotBlank()) {
-                            Text("ICC ID: $iccId")
+                            FormatText(R.string.icc_id_format, iccId)
                         }
                         if (hplmns.isNotEmpty()) {
-                            Text("HPLMNs: ${hplmns.joinToString(", ")}")
+                            FormatText(R.string.hplmns_format, hplmns.joinToString(", "))
                         }
                         if (ehplmns.isNotEmpty()) {
-                            Text("EHPLMNs: ${ehplmns.joinToString(", ")}")
+                            FormatText(R.string.ehplmns_format, ehplmns.joinToString(", "))
                         }
-                        Text("Group Disabled: $isGroupDisabled")
+                        FormatText(R.string.group_disabled_format, "$isGroupDisabled")
                         this.groupUuid?.apply {
-                            Text("Group UUID: $this")
+                            FormatText(R.string.group_uuid_format, "$this")
                         }
                         this.groupOwner?.apply {
-                            Text("Group Owner: $this")
+                            FormatText(R.string.group_owner_format, this)
                         }
-                        Text("Country ISO: $countryIso")
+                        FormatText(R.string.country_iso_format, countryIso)
                         if (cardString.isNotBlank()) {
-                            Text("Card String: $cardString")
+                            FormatText(R.string.card_string_format, cardString)
                         }
-                        Text("Card ID: $cardId")
-                        Text("Data Roaming: $dataRoaming")
-                        Text("Access Rules: $allAccessRules")
-                        Text("MCC-MNC: $mccString-$mncString")
-                        Text("UICC Apps: ${areUiccApplicationsEnabled()}")
+                        FormatText(R.string.card_id_format, "$cardId")
+                        FormatText(R.string.data_roaming_from_reg_format, "$dataRoaming")
+                        FormatText(R.string.access_rules_format, "$allAccessRules")
+                        FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
+                        FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
                     }
                 }
         }

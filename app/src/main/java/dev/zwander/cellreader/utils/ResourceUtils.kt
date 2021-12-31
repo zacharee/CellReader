@@ -39,7 +39,7 @@ fun FormatText(
     val string = if (textFormat.isEmpty()) {
         stringResource(id = textId)
     } else {
-        stringResource(id = textId, textFormat)
+        stringResource(id = textId, *textFormat)
     }
 
     Text(

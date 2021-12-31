@@ -4,6 +4,7 @@
     <string name="signal_strength">Signal Strength</string>
     <string name="service_state">Service State</string>
     <string name="network_registrations">Network Registrations</string>
+    <string name="subscription_info">Subscription Info</string>
     <string name="gsm">GSM</string>
     <string name="cdma">CDMA</string>
     <string name="wcdma">WCDMA</string>
@@ -105,4 +106,26 @@
     <string name="cdma_ecio_format">CDMA Ec/Io: %s</string>
     <string name="evdo_ecio_format">EvDo Ec/Io: %s</string>
     <string name="psc_format">PSC: %s</string>
+    <string name="sim_slot_format">SIM Slot: %s</string>
+    <string name="number_format">Number: %s</string>
+    <string name="display_name_format">Display Name: %s</string>
+    <string name="carrier_name_format">Carrier Name: %s</string>
+    <string name="carrier_id_format">Carrier ID: %s</string>
+    <string name="subscription_type_format">Sub Type: %s</string>
+    <string name="subscription_id_format">Sub ID: %s</string>
+    <string name="profile_class_format">Profile Class: %s</string>
+    <string name="name_source_format">Name Source: %s</string>
+    <string name="opportunistic_format">Opportunistic: %s</string>
+    <string name="embedded_format">Embedded: %s</string>
+    <string name="icc_id_format">ICC ID: %s</string>
+    <string name="hplmns_format">HPLMNs: %s</string>
+    <string name="ehplmns_format">EHPLMNs: %s</string>
+    <string name="group_disabled_format">Group Disabled: %s</string>
+    <string name="group_uuid_format">Group UUID: %s</string>
+    <string name="group_owner_format">Group Owner: %s</string>
+    <string name="country_iso_format">Country ISO: %s</string>
+    <string name="card_string_format">Card String: %s</string>
+    <string name="card_id_format">Card ID: %s</string>
+    <string name="access_rules_format">Access Rules: %s</string>
+    <string name="uicc_apps_format">UICC Apps: %s</string>
 </resources>

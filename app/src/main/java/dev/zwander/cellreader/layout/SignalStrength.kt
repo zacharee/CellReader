@@ -48,104 +48,23 @@ fun SignalStrength(
         modifier = modifier,
         basicInfo = {
             with(cellSignalStrength) {
-                cast<CellSignalStrengthGsm>()?.apply {
-                    FormatText(R.string.type_format, stringResource(id = R.string.gsm))
-                    timingAdvance.onAvail {
-                        FormatText(R.string.timing_advance_format, "$timingAdvance")
+                FormatText(R.string.type_format, stringResource(
+                    when (this) {
+                        is CellSignalStrengthGsm -> R.string.gsm
+                        is CellSignalStrengthWcdma -> R.string.wcdma
+                        is CellSignalStrengthCdma -> R.string.cdma
+                        is CellSignalStrengthTdscdma -> R.string.tdscdma
+                        is CellSignalStrengthLte -> R.string.lte
+                        is CellSignalStrengthNr -> R.string.nr
+                        else -> R.string.unknown
                     }
-                    bitErrorRate.onAvail {
-                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
-                    }
-                }
+                ))
 
-                cast<CellSignalStrengthCdma>()?.apply {
-                    cdmaDbm.onAvail {
-                        FormatText(R.string.cdma_dbm_format, "$cdmaDbm")
-                    }
-                    evdoDbm.onAvail {
-                        FormatText(R.string.evdo_dbm_format, "$evdoDbm")
-                    }
-                    cdmaEcio.onAvail {
-                        FormatText(R.string.cdma_ecio_format, "$cdmaEcio")
-                    }
-                    evdoEcio.onAvail {
-                        FormatText(R.string.evdo_ecio_format, "$evdoEcio")
-                    }
-                    evdoSnr.onAvail {
-                        FormatText(R.string.snr_format, "$evdoSnr")
-                    }
-                    evdoAsuLevel.onAvail {
-                        FormatText(R.string.evdo_asu_format, "$evdoAsuLevel")
-                    }
-                }
-
-                cast<CellSignalStrengthWcdma>()?.apply {
-                    FormatText(R.string.type_format, stringResource(id = R.string.wcdma))
-                    FormatText(R.string.rscp_format, "$rscp")
-                    bitErrorRate.onAvail {
-                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
-                    }
-                    ecNo.onAvail {
-                        FormatText(R.string.ecno_format, "$ecNo")
-                    }
-                }
-
-                cast<CellSignalStrengthTdscdma>()?.apply {
-                    FormatText(R.string.type_format, stringResource(id = R.string.tdscdma))
-                    FormatText(R.string.rscp_format, "$rscp")
-                    bitErrorRate.onAvail {
-                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
-                    }
-                }
-
-                cast<CellSignalStrengthLte>()?.apply {
-                    FormatText(R.string.type_format, stringResource(id = R.string.lte))
-                    FormatText(R.string.rsrq_format, "$rsrq")
-                    FormatText(R.string.rssi_format, "$rssi")
-                    timingAdvance.onAvail {
-                        FormatText(R.string.timing_advance_format, "$timingAdvance")
-                    }
-                    rssnr.onAvail {
-                        FormatText(R.string.rssnr_format, "$rssnr")
-                    }
-                    cqi.onAvail {
-                        FormatText(R.string.cqi_format, "$cqi")
-                    }
-                    cqiTableIndex.onAvail {
-                        FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
-                    }
-                }
-
-                cast<CellSignalStrengthNr>()?.apply {
-                    FormatText(R.string.type_format, stringResource(id = R.string.nr))
-                    ssRsrp.onAvail {
-                        FormatText(R.string.ss_rsrp_format, "$ssRsrp")
-                    }
-                    csiRsrp.onAvail {
-                        FormatText(R.string.csi_rsrp_format, "$csiRsrp")
-                    }
-                    ssRsrq.onAvail {
-                        FormatText(R.string.ss_rsrq_format, "$ssRsrq")
-                    }
-                    csiRsrq.onAvail {
-                        FormatText(R.string.csi_rsrq_format, "$csiRsrq")
-                    }
-                    ssSinr.onAvail {
-                        FormatText(R.string.ss_sinr_format, "$ssSinr")
-                    }
-                    csiSinr.onAvail {
-                        FormatText(R.string.csi_sinr_format, "$csiSinr")
-                    }
-                    if (csiCqiReport.isNotEmpty()) {
-                        FormatText(R.string.csi_cqi_report_format, csiCqiReport.joinToString(", "))
-                    }
-                    csiCqiTableIndex.onAvail {
-                        FormatText(R.string.csi_cqi_table_index_format, "$it")
-                    }
-                }
-
-                FormatText(R.string.valid_format, "$isValid")
-                FormatText(R.string.asu_format, "$asuLevel")
+                CellSignalStrength(
+                    cellSignalStrength = this,
+                    simple = true,
+                    advanced = true
+                )
             }
         }
     )
