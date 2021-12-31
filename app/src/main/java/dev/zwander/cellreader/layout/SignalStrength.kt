@@ -50,9 +50,6 @@ fun SignalStrength(
         modifier = modifier,
         basicInfo = {
             with(cellSignalStrength) {
-                Text("Valid: $isValid")
-                Text("ASU: $asuLevel")
-
                 cast<CellSignalStrengthGsm>()?.apply {
                     Text("Type: GSM")
                     timingAdvance.onAvail {
@@ -65,18 +62,18 @@ fun SignalStrength(
 
                 cast<CellSignalStrengthCdma>()?.apply {
                     Text("Type: CDMA")
-                    Text("SnR: $evdoSnr")
                     Text("dBm: $cdmaDbm/$evdoDbm")
+                    Text("SnR: $evdoSnr")
                     Text("Ec/Io: $cdmaEcio/$evdoEcio")
                     Text("EvDO ASU Level: $evdoAsuLevel")
                 }
 
                 cast<CellSignalStrengthWcdma>()?.apply {
                     Text("Type: WCDMA")
+                    Text("RSCP: $rscp")
                     bitErrorRate.onAvail {
                         Text("Bit Error Rate: $bitErrorRate")
                     }
-                    Text("RSCP: $rscp")
                     ecNo.onAvail {
                         Text("EcNo: $ecNo")
                     }
@@ -84,19 +81,19 @@ fun SignalStrength(
 
                 cast<CellSignalStrengthTdscdma>()?.apply {
                     Text("Type: TDSCDMA")
+                    Text("RSCP: $rscp")
                     bitErrorRate.onAvail {
                         Text("Bit Error Rate: $bitErrorRate")
                     }
-                    Text("RSCP: $rscp")
                 }
 
                 cast<CellSignalStrengthLte>()?.apply {
                     Text("Type: LTE")
+                    Text("RSRQ: $rsrq")
+                    Text("RSSI: $rssi")
                     timingAdvance.onAvail {
                         Text("Timing Advance: $timingAdvance")
                     }
-                    Text("RSRQ: $rsrq")
-                    Text("RSSI: $rssi")
                     rssnr.onAvail {
                         Text("RSSnR: $rssnr")
                     }
@@ -135,6 +132,9 @@ fun SignalStrength(
                         Text("CQI Index: $it")
                     }
                 }
+
+                Text("Valid: $isValid")
+                Text("ASU: $asuLevel")
             }
         }
     )
