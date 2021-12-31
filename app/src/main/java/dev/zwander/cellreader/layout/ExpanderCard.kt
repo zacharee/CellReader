@@ -1,23 +1,28 @@
 package dev.zwander.cellreader.layout
 
-import android.telephony.*
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
-import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
+import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.angledGradient
+import kotlin.math.exp
 
 @Composable
 fun ExpanderSignalCard(
@@ -59,9 +64,9 @@ fun ExpanderSignalCard(
                             colors,
                             87f
                         )
-                        .clickable {
-                            onExpand(!expanded)
-                        }
+//                        .clickable {
+//                            onExpand(!expanded)
+//                        }
                         .padding(8.dp)
                         .fillMaxWidth(),
                 ) {
@@ -83,6 +88,13 @@ fun ExpanderSignalCard(
                         }
 
                         expandedInfo?.let {
+                            Expander(
+                                expanded = expanded,
+                                onExpand = onExpand,
+                                modifier = Modifier.fillMaxWidth()
+                                    .height(24.dp)
+                            )
+
                             AnimatedVisibility(visible = expanded) {
                                 Column {
                                     PaddedDivider()

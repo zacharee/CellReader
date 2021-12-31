@@ -8,6 +8,7 @@ import android.telephony.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -63,6 +64,10 @@ fun Content() {
         context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
     }
 
+    val showingCells = remember {
+        mutableStateMapOf<Int, Boolean>()
+    }
+
     CellReaderTheme {
         SelectionContainer {
             Surface(
@@ -94,6 +99,8 @@ fun Content() {
                                     subInfo = subInfo,
                                     expanded = expanded,
                                     onExpand = { expanded = it },
+                                    showingCells = showingCells[t] ?: true,
+                                    onShowingCells = { showingCells[t] = it }
                                 )
                             }
                         }
@@ -104,32 +111,38 @@ fun Content() {
                             }
                             val info = cellInfos[it]
 
-                            Box(
+                            AnimatedVisibility(
+                                visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                SignalCard(
-                                    cellInfo = info,
-                                    expanded = expanded,
-                                    isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
-                                    onExpand = { expanded = it },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                )
+                                Box {
+                                    SignalCard(
+                                        cellInfo = info,
+                                        expanded = expanded,
+                                        isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
+                                        onExpand = { expanded = it },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
                             }
                         }
 
                         items(signalStrengths.size, { "$t:$it" }) {
                             val info = signalStrengths[it]
 
-                            Box(
+                            AnimatedVisibility(
+                                visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                SignalStrength(
-                                    cellSignalStrength = info,
-                                    isFinal = it == signalStrengths.lastIndex,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                )
+                                Box {
+                                    SignalStrength(
+                                        cellSignalStrength = info,
+                                        isFinal = it == signalStrengths.lastIndex,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }
