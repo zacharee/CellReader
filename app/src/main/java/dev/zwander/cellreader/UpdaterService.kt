@@ -46,12 +46,24 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         )
 
         val n = NotificationCompat.Builder(this, "main")
-            .setContentTitle(resources.getString(R.string.app_name))
+            .setContentTitle(resources.getString(R.string.running_notification_title))
+            .setContentText(resources.getString(R.string.running_notification_desc))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this,
+                    101,
+                    Intent(
+                        this,
+                        MainActivity::class.java
+                    ),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                )
+            )
             .addAction(
                 NotificationCompat.Action.Builder(
-                    null, "Exit", PendingIntent.getService(
+                    null, resources.getString(R.string.exit), PendingIntent.getService(
                         this,
                         100,
                         Intent(this, UpdaterService::class.java).apply { action = ACTION_EXIT },

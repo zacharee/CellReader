@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">CellReader</string>
+    <string name="running_notification_title">Running</string>
+    <string name="running_notification_desc">Long-press to hide this notification.</string>
 
     <string name="signal_strength">Signal Strength</string>
     <string name="service_state">Service State</string>
@@ -12,6 +14,7 @@
     <string name="lte">LTE</string>
     <string name="nr">NR</string>
     <string name="unknown">Unknown</string>
+    <string name="exit">Exit</string>
 
     <string name="level_format">Level: %s</string>
     <string name="timestamp_format">Timestamp: %s</string>
