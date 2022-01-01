@@ -128,4 +128,5 @@
     <string name="card_id_format">Card ID: %s</string>
     <string name="access_rules_format">Access Rules: %s</string>
     <string name="uicc_apps_format">UICC Apps: %s</string>
+    <string name="data_roaming_format">Data Roaming: %s</string>
 </resources>

@@ -69,40 +69,28 @@ fun AdvancedSubInfo(subId: Int) {
                     ).joinToString("/")
                 )
 
-                FormatText(R.string.roaming_format, "${roaming}/${dataRoaming}/${voiceRoaming}")
                 FormatText(
                     R.string.roaming_type_format,
-                    "${ServiceState.roamingTypeToString(dataRoamingType)}/${
-                        ServiceState.roamingTypeToString(
-                            voiceRoamingType
-                        )
-                    }"
+                    HashSet(networkRegistrationInfoList.map { it.roamingType })
+                        .joinToString("/") { ServiceState.roamingTypeToString(it) }
                 )
                 FormatText(R.string.data_roaming_from_reg_format, "$dataRoamingFromRegistration")
 
                 FormatText(
                     R.string.state_format,
-                    "${ServiceState.rilServiceStateToString(dataRegState)}/${
-                        ServiceState.rilServiceStateToString(
-                            voiceRegState
-                        )
-                    }"
+                    setOf(dataRegState, voiceRegState).joinToString("/") { ServiceState.rilServiceStateToString(it) }
                 )
                 FormatText(R.string.emergency_only_format, "$isEmergencyOnly")
 
                 FormatText(
                     R.string.network_type_format,
-                    "${
+                    setOf(dataNetworkType, voiceNetworkType).joinToString("/") {
                         ServiceState.rilRadioTechnologyToString(
                             ServiceState.networkTypeToRilRadioTechnology(
-                                voiceNetworkType
+                                it
                             )
                         )
-                    }/" + ServiceState.rilRadioTechnologyToString(
-                        ServiceState.networkTypeToRilRadioTechnology(
-                            dataNetworkType
-                        )
-                    )
+                    }
                 )
 
                 FormatText(R.string.bandwidths_format, cellBandwidths.joinToString(", "))
@@ -215,11 +203,9 @@ fun AdvancedSubInfo(subId: Int) {
                                 FormatText(R.string.searching_format, "$isSearching")
                                 FormatText(
                                     R.string.roaming_format,
-                                    "$isRoaming/${
-                                        ServiceState.roamingTypeToString(
-                                            roamingType
-                                        )
-                                    }"
+                                    ServiceState.roamingTypeToString(
+                                        roamingType
+                                    )
                                 )
 
                                 FormatText(
@@ -318,7 +304,7 @@ fun AdvancedSubInfo(subId: Int) {
                         FormatText(R.string.card_string_format, cardString)
                     }
                     FormatText(R.string.card_id_format, "$cardId")
-                    FormatText(R.string.data_roaming_from_reg_format, "$dataRoaming")
+                    FormatText(R.string.data_roaming_format, "$dataRoaming")
                     FormatText(R.string.access_rules_format, "$allAccessRules")
                     FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
                     FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
