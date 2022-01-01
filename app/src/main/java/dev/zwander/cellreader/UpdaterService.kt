@@ -124,7 +124,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
             val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
             launch(Dispatchers.Main) {
-                model.cellInfos = newInfo
+                model.cellInfos.clear()
+                model.cellInfos.addAll(newInfo)
                 SignalWidget().updateAll(this@UpdaterService)
             }
         }
@@ -136,7 +137,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
             val newInfo = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
 
             launch(Dispatchers.Main) {
-                model.strengths = newInfo
+                model.strengths.clear()
+                model.strengths.addAll(newInfo)
                 SignalWidget().updateAll(this@UpdaterService)
             }
         }
