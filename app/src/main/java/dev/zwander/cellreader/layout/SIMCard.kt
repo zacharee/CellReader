@@ -119,7 +119,7 @@ fun SIMCard(
                     expanded = expanded,
                     onExpand = onExpand,
                     modifier = Modifier.fillMaxWidth()
-                        .height(24.dp)
+                        .height(20.dp)
                 )
 
                 AnimatedVisibility(
