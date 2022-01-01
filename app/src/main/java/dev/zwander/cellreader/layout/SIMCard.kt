@@ -116,11 +116,12 @@ fun SIMCard(
                     }
                 }
 
+                val scroll = rememberCarouselScrollState()
+
                 AnimatedVisibility(
                     visible = expanded
                 ) {
                     Column {
-                        val scroll = rememberCarouselScrollState()
                         val topAlpha by animateFloatAsState(targetValue = if (scroll.value > 0) 1f else 0f)
                         val bottomAlpha by animateFloatAsState(targetValue = if (scroll.value < scroll.maxValue) 1f else 0f)
 
