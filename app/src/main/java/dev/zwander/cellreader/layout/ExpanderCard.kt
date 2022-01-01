@@ -83,13 +83,6 @@ fun ExpanderSignalCard(
                         }
 
                         expandedInfo?.let {
-                            Expander(
-                                expanded = expanded,
-                                onExpand = onExpand,
-                                modifier = Modifier.fillMaxWidth()
-                                    .height(20.dp)
-                            )
-
                             AnimatedVisibility(visible = expanded) {
                                 Column {
                                     PaddedDivider()
@@ -103,6 +96,13 @@ fun ExpanderSignalCard(
                                     }
                                 }
                             }
+
+                            Expander(
+                                expanded = expanded,
+                                onExpand = onExpand,
+                                modifier = Modifier.fillMaxWidth()
+                                    .height(20.dp)
+                            )
                         }
                     }
                 }

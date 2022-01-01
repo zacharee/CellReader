@@ -114,13 +114,6 @@ fun SIMCard(
                     }
                 }
 
-                Expander(
-                    expanded = expanded,
-                    onExpand = onExpand,
-                    modifier = Modifier.fillMaxWidth()
-                        .height(20.dp)
-                )
-
                 AnimatedVisibility(
                     visible = expanded
                 ) {
@@ -130,6 +123,13 @@ fun SIMCard(
                         AdvancedSubInfo(telephony = telephony, subs = subs)
                     }
                 }
+
+                Expander(
+                    expanded = expanded,
+                    onExpand = onExpand,
+                    modifier = Modifier.fillMaxWidth()
+                        .height(20.dp)
+                )
             }
         }
     }
