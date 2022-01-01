@@ -92,9 +92,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun init() {
+    private fun init(subscriptions: List<SubscriptionInfo>) {
         telephonies.putAll(
-            subs.allSubscriptionInfoList.map {
+            subscriptions.map {
                 cellInfos[it.subscriptionId] = listOf()
                 strengthInfos[it.subscriptionId] = listOf()
                 subInfos[it.subscriptionId] = it
@@ -176,7 +176,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
                 launch(Dispatchers.Main) {
                     deinit()
-                    init()
+                    init(newList)
                 }
             }
         }
