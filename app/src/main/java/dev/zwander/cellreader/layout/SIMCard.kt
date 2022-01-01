@@ -6,6 +6,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -14,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -115,16 +118,33 @@ fun SIMCard(
                     visible = expanded
                 ) {
                     Column {
-                        PaddedDivider()
+                        val scroll = rememberScrollState()
+                        val topAlpha by animateFloatAsState(targetValue = if (scroll.value > 0) 1f else 0f)
+                        val bottomAlpha by animateFloatAsState(targetValue = if (scroll.value < scroll.maxValue) 1f else 0f)
 
-                        AdvancedSubInfo(telephony = telephony, subs = subs)
+                        PaddedDivider(
+                            modifier = Modifier.alpha(alpha = topAlpha)
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .height(300.dp)
+                                .verticalScroll(scroll)
+                        ) {
+                            AdvancedSubInfo(telephony = telephony, subs = subs)
+                        }
+
+                        PaddedDivider(
+                            modifier = Modifier.alpha(alpha = bottomAlpha)
+                        )
                     }
                 }
 
                 Expander(
                     expanded = expanded,
                     onExpand = onExpand,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .height(20.dp)
                 )
             }
