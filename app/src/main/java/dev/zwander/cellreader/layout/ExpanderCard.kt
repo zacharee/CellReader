@@ -20,9 +20,7 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
-import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.angledGradient
-import kotlin.math.exp
 
 @Composable
 fun ExpanderSignalCard(
@@ -64,9 +62,6 @@ fun ExpanderSignalCard(
                             colors,
                             87f
                         )
-//                        .clickable {
-//                            onExpand(!expanded)
-//                        }
                         .padding(8.dp)
                         .fillMaxWidth(),
                 ) {
@@ -76,7 +71,7 @@ fun ExpanderSignalCard(
                         ) {
                             LevelIndicator(level, dBm)
 
-                            Spacer(Modifier.size(16.dp))
+                            Spacer(Modifier.size(8.dp))
 
                             FlowRow(
                                 mainAxisSpacing = 16.dp,
@@ -92,7 +87,7 @@ fun ExpanderSignalCard(
                                 expanded = expanded,
                                 onExpand = onExpand,
                                 modifier = Modifier.fillMaxWidth()
-                                    .height(24.dp)
+                                    .height(20.dp)
                             )
 
                             AnimatedVisibility(visible = expanded) {

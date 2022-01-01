@@ -96,16 +96,15 @@ fun SIMCard(
                             contentDescription = null,
                             modifier = Modifier
                                 .rotate(rotation)
-                                .width(48.dp)
-                                .height(48.dp),
+                                .width(32.dp)
+                                .height(32.dp),
                         )
                     }
 
-                    Spacer(Modifier.size(16.dp))
-
                     FlowRow(
                         mainAxisSpacing = 16.dp,
-                        mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly
+                        mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         FormatText(R.string.rplmn_format, "${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
                         FormatText(R.string.network_type_format, telephony.networkTypeName)
