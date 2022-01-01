@@ -20,6 +20,7 @@ val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrength>>()
 val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
 val subInfos = mutableStateMapOf<Int, SubscriptionInfo>()
 val serviceStates = mutableStateMapOf<Int, ServiceState?>()
+val telephonies = mutableStateMapOf<Int, TelephonyManager>()
 
 class App : Application() {
     override fun onCreate() {

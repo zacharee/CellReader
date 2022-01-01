@@ -10,10 +10,8 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
-import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.utils.CellUtils
 import kotlinx.coroutines.*
-import java.util.*
 import kotlin.collections.HashMap
 
 class UpdaterService : Service(), CoroutineScope by MainScope() {
@@ -24,7 +22,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
-    private val telephonies = HashMap<Int, TelephonyManager>()
     private val callbacks = HashMap<Int, TelephonyCallback>()
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
 
@@ -66,7 +63,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
         startForeground(100, n)
 
-        subs.addOnSubscriptionsChangedListener(Dispatchers.Main.asExecutor(), subsListener)
+        subs.addOnSubscriptionsChangedListener(Dispatchers.IO.asExecutor(), subsListener)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -86,19 +83,16 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
             telephony.unregisterTelephonyCallback(callbacks[subId])
         }
 
+        subIds.clear()
+        cellInfos.clear()
+        strengthInfos.clear()
+        subInfos.clear()
+        serviceStates.clear()
         telephonies.clear()
-        callbacks.clear()
     }
 
     @SuppressLint("MissingPermission")
     private fun init() {
-        cellInfos.clear()
-        strengthInfos.clear()
-        subIds.clear()
-        subInfos.clear()
-        serviceStates.clear()
-        signalStrengths.clear()
-
         telephonies.putAll(
             subs.allSubscriptionInfoList.map {
                 cellInfos[it.subscriptionId] = listOf()
@@ -118,7 +112,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     private fun update(subId: Int, infos: MutableList<CellInfo>) {
-        primaryCell = subs.defaultDataSubscriptionInfo?.subscriptionId ?: 0
         infos.sortWith(CellUtils.CellInfoComparator)
 
         val foundIDs = mutableListOf<String>()
@@ -149,7 +142,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     private inner class TelephonyListener(private val subId: Int) : TelephonyCallback(),
-        TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener, TelephonyCallback.ServiceStateListener {
+        TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener,
+        TelephonyCallback.ServiceStateListener {
         @SuppressLint("MissingPermission")
         override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
             update(subId, cellInfo ?: mutableListOf())
@@ -164,18 +158,26 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         }
     }
 
-    private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) :  SubscriptionManager.OnSubscriptionsChangedListener() {
+    private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) : SubscriptionManager.OnSubscriptionsChangedListener() {
         override fun onSubscriptionsChanged() {
             val newList = subs.allSubscriptionInfoList
             val newIds = newList.map { it.subscriptionId }
             val currentIds = currentList.map { it.subscriptionId }
 
+            val defaultId = SubscriptionManager.getDefaultSubscriptionId()
+
+            launch(Dispatchers.Main) {
+                primaryCell = defaultId
+            }
+
             if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
                 currentList.clear()
                 currentList.addAll(newList)
 
-                deinit()
-                init()
+                launch(Dispatchers.Main) {
+                    deinit()
+                    init()
+                }
             }
         }
     }

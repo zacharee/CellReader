@@ -1,10 +1,8 @@
 package dev.zwander.cellreader
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.telephony.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,13 +58,11 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Content() {
-    val context = LocalContext.current
-    val subs = remember {
-        context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
-    }
-
     val showingCells = remember {
         mutableStateMapOf<Int, Boolean>()
+    }
+    val expanded = remember {
+        mutableStateMapOf<String, Boolean>()
     }
 
     CellReaderTheme {
@@ -80,22 +76,15 @@ fun Content() {
                 ) {
                     sortedSubIds.forEach { t ->
                         item(t) {
-                            val telephony = remember(t) {
-                                TelephonyManager.from(context).createForSubscriptionId(t)
-                            }
-
-                            var expanded by remember {
-                                mutableStateOf(false)
-                            }
-
                             SIMCard(
-                                telephony = telephony,
+                                telephony = telephonies[t]!!,
                                 subInfo = subInfos[t]!!,
-                                expanded = expanded,
-                                onExpand = { expanded = it },
+                                expanded = expanded[t.toString()] ?: false,
+                                onExpand = { expanded[t.toString()] = it },
                                 showingCells = showingCells[t] ?: true,
                                 onShowingCells = { showingCells[t] = it },
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier
+                                    .animateItemPlacement()
                                     .padding(bottom = 8.dp)
                             )
                         }
@@ -105,22 +94,23 @@ fun Content() {
                         val strengthsEmpty = strengthInfos[t]!!.isEmpty()
 
                         itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                            var expanded by remember {
-                                mutableStateOf(false)
-                            }
-
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier
+                                    .animateItemPlacement()
                                     .padding(bottom = 8.dp),
                                 enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                                 exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                             ) {
+                                val key = remember(item.cellIdentity) {
+                                    "$t:${item.cellIdentity}"
+                                }
+
                                 SignalCard(
                                     cellInfo = item,
-                                    expanded = expanded,
+                                    expanded = expanded[key] ?: false,
                                     isFinal = index == lastCellIndex && strengthsEmpty,
-                                    onExpand = { expanded = it },
+                                    onExpand = { expanded[key] = it },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 )
@@ -130,7 +120,8 @@ fun Content() {
                         itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier
+                                    .animateItemPlacement()
                                     .padding(bottom = 8.dp),
                                 enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                                 exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
