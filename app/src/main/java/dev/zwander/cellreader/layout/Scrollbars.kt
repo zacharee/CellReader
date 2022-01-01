@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.android.internal.R.attr.layoutDirection
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
