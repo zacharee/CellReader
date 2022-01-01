@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.telephony.*
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -79,13 +80,14 @@ fun Content() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     sortedInfos.forEach { (t, u) ->
-                        val (cellInfos, signalStrengths) = u
-
-                        val subInfo = subs.getActiveSubscriptionInfo(t)
-                        val telephony =
-                            TelephonyManager.from(context).createForSubscriptionId(t)
-
                         item(t) {
+                            val subInfo = remember(t) {
+                                subs.getActiveSubscriptionInfo(t)
+                            }
+                            val telephony = remember(t) {
+                                TelephonyManager.from(context).createForSubscriptionId(t)
+                            }
+
                             var expanded by remember {
                                 mutableStateOf(false)
                             }
@@ -102,20 +104,23 @@ fun Content() {
                             )
                         }
 
-                        items(cellInfos.size, { "$t:${cellInfos[it].cellIdentity}" }) {
+                        val lastCellIndex = u.cellInfos.lastIndex
+                        val lastStrengthIndex = u.strengths.lastIndex
+                        val strengthsEmpty = u.strengths.isEmpty()
+
+                        itemsIndexed(u.cellInfos, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
                             var expanded by remember {
                                 mutableStateOf(false)
                             }
-                            val info = cellInfos[it]
 
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()
                             ) {
                                 SignalCard(
-                                    cellInfo = info,
+                                    cellInfo = item,
                                     expanded = expanded,
-                                    isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
+                                    isFinal = index == lastCellIndex && strengthsEmpty,
                                     onExpand = { expanded = it },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -123,16 +128,14 @@ fun Content() {
                             }
                         }
 
-                        items(signalStrengths.size, { "$t:$it" }) {
-                            val info = signalStrengths[it]
-
+                        itemsIndexed(u.strengths, { index, _ -> "$t:$index" }) { index, item ->
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()
                             ) {
                                 SignalStrength(
-                                    cellSignalStrength = info,
-                                    isFinal = it == signalStrengths.lastIndex,
+                                    cellSignalStrength = item,
+                                    isFinal = index == lastStrengthIndex,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 )

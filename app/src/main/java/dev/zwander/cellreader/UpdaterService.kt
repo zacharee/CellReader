@@ -67,7 +67,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         startForeground(100, n)
 
         subs.addOnSubscriptionsChangedListener(Dispatchers.Main.asExecutor(), subsListener)
-//        init()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -104,8 +103,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
                 callbacks[subId] = this
             }
 
-//            updateSignal(telephony.subscriptionId, telephony.signalStrength)
-//            update(telephony.subscriptionId, telephony.allCellInfo)
             telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
         }
     }
