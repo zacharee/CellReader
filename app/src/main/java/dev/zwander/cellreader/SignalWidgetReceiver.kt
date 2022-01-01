@@ -6,8 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.telephony.*
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
@@ -21,6 +24,7 @@ import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import dev.zwander.cellreader.utils.PrefUtils
+import dev.zwander.cellreader.utils.onAvail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -48,8 +52,7 @@ class SignalWidget : GlanceAppWidget() {
 
     @Composable
     override fun Content() {
-//        val prefs = currentState<Preferences>()
-//        val infos = PrefUtils.getCellInfo(prefs)
+        val context = LocalContext.current
 
         Box(
             modifier = GlanceModifier.cornerRadius(8.dp)
@@ -66,7 +69,7 @@ class SignalWidget : GlanceAppWidget() {
                                 .fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "SIM $t")
+                            Text(text = context.resources.getString(R.string.sim_slot_format, t.toString()))
                         }
                     }
 
@@ -74,29 +77,14 @@ class SignalWidget : GlanceAppWidget() {
                         SignalCard(cellInfo = item)
                     }
                 }
-
-//                sortedInfos.forEach { (t, u) ->
-//                    val (cellInfos, _) = u
-//
-//                    item {
-//                        Box(
-//                            modifier = GlanceModifier.height(48.dp)
-//                                .fillMaxWidth(),
-//                            contentAlignment = Alignment.Center
-//                        ) {
-//                            Text(text = "SIM $t")
-//                        }
-//                    }
-//                    items(cellInfos.size) {
-//                        SignalCard(cellInfo = cellInfos[it])
-//                    }
-//                }
             }
         }
     }
 
     @Composable
     private fun SignalCard(cellInfo: CellInfo) {
+        val context = LocalContext.current
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = GlanceModifier.fillMaxWidth()
@@ -134,19 +122,24 @@ class SignalWidget : GlanceAppWidget() {
 
                     Spacer(GlanceModifier.size(8.dp))
 
-                    Column {
+                    Column(
+                        modifier = GlanceModifier.fillMaxWidth()
+                    ) {
                         Text(
-                            text = "Signal type: ${
-                                when (cellInfo.cellSignalStrength) {
-                                    is CellSignalStrengthGsm -> "GSM"
-                                    is CellSignalStrengthWcdma -> "WCDMA"
-                                    is CellSignalStrengthCdma -> "CDMA"
-                                    is CellSignalStrengthTdscdma -> "TDSCDMA"
-                                    is CellSignalStrengthLte -> "LTE"
-                                    is CellSignalStrengthNr -> "5G NR"
-                                    else -> "Unknown"
-                                }
-                            }"
+                            text = context.resources.getString(
+                                R.string.type_format,
+                                context.resources.getString(
+                                    when (cellInfo.cellSignalStrength) {
+                                        is CellSignalStrengthGsm -> R.string.gsm
+                                        is CellSignalStrengthWcdma -> R.string.wcdma
+                                        is CellSignalStrengthCdma -> R.string.cdma
+                                        is CellSignalStrengthTdscdma -> R.string.tdscdma
+                                        is CellSignalStrengthLte -> R.string.lte
+                                        is CellSignalStrengthNr -> R.string.nr
+                                        else -> R.string.unknown
+                                    }
+                                )
+                            )
                         )
 
                         with(cellInfo.cellSignalStrength) {
@@ -154,12 +147,20 @@ class SignalWidget : GlanceAppWidget() {
                                 is CellSignalStrengthLte -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
-                                    Text(text = "RSRP: ${rsrp}, RSRQ: ${rsrq}")
+                                    Text(
+                                        text = context.resources.getString(R.string.rsrq_format, rsrq.toString())
+                                    )
                                 }
                                 is CellSignalStrengthNr -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
-                                    Text(text = "RSRP: ${csiRsrp}/${ssRsrp}, RSRQ: ${csiRsrq}/${ssRsrq}")
+                                    csiRsrq.onAvail {
+                                        Text(text = context.resources.getString(R.string.rsrq_format, it.toString()))
+                                    }
+
+                                    ssRsrq.onAvail {
+                                        Text(text = context.resources.getString(R.string.rsrq_format, it.toString()))
+                                    }
                                 }
                             }
                         }
@@ -169,12 +170,12 @@ class SignalWidget : GlanceAppWidget() {
                                 is CellIdentityLte -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
-                                    Text(text = "Bands: ${bands.contentToString()}")
+                                    Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
                                 }
                                 is CellIdentityNr -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
-                                    Text(text = "Bands: ${bands.contentToString()}")
+                                    Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
                                 }
                             }
                         }

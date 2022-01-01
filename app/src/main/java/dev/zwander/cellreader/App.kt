@@ -25,7 +25,5 @@ class App : Application() {
         super.onCreate()
 
         HiddenApiBypass.setHiddenApiExemptions("")
-
-
     }
 }
