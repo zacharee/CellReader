@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.telephony.*
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,13 +14,12 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,7 @@ import dev.zwander.cellreader.serviceStates
 import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.angledGradient
 import dev.zwander.cellreader.utils.asMccMnc
+import kotlinx.coroutines.delay
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -118,7 +120,7 @@ fun SIMCard(
                     visible = expanded
                 ) {
                     Column {
-                        val scroll = rememberScrollState()
+                        val scroll = rememberCarouselScrollState()
                         val topAlpha by animateFloatAsState(targetValue = if (scroll.value > 0) 1f else 0f)
                         val bottomAlpha by animateFloatAsState(targetValue = if (scroll.value < scroll.maxValue) 1f else 0f)
 
@@ -127,11 +129,39 @@ fun SIMCard(
                         )
 
                         Box(
-                            modifier = Modifier
-                                .height(300.dp)
-                                .verticalScroll(scroll)
+                            modifier = Modifier.height(300.dp)
                         ) {
-                            AdvancedSubInfo(subId = telephony.subscriptionId)
+                            var target by remember {
+                                mutableStateOf(0f)
+                            }
+                            val scrollAlphaState by animateFloatAsState(targetValue = target)
+
+                            LaunchedEffect(key1 = scroll.isScrollInProgress) {
+                                target = if (scroll.isScrollInProgress) {
+                                    1f
+                                } else {
+                                    delay(1000L)
+                                    0f
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .verticalScroll(scroll)
+                            ) {
+                                AdvancedSubInfo(subId = telephony.subscriptionId)
+                            }
+
+                            Carousel(
+                                state = scroll,
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .fillMaxHeight()
+                                    .alpha(scrollAlphaState)
+                                    .align(Alignment.CenterEnd),
+                                colors = CarouselDefaults.colors(thumbColor = Color.White, backgroundColor = Color.Transparent)
+                            )
                         }
 
                         PaddedDivider(
