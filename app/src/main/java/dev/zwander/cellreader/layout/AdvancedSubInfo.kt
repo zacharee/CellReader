@@ -37,7 +37,10 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                 FormatText(R.string.timestamp_format, "$timestampMillis")
             }
 
-            PaddedDivider(modifier = Modifier.fillMaxWidth())
+            PaddedDivider(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp)
+            )
 
             telephony.serviceState?.apply {
                 Text(
@@ -129,7 +132,10 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                 }
                 FormatText(R.string.arfcn_rsrp_boost_format, "$arfcnRsrpBoost")
 
-                PaddedDivider(modifier = Modifier.fillMaxWidth())
+                PaddedDivider(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp)
+                )
 
                 Text(
                     text = stringResource(id = R.string.network_registrations),
@@ -255,7 +261,10 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
 
             subs.allSubscriptionInfoList.find { it.subscriptionId == telephony.subscriptionId }
                 ?.apply {
-                    PaddedDivider(modifier = Modifier.fillMaxWidth())
+                    PaddedDivider(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp)
+                    )
 
                     Text(
                         text = stringResource(id = R.string.subscription_info),
