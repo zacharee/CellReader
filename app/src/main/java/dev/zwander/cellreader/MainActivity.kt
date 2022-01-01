@@ -78,7 +78,6 @@ fun Content() {
             ) {
                 LazyColumn(
                     contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     sortedSubIds.forEach { t ->
                         item(t) {
@@ -102,6 +101,7 @@ fun Content() {
                                 showingCells = showingCells[t] ?: true,
                                 onShowingCells = { showingCells[t] = it },
                                 modifier = Modifier.animateItemPlacement()
+                                    .padding(bottom = 8.dp)
                             )
                         }
 
@@ -116,7 +116,8 @@ fun Content() {
 
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
-                                modifier = Modifier.animateItemPlacement(),
+                                modifier = Modifier.animateItemPlacement()
+                                    .padding(bottom = 8.dp),
                                 enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                                 exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                             ) {
@@ -134,7 +135,8 @@ fun Content() {
                         itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
-                                modifier = Modifier.animateItemPlacement(),
+                                modifier = Modifier.animateItemPlacement()
+                                    .padding(bottom = 8.dp),
                                 enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                                 exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                             ) {
