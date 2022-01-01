@@ -23,26 +23,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SignalWidget : GlanceAppWidget() {
-    companion object {
-        val cellInfoKey = stringPreferencesKey("cellInfos")
-        val primaryCellKey = intPreferencesKey("primaryCell")
-
-        private val SMALL_BOX = DpSize(120.dp, 120.dp)
-        private val BIG_BOX = DpSize(180.dp, 180.dp)
-        private val VERY_BIG_BOX = DpSize(300.dp, 300.dp)
-        private val ROW = DpSize(120.dp, 48.dp)
-        private val LARGE_ROW = DpSize(300.dp, 48.dp)
-        private val COLUMN = DpSize(48.dp, 120.dp)
-        private val LARGE_COLUMN = DpSize(48.dp, 300.dp)
-    }
-
     override val stateDefinition = PreferencesGlanceStateDefinition
-
-    override val sizeMode = SizeMode.Responsive(
-        setOf(
-            SMALL_BOX, BIG_BOX, VERY_BIG_BOX, ROW, LARGE_ROW, COLUMN, LARGE_COLUMN
-        )
-    )
 
     @Composable
     override fun Content() {
