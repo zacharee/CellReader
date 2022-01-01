@@ -221,7 +221,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                                 )
                                 FormatText(R.string.reject_cause_format, "$rejectCause")
 
-                                FormatText(R.string.rplmn_format, registeredPlmn)
+                                FormatText(R.string.rplmn_format, registeredPlmn.asMccMnc)
 
                                 FormatText(
                                     R.string.services_format,
@@ -290,10 +290,10 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                             FormatText(R.string.icc_id_format, iccId)
                         }
                         if (hplmns.isNotEmpty()) {
-                            FormatText(R.string.hplmns_format, hplmns.joinToString(", "))
+                            FormatText(R.string.hplmns_format, hplmns.joinToString(", ") { it.asMccMnc })
                         }
                         if (ehplmns.isNotEmpty()) {
-                            FormatText(R.string.ehplmns_format, ehplmns.joinToString(", "))
+                            FormatText(R.string.ehplmns_format, ehplmns.joinToString(", ") { it.asMccMnc })
                         }
                         FormatText(R.string.group_disabled_format, "$isGroupDisabled")
                         this.groupUuid?.apply {

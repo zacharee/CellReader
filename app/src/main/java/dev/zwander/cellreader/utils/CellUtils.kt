@@ -118,17 +118,19 @@ val CellConfigLte.endcAvailable: Boolean
         .apply { isAccessible = true }
         .invoke(this) as Boolean
 
-val NetworkRegistrationInfo.safeRegisteredPlmn: String
-    get() = when {
-        registeredPlmn.isNullOrBlank() -> "000000"
-        registeredPlmn.length < 3 -> StringBuilder(registeredPlmn).run {
-            val makeup = 6 - registeredPlmn.length
+val String?.asMccMnc: String
+    get() = StringBuilder(
+        when {
+            isNullOrBlank() -> "000000"
+            length < 3 -> StringBuilder(this).run {
+                val makeup = 6 - this@asMccMnc.length
 
-            appendRange("000000", 0, makeup + 1)
-            toString()
+                appendRange("000000", 0, makeup + 1)
+                toString()
+            }
+            else -> this
         }
-        else -> registeredPlmn
-    }
+    ).insert(3, "-").toString()
 
 inline fun <reified T : CellInfo> CellInfo.cast() = castGeneric<T>()
 inline fun <reified T : CellIdentity> CellIdentity.cast() = castGeneric<T>()

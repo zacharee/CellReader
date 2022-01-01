@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.FormatText
+import dev.zwander.cellreader.utils.asMccMnc
 import dev.zwander.cellreader.utils.cast
 import dev.zwander.cellreader.utils.onAvail
 
@@ -52,7 +53,7 @@ fun CellIdentity(
                 FormatText(R.string.gci_format, this)
             }
             plmn?.apply {
-                FormatText(R.string.plmn_format, this)
+                FormatText(R.string.plmn_format, asMccMnc)
             }
         }
 
@@ -78,7 +79,7 @@ fun CellIdentity(
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
                         R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ")
+                        additionalPlmns.joinToString(", ") { it.asMccMnc }
                     )
                 }
             }
@@ -123,7 +124,7 @@ fun CellIdentity(
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
                         R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ")
+                        additionalPlmns.joinToString(", ") { it.asMccMnc }
                     )
                 }
 
@@ -160,7 +161,7 @@ fun CellIdentity(
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
                         R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ")
+                        additionalPlmns.joinToString(", ") { it.asMccMnc }
                     )
                 }
 
@@ -206,7 +207,7 @@ fun CellIdentity(
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
                         R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ")
+                        additionalPlmns.joinToString(", ") { it.asMccMnc }
                     )
                 }
 
@@ -253,7 +254,7 @@ fun CellIdentity(
                 if (!additionalPlmns.isNullOrEmpty()) {
                     FormatText(
                         textId = R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ")
+                        additionalPlmns.joinToString(", ") { it.asMccMnc }
                     )
                 }
             }

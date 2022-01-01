@@ -29,8 +29,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.angledGradient
-import dev.zwander.cellreader.utils.safeRegisteredPlmn
-import kotlin.math.exp
+import dev.zwander.cellreader.utils.asMccMnc
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -106,7 +105,7 @@ fun SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.rplmn_format, "${StringBuilder(properInfo?.safeRegisteredPlmn ?: "000000").insert(3, "-")}")
+                        FormatText(R.string.rplmn_format, properInfo?.registeredPlmn.asMccMnc)
                         FormatText(R.string.network_type_format, telephony.networkTypeName)
                         FormatText(R.string.carrier_aggregation_format, "${telephony.serviceState?.isUsingCarrierAggregation}")
                         FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
