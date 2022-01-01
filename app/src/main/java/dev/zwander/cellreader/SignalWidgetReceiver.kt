@@ -16,6 +16,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.*
 import androidx.glance.appwidget.*
 import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
@@ -58,10 +59,8 @@ class SignalWidget : GlanceAppWidget() {
             LazyColumn(
                 modifier = GlanceModifier.fillMaxSize()
             ) {
-                sortedInfos.forEach { (t, u) ->
-                    val (cellInfos, _) = u
-
-                    item {
+                sortedSubIds.forEach { t ->
+                    item(t.toLong()) {
                         Box(
                             modifier = GlanceModifier.height(48.dp)
                                 .fillMaxWidth(),
@@ -70,10 +69,28 @@ class SignalWidget : GlanceAppWidget() {
                             Text(text = "SIM $t")
                         }
                     }
-                    items(cellInfos.size) {
-                        SignalCard(cellInfo = cellInfos[it])
+
+                    itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { _, item ->
+                        SignalCard(cellInfo = item)
                     }
                 }
+
+//                sortedInfos.forEach { (t, u) ->
+//                    val (cellInfos, _) = u
+//
+//                    item {
+//                        Box(
+//                            modifier = GlanceModifier.height(48.dp)
+//                                .fillMaxWidth(),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Text(text = "SIM $t")
+//                        }
+//                    }
+//                    items(cellInfos.size) {
+//                        SignalCard(cellInfo = cellInfos[it])
+//                    }
+//                }
             }
         }
     }

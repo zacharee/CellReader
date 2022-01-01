@@ -79,7 +79,7 @@ fun Content() {
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    sortedInfos.forEach { (t, u) ->
+                    sortedSubIds.forEach { t ->
                         item(t) {
                             val subInfo = remember(t) {
                                 subs.getActiveSubscriptionInfo(t)
@@ -104,11 +104,11 @@ fun Content() {
                             )
                         }
 
-                        val lastCellIndex = u.cellInfos.lastIndex
-                        val lastStrengthIndex = u.strengths.lastIndex
-                        val strengthsEmpty = u.strengths.isEmpty()
+                        val lastCellIndex = cellInfos[t]!!.lastIndex
+                        val lastStrengthIndex = strengthInfos[t]!!.lastIndex
+                        val strengthsEmpty = strengthInfos[t]!!.isEmpty()
 
-                        itemsIndexed(u.cellInfos, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
                             var expanded by remember {
                                 mutableStateOf(false)
                             }
@@ -128,7 +128,7 @@ fun Content() {
                             }
                         }
 
-                        itemsIndexed(u.strengths, { index, _ -> "$t:$index" }) { index, item ->
+                        itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()

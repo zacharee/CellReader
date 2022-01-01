@@ -11,11 +11,14 @@ import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.utils.CellUtils
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
-val sortedInfos by derivedStateOf {
-    cellInfos.toSortedMap(CellUtils.SubsComparator(primaryCell))
-}
-val cellInfos = mutableStateMapOf<Int, CellModel>()
 var primaryCell by mutableStateOf(0)
+val subIds = mutableStateListOf<Int>()
+val sortedSubIds by derivedStateOf {
+    subIds.sortedWith(CellUtils.SubsComparator(primaryCell))
+}
+
+val cellInfos = mutableStateMapOf<Int, List<CellInfo>>()
+val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrength>>()
 
 class App : Application() {
     override fun onCreate() {
