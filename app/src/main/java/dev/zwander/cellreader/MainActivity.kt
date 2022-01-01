@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.telephony.*
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,9 +80,6 @@ fun Content() {
                 ) {
                     sortedSubIds.forEach { t ->
                         item(t) {
-                            val subInfo = remember(t) {
-                                subs.getActiveSubscriptionInfo(t)
-                            }
                             val telephony = remember(t) {
                                 TelephonyManager.from(context).createForSubscriptionId(t)
                             }
@@ -94,8 +90,7 @@ fun Content() {
 
                             SIMCard(
                                 telephony = telephony,
-                                subs = subs,
-                                subInfo = subInfo,
+                                subInfo = subInfos[t]!!,
                                 expanded = expanded,
                                 onExpand = { expanded = it },
                                 showingCells = showingCells[t] ?: true,

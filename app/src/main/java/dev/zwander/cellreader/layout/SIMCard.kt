@@ -14,6 +14,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.serviceStates
 import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.angledGradient
 import dev.zwander.cellreader.utils.asMccMnc
@@ -35,7 +37,6 @@ import dev.zwander.cellreader.utils.asMccMnc
 @Composable
 fun SIMCard(
     telephony: TelephonyManager,
-    subs: SubscriptionManager,
     subInfo: SubscriptionInfo,
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
@@ -59,18 +60,16 @@ fun SIMCard(
                     ),
                     87f
                 )
-//                .clickable {
-//                    onExpand(!expanded)
-//                }
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column {
-                val properInfo = telephony.serviceState
-                    ?.getNetworkRegistrationInfoListForTransportType(
+                val properInfo = remember(serviceStates[telephony.subscriptionId]) {
+                    serviceStates[telephony.subscriptionId]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                     )
                     ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                }
 
                 FlowRow(
                     mainAxisSpacing = 16.dp,
@@ -107,9 +106,10 @@ fun SIMCard(
                     ) {
                         FormatText(R.string.rplmn_format, properInfo?.registeredPlmn.asMccMnc)
                         FormatText(R.string.network_type_format, telephony.networkTypeName)
-                        FormatText(R.string.carrier_aggregation_format, "${telephony.serviceState?.isUsingCarrierAggregation}")
-                        FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(telephony.serviceState?.nrState ?: -100)}/" +
-                                ServiceState.frequencyRangeToString(telephony.serviceState?.nrFrequencyRange ?: -100)
+                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[telephony.subscriptionId]?.isUsingCarrierAggregation}")
+                        FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(
+                            serviceStates[telephony.subscriptionId]?.nrState ?: -100)}/" +
+                                ServiceState.frequencyRangeToString(serviceStates[telephony.subscriptionId]?.nrFrequencyRange ?: -100)
                         )
                     }
                 }
@@ -131,7 +131,7 @@ fun SIMCard(
                                 .height(300.dp)
                                 .verticalScroll(scroll)
                         ) {
-                            AdvancedSubInfo(telephony = telephony, subs = subs)
+                            AdvancedSubInfo(subId = telephony.subscriptionId)
                         }
 
                         PaddedDivider(

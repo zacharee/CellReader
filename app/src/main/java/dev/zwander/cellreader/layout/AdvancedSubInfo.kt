@@ -15,18 +15,21 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.serviceStates
+import dev.zwander.cellreader.signalStrengths
+import dev.zwander.cellreader.subInfos
 import dev.zwander.cellreader.utils.*
 
 @SuppressLint("MissingPermission")
 @Composable
-fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
+fun AdvancedSubInfo(subId: Int) {
     ProvideTextStyle(value = LocalTextStyle.current.copy(textAlign = TextAlign.Center)) {
         FlowRow(
             mainAxisSpacing = 16.dp,
             mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
             mainAxisSize = SizeMode.Expand
         ) {
-            with(telephony.signalStrength) {
+            signalStrengths[subId]?.apply {
                 Text(
                     text = stringResource(id = R.string.signal_strength),
                     modifier = Modifier.fillMaxWidth(),
@@ -42,7 +45,7 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                     .padding(start = 16.dp, end = 16.dp)
             )
 
-            telephony.serviceState?.apply {
+            serviceStates[subId]?.apply {
                 Text(
                     text = stringResource(id = R.string.service_state),
                     modifier = Modifier.fillMaxWidth(),
@@ -259,69 +262,68 @@ fun AdvancedSubInfo(telephony: TelephonyManager, subs: SubscriptionManager) {
                 }
             }
 
-            subs.allSubscriptionInfoList.find { it.subscriptionId == telephony.subscriptionId }
-                ?.apply {
-                    PaddedDivider(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp)
-                    )
+            subInfos[subId]?.apply {
+                PaddedDivider(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp)
+                )
 
-                    Text(
-                        text = stringResource(id = R.string.subscription_info),
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+                Text(
+                    text = stringResource(id = R.string.subscription_info),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
 
-                    FlowRow(
-                        mainAxisSpacing = 16.dp,
-                        mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                        mainAxisSize = SizeMode.Expand,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        FormatText(R.string.sim_slot_format, "$simSlotIndex")
-                        FormatText(R.string.number_format, number)
-                        FormatText(R.string.display_name_format, "$displayName")
-                        FormatText(R.string.carrier_name_format, "$carrierName")
-                        FormatText(R.string.carrier_id_format, "$carrierId")
-                        FormatText(
-                            R.string.subscription_type_format,
-                            subscriptionTypeToString(subscriptionType)
-                        )
-                        FormatText(R.string.subscription_id_format, "$subscriptionId")
-                        FormatText(
-                            R.string.profile_class_format,
-                            profileClassToString(profileClass)
-                        )
-                        FormatText(R.string.name_source_format, nameSourceToString(nameSource))
-                        FormatText(R.string.opportunistic_format, "$isOpportunistic")
-                        FormatText(R.string.embedded_format, "$isEmbedded")
-                        if (iccId.isNotBlank()) {
-                            FormatText(R.string.icc_id_format, iccId)
-                        }
-                        if (hplmns.isNotEmpty()) {
-                            FormatText(R.string.hplmns_format, hplmns.joinToString(", ") { it.asMccMnc })
-                        }
-                        if (ehplmns.isNotEmpty()) {
-                            FormatText(R.string.ehplmns_format, ehplmns.joinToString(", ") { it.asMccMnc })
-                        }
-                        FormatText(R.string.group_disabled_format, "$isGroupDisabled")
-                        this.groupUuid?.apply {
-                            FormatText(R.string.group_uuid_format, "$this")
-                        }
-                        this.groupOwner?.apply {
-                            FormatText(R.string.group_owner_format, this)
-                        }
-                        FormatText(R.string.country_iso_format, countryIso)
-                        if (cardString.isNotBlank()) {
-                            FormatText(R.string.card_string_format, cardString)
-                        }
-                        FormatText(R.string.card_id_format, "$cardId")
-                        FormatText(R.string.data_roaming_from_reg_format, "$dataRoaming")
-                        FormatText(R.string.access_rules_format, "$allAccessRules")
-                        FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
-                        FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
+                FlowRow(
+                    mainAxisSpacing = 16.dp,
+                    mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
+                    mainAxisSize = SizeMode.Expand,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    FormatText(R.string.sim_slot_format, "$simSlotIndex")
+                    FormatText(R.string.number_format, number)
+                    FormatText(R.string.display_name_format, "$displayName")
+                    FormatText(R.string.carrier_name_format, "$carrierName")
+                    FormatText(R.string.carrier_id_format, "$carrierId")
+                    FormatText(
+                        R.string.subscription_type_format,
+                        subscriptionTypeToString(subscriptionType)
+                    )
+                    FormatText(R.string.subscription_id_format, "$subscriptionId")
+                    FormatText(
+                        R.string.profile_class_format,
+                        profileClassToString(profileClass)
+                    )
+                    FormatText(R.string.name_source_format, nameSourceToString(nameSource))
+                    FormatText(R.string.opportunistic_format, "$isOpportunistic")
+                    FormatText(R.string.embedded_format, "$isEmbedded")
+                    if (iccId.isNotBlank()) {
+                        FormatText(R.string.icc_id_format, iccId)
                     }
+                    if (hplmns.isNotEmpty()) {
+                        FormatText(R.string.hplmns_format, hplmns.joinToString(", ") { it.asMccMnc })
+                    }
+                    if (ehplmns.isNotEmpty()) {
+                        FormatText(R.string.ehplmns_format, ehplmns.joinToString(", ") { it.asMccMnc })
+                    }
+                    FormatText(R.string.group_disabled_format, "$isGroupDisabled")
+                    this.groupUuid?.apply {
+                        FormatText(R.string.group_uuid_format, "$this")
+                    }
+                    this.groupOwner?.apply {
+                        FormatText(R.string.group_owner_format, this)
+                    }
+                    FormatText(R.string.country_iso_format, countryIso)
+                    if (cardString.isNotBlank()) {
+                        FormatText(R.string.card_string_format, cardString)
+                    }
+                    FormatText(R.string.card_id_format, "$cardId")
+                    FormatText(R.string.data_roaming_from_reg_format, "$dataRoaming")
+                    FormatText(R.string.access_rules_format, "$allAccessRules")
+                    FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
+                    FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
                 }
+            }
         }
     }
 }

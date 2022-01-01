@@ -1,9 +1,7 @@
 package dev.zwander.cellreader
 
 import android.app.Application
-import android.telephony.CellInfo
-import android.telephony.CellSignalStrength
-import android.telephony.SubscriptionInfo
+import android.telephony.*
 import androidx.collection.ArraySet
 import androidx.compose.runtime.*
 import dev.zwander.cellreader.data.CellInfoWrapper
@@ -19,6 +17,9 @@ val sortedSubIds by derivedStateOf {
 
 val cellInfos = mutableStateMapOf<Int, List<CellInfo>>()
 val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrength>>()
+val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
+val subInfos = mutableStateMapOf<Int, SubscriptionInfo>()
+val serviceStates = mutableStateMapOf<Int, ServiceState?>()
 
 class App : Application() {
     override fun onCreate() {

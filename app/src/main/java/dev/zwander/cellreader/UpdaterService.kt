@@ -95,11 +95,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         cellInfos.clear()
         strengthInfos.clear()
         subIds.clear()
+        subInfos.clear()
+        serviceStates.clear()
+        signalStrengths.clear()
 
         telephonies.putAll(
             subs.allSubscriptionInfoList.map {
                 cellInfos[it.subscriptionId] = listOf()
                 strengthInfos[it.subscriptionId] = listOf()
+                subInfos[it.subscriptionId] = it
                 subIds.add(it.subscriptionId)
 
                 val callback = callbacks[it.subscriptionId] ?: TelephonyListener(it.subscriptionId).apply {
@@ -131,14 +135,21 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         val newInfo = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
 
         launch(Dispatchers.Main) {
+            signalStrengths[subId] = strength
             strengthInfos[subId] = newInfo
 
             SignalWidget().updateAll(this@UpdaterService)
         }
     }
 
+    private fun updateServiceState(subId: Int, serviceState: ServiceState?) {
+        launch(Dispatchers.Main) {
+            serviceStates[subId] = serviceState
+        }
+    }
+
     private inner class TelephonyListener(private val subId: Int) : TelephonyCallback(),
-        TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener {
+        TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener, TelephonyCallback.ServiceStateListener {
         @SuppressLint("MissingPermission")
         override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
             update(subId, cellInfo ?: mutableListOf())
@@ -146,6 +157,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
         override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
             updateSignal(subId, signalStrength)
+        }
+
+        override fun onServiceStateChanged(serviceState: ServiceState?) {
+            updateServiceState(subId, serviceState)
         }
     }
 

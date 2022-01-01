@@ -5,15 +5,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.telephony.*
-import android.util.Log
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.*
@@ -23,7 +18,6 @@ import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
-import dev.zwander.cellreader.utils.PrefUtils
 import dev.zwander.cellreader.utils.onAvail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
