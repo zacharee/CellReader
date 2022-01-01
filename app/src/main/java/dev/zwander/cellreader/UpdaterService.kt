@@ -6,7 +6,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.telephony.*
-import androidx.collection.ArraySet
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -14,8 +13,7 @@ import androidx.glance.appwidget.updateAll
 import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.utils.CellUtils
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import java.util.*
 import kotlin.collections.HashMap
 
 class UpdaterService : Service(), CoroutineScope by MainScope() {
@@ -26,7 +24,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
-    private val telephonies = arrayListOf<TelephonyManager>()
+    private val telephonies = HashMap<Int, TelephonyManager>()
     private val callbacks = HashMap<Int, TelephonyCallback>()
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
 
@@ -85,8 +83,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     private fun deinit() {
-        telephonies.forEach {
-            it.unregisterTelephonyCallback(callbacks[it.subscriptionId])
+        telephonies.forEach { (subId, telephony) ->
+            telephony.unregisterTelephonyCallback(callbacks[subId])
         }
 
         telephonies.clear()
@@ -97,15 +95,13 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     private fun init() {
         cellInfos.clear()
 
-        telephonies.addAll(
-            subs.allSubscriptionInfoList.map { telephony.createForSubscriptionId(it.subscriptionId) }
-        )
+        telephonies.putAll(subs.allSubscriptionInfoList.map { it.subscriptionId to telephony.createForSubscriptionId(it.subscriptionId) })
 
-        telephonies.forEach { telephony ->
-            cellInfos[telephony.subscriptionId] = CellModel()
+        telephonies.forEach { (subId, telephony) ->
+            cellInfos[subId] = CellModel()
 
-            val callback = callbacks[telephony.subscriptionId] ?: TelephonyListener(telephony.subscriptionId).apply {
-                callbacks[telephony.subscriptionId] = this
+            val callback = callbacks[subId] ?: TelephonyListener(subId).apply {
+                callbacks[subId] = this
             }
 
 //            updateSignal(telephony.subscriptionId, telephony.signalStrength)
@@ -122,10 +118,24 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
             val foundIDs = mutableListOf<String>()
             val model = cellInfos[subId]!!
             val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
+            val oldIds = model.cellInfos.map { it.cellIdentity.toString() }
+
+            val toRemove = oldIds.filterNot { foundIDs.contains(it) }
+            val toAdd = newInfo.filterNot { oldIds.contains(it.cellIdentity.toString()) }
 
             launch(Dispatchers.Main) {
-                model.cellInfos.clear()
-                model.cellInfos.addAll(newInfo)
+                model.cellInfos.removeIf { toRemove.contains(it.cellIdentity.toString()) }
+
+                toAdd.forEach { add ->
+                    var index = Collections.binarySearch(model.cellInfos, add, CellUtils.CellInfoComparator)
+
+                    if (index < 0) {
+                        index = -index - 1
+                    }
+
+                    model.cellInfos.add(index, add)
+                }
+
                 SignalWidget().updateAll(this@UpdaterService)
             }
         }
@@ -162,7 +172,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
             val newIds = newList.map { it.subscriptionId }
             val currentIds = currentList.map { it.subscriptionId }
 
-            if (newList.size != currentList.size || !newIds.containsAll(currentIds) || !currentIds.containsAll(newIds)) {
+            if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
                 currentList.clear()
                 currentList.addAll(newList)
 
