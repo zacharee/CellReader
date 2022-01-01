@@ -9,13 +9,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -115,7 +116,9 @@ fun Content() {
 
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier.animateItemPlacement(),
+                                enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                             ) {
                                 SignalCard(
                                     cellInfo = item,
@@ -131,7 +134,9 @@ fun Content() {
                         itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
                             AnimatedVisibility(
                                 visible = showingCells[t] != false,
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier.animateItemPlacement(),
+                                enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                             ) {
                                 SignalStrength(
                                     cellSignalStrength = item,
