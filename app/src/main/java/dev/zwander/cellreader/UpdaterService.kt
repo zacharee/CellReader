@@ -106,51 +106,34 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
 //            updateSignal(telephony.subscriptionId, telephony.signalStrength)
 //            update(telephony.subscriptionId, telephony.allCellInfo)
-            telephony.registerTelephonyCallback(Dispatchers.Main.asExecutor(), callback)
+            telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
         }
     }
 
     private fun update(subId: Int, infos: MutableList<CellInfo>) {
-        launch(Dispatchers.IO) {
-            primaryCell = subs.defaultDataSubscriptionInfo?.subscriptionId ?: 0
-            infos.sortWith(CellUtils.CellInfoComparator)
+        primaryCell = subs.defaultDataSubscriptionInfo?.subscriptionId ?: 0
+        infos.sortWith(CellUtils.CellInfoComparator)
 
-            val foundIDs = mutableListOf<String>()
-            val model = cellInfos[subId]!!
-            val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
-            val oldIds = model.cellInfos.map { it.cellIdentity.toString() }
+        val foundIDs = mutableListOf<String>()
+        val model = cellInfos[subId]!!
+        val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
-            val toRemove = oldIds.filterNot { foundIDs.contains(it) }
-            val toAdd = newInfo.filterNot { oldIds.contains(it.cellIdentity.toString()) }
+        launch(Dispatchers.Main) {
+            model.cellInfos.clear()
+            model.cellInfos.addAll(newInfo)
 
-            launch(Dispatchers.Main) {
-                model.cellInfos.removeIf { toRemove.contains(it.cellIdentity.toString()) }
-
-                toAdd.forEach { add ->
-                    var index = Collections.binarySearch(model.cellInfos, add, CellUtils.CellInfoComparator)
-
-                    if (index < 0) {
-                        index = -index - 1
-                    }
-
-                    model.cellInfos.add(index, add)
-                }
-
-                SignalWidget().updateAll(this@UpdaterService)
-            }
+            SignalWidget().updateAll(this@UpdaterService)
         }
     }
 
     private fun updateSignal(subId: Int, strength: SignalStrength?) {
-        launch(Dispatchers.IO) {
-            val model = cellInfos[subId]!!
-            val newInfo = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
+        val model = cellInfos[subId]!!
+        val newInfo = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
 
-            launch(Dispatchers.Main) {
-                model.strengths.clear()
-                model.strengths.addAll(newInfo)
-                SignalWidget().updateAll(this@UpdaterService)
-            }
+        launch(Dispatchers.Main) {
+            model.strengths.clear()
+            model.strengths.addAll(newInfo)
+            SignalWidget().updateAll(this@UpdaterService)
         }
     }
 

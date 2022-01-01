@@ -90,19 +90,16 @@ fun Content() {
                                 mutableStateOf(false)
                             }
 
-                            Box(
+                            SIMCard(
+                                telephony = telephony,
+                                subs = subs,
+                                subInfo = subInfo,
+                                expanded = expanded,
+                                onExpand = { expanded = it },
+                                showingCells = showingCells[t] ?: true,
+                                onShowingCells = { showingCells[t] = it },
                                 modifier = Modifier.animateItemPlacement()
-                            ) {
-                                SIMCard(
-                                    telephony = telephony,
-                                    subs = subs,
-                                    subInfo = subInfo,
-                                    expanded = expanded,
-                                    onExpand = { expanded = it },
-                                    showingCells = showingCells[t] ?: true,
-                                    onShowingCells = { showingCells[t] = it }
-                                )
-                            }
+                            )
                         }
 
                         items(cellInfos.size, { "$t:${cellInfos[it].cellIdentity}" }) {
@@ -115,16 +112,14 @@ fun Content() {
                                 visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                Box {
-                                    SignalCard(
-                                        cellInfo = info,
-                                        expanded = expanded,
-                                        isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
-                                        onExpand = { expanded = it },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    )
-                                }
+                                SignalCard(
+                                    cellInfo = info,
+                                    expanded = expanded,
+                                    isFinal = it == cellInfos.lastIndex && signalStrengths.isEmpty(),
+                                    onExpand = { expanded = it },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
                             }
                         }
 
@@ -135,14 +130,12 @@ fun Content() {
                                 visible = showingCells[t] != false,
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                Box {
-                                    SignalStrength(
-                                        cellSignalStrength = info,
-                                        isFinal = it == signalStrengths.lastIndex,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    )
-                                }
+                                SignalStrength(
+                                    cellSignalStrength = info,
+                                    isFinal = it == signalStrengths.lastIndex,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
                             }
                         }
                     }
