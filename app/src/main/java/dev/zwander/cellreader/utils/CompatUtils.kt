@@ -57,3 +57,43 @@ val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
             listOf()
         }
     }
+
+val CellInfo.cellIdentityCompat: CellIdentity
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        cellIdentity
+    } else {
+        this::class.java
+            .getMethod("getCellIdentity")
+            .invoke(this) as CellIdentity
+    }
+
+val CellInfo.cellSignalStrengthCompat: CellSignalStrength
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        cellSignalStrength
+    } else {
+        this::class.java
+            .getMethod("getCellSignalStrength")
+            .invoke(this) as CellSignalStrength
+    }
+
+val CellIdentity.mccStringCompat: String?
+    @SuppressLint("SoonBlockedPrivateApi")
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        mccString
+    } else {
+        CellIdentity::class.java
+            .getDeclaredField("mMccStr")
+            .apply { isAccessible = true }
+            .get(this)?.toString()
+    }
+
+val CellIdentity.mncStringCompat: String?
+    @SuppressLint("SoonBlockedPrivateApi")
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        mccString
+    } else {
+        CellIdentity::class.java
+            .getDeclaredField("mMncStr")
+            .apply { isAccessible = true }
+            .get(this)?.toString()
+    }

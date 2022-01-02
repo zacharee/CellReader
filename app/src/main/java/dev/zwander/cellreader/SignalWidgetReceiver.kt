@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -18,6 +19,8 @@ import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
+import dev.zwander.cellreader.utils.cellIdentityCompat
+import dev.zwander.cellreader.utils.cellSignalStrengthCompat
 import dev.zwander.cellreader.utils.onAvail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -48,7 +51,7 @@ class SignalWidget : GlanceAppWidget() {
                         }
                     }
 
-                    itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { _, item ->
+                    itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}".hashCode().toLong() }) { _, item ->
                         SignalCard(cellInfo = item)
                     }
                 }
@@ -77,7 +80,7 @@ class SignalWidget : GlanceAppWidget() {
                     ) {
                         Image(
                             provider = ImageProvider(
-                                when (cellInfo.cellSignalStrength.level) {
+                                when (cellInfo.cellSignalStrengthCompat.level) {
                                     CellSignalStrength.SIGNAL_STRENGTH_POOR -> R.drawable.cell_1
                                     CellSignalStrength.SIGNAL_STRENGTH_MODERATE -> R.drawable.cell_2
                                     CellSignalStrength.SIGNAL_STRENGTH_GOOD -> R.drawable.cell_3
@@ -92,7 +95,7 @@ class SignalWidget : GlanceAppWidget() {
 
                         Spacer(GlanceModifier.size(8.dp))
 
-                        Text(text = cellInfo.cellSignalStrength.dbm.toString())
+                        Text(text = cellInfo.cellSignalStrengthCompat.dbm.toString())
                     }
 
                     Spacer(GlanceModifier.size(8.dp))
@@ -104,29 +107,31 @@ class SignalWidget : GlanceAppWidget() {
                             text = context.resources.getString(
                                 R.string.type_format,
                                 context.resources.getString(
-                                    when (cellInfo.cellSignalStrength) {
-                                        is CellSignalStrengthGsm -> R.string.gsm
-                                        is CellSignalStrengthWcdma -> R.string.wcdma
-                                        is CellSignalStrengthCdma -> R.string.cdma
-                                        is CellSignalStrengthTdscdma -> R.string.tdscdma
-                                        is CellSignalStrengthLte -> R.string.lte
-                                        is CellSignalStrengthNr -> R.string.nr
-                                        else -> R.string.unknown
+                                    cellInfo.cellSignalStrengthCompat.run {
+                                        when {
+                                            this is CellSignalStrengthGsm -> R.string.gsm
+                                            this is CellSignalStrengthWcdma -> R.string.wcdma
+                                            this is CellSignalStrengthCdma -> R.string.cdma
+                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdma -> R.string.tdscdma
+                                            this is CellSignalStrengthLte -> R.string.lte
+                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> R.string.nr
+                                            else -> R.string.unknown
+                                        }
                                     }
                                 )
                             )
                         )
 
-                        with(cellInfo.cellSignalStrength) {
-                            when (this) {
-                                is CellSignalStrengthLte -> {
+                        with(cellInfo.cellSignalStrengthCompat) {
+                            when {
+                                this is CellSignalStrengthLte -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     Text(
                                         text = context.resources.getString(R.string.rsrq_format, rsrq.toString())
                                     )
                                 }
-                                is CellSignalStrengthNr -> {
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     csiRsrq.onAvail {
@@ -140,17 +145,21 @@ class SignalWidget : GlanceAppWidget() {
                             }
                         }
 
-                        with (cellInfo.cellIdentity) {
-                            when (this) {
-                                is CellIdentityLte -> {
+                        with (cellInfo.cellIdentityCompat) {
+                            when {
+                                this is CellIdentityLte -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
-                                    Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    }
                                 }
-                                is CellIdentityNr -> {
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNr -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
-                                    Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    }
                                 }
                             }
                         }

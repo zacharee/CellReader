@@ -20,8 +20,8 @@ fun SignalCard(
         isFinal = isFinal,
         expanded = expanded,
         onExpand = onExpand,
-        level = cellInfo.cellSignalStrength.level,
-        dBm = cellInfo.cellSignalStrength.dbm,
+        level = cellInfo.cellSignalStrengthCompat.level,
+        dBm = cellInfo.cellSignalStrengthCompat.dbm,
         colors = listOf(
             0.0f to colorResource(id = R.color.cell_info),
             1.0f to colorResource(id = R.color.cell_info_1)
@@ -30,13 +30,13 @@ fun SignalCard(
         basicInfo = {
             with(cellInfo) {
                 CellIdentity(
-                    cellIdentity = cellIdentity,
+                    cellIdentity = cellIdentityCompat,
                     simple = true,
                     advanced = false
                 )
 
                 CellSignalStrength(
-                    cellSignalStrength = cellSignalStrength,
+                    cellSignalStrength = cellSignalStrengthCompat,
                     simple = true,
                     advanced = false
                 )
@@ -55,13 +55,13 @@ fun SignalCard(
                 FormatText(R.string.timestamp_format, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) timestampMillis else (timeStamp / 1000000))
 
                 CellSignalStrength(
-                    cellSignalStrength = cellSignalStrength,
+                    cellSignalStrength = cellSignalStrengthCompat,
                     simple = false,
                     advanced = true
                 )
 
                 CellIdentity(
-                    cellIdentity = cellIdentity,
+                    cellIdentity = cellIdentityCompat,
                     simple = false,
                     advanced = true
                 )

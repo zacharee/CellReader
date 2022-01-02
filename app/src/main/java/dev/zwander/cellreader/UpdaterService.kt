@@ -7,13 +7,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
 import dev.zwander.cellreader.utils.CellUtils
+import dev.zwander.cellreader.utils.cellIdentityCompat
 import kotlinx.coroutines.*
 import kotlin.collections.HashMap
 
@@ -165,7 +165,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         infos.sortWith(CellUtils.CellInfoComparator)
 
         val foundIDs = mutableListOf<String>()
-        val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
+        val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentityCompat.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentityCompat.toString()) } }
 
         launch(Dispatchers.Main) {
             cellInfos[subId] = newInfo

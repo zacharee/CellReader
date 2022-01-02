@@ -118,7 +118,7 @@ fun Content() {
                             val lastStrengthIndex = strengthInfos[t]!!.lastIndex
                             val strengthsEmpty = strengthInfos[t]!!.isEmpty()
 
-                            itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                            itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}" }) { index, item ->
                                 AnimatedVisibility(
                                     visible = showingCells[t] != false,
                                     modifier = Modifier
@@ -127,8 +127,8 @@ fun Content() {
                                     enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                                     exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                                 ) {
-                                    val key = remember(item.cellIdentity) {
-                                        "$t:${item.cellIdentity}"
+                                    val key = remember(item.cellIdentityCompat) {
+                                        "$t:${item.cellIdentityCompat}"
                                     }
 
                                     SignalCard(

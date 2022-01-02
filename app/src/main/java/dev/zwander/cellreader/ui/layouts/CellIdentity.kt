@@ -5,10 +5,7 @@ import android.telephony.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.utils.FormatText
-import dev.zwander.cellreader.utils.asMccMnc
-import dev.zwander.cellreader.utils.cast
-import dev.zwander.cellreader.utils.onAvail
+import dev.zwander.cellreader.utils.*
 
 @Composable
 fun CellIdentity(
@@ -40,8 +37,8 @@ fun CellIdentity(
                 )
             }
 
-            mccString?.apply {
-                FormatText(R.string.mcc_mnc_format, "${mccString}-${mncString}")
+            mccStringCompat?.apply {
+                FormatText(R.string.mcc_mnc_format, "${mccStringCompat}-${mncStringCompat}")
             }
         }
 

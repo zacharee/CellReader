@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.utils
 
+import android.os.Build
 import android.telephony.*
 import android.telephony.NetworkRegistrationInfo.NRState
 import androidx.compose.runtime.Composable
@@ -73,13 +74,13 @@ object CellUtils {
             }
 
             fun getTypeRanking(info: CellInfo): Int {
-                return when (info) {
-                    is CellInfoGsm -> 0
-                    is CellInfoCdma -> 0
-                    is CellInfoTdscdma -> 1
-                    is CellInfoWcdma -> 2
-                    is CellInfoLte -> 3
-                    is CellInfoNr -> 4
+                return when {
+                    info is CellInfoGsm -> 0
+                    info is CellInfoCdma -> 0
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && info is CellInfoTdscdma -> 1
+                    info is CellInfoWcdma -> 2
+                    info is CellInfoLte -> 3
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && info is CellInfoNr -> 4
                     else -> 0
                 }
             }
@@ -90,20 +91,20 @@ object CellUtils {
                 return rankResult
             }
 
-            return CellSignalStrengthComparator.compare(o1.cellSignalStrength, o2.cellSignalStrength)
+            return CellSignalStrengthComparator.compare(o1.cellSignalStrengthCompat, o2.cellSignalStrengthCompat)
         }
     }
 
     object CellSignalStrengthComparator : Comparator<CellSignalStrength> {
         override fun compare(o1: CellSignalStrength, o2: CellSignalStrength): Int {
             fun getTypeRanking(strength: CellSignalStrength): Int {
-                return when (strength) {
-                    is CellSignalStrengthGsm -> 0
-                    is CellSignalStrengthCdma -> 0
-                    is CellSignalStrengthTdscdma -> 1
-                    is CellSignalStrengthWcdma -> 2
-                    is CellSignalStrengthLte -> 3
-                    is CellSignalStrengthNr -> 4
+                return when {
+                    strength is CellSignalStrengthGsm -> 0
+                    strength is CellSignalStrengthCdma -> 0
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && strength is CellSignalStrengthTdscdma -> 1
+                    strength is CellSignalStrengthWcdma -> 2
+                    strength is CellSignalStrengthLte -> 3
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && strength is CellSignalStrengthNr -> 4
                     else -> 0
                 }
             }
