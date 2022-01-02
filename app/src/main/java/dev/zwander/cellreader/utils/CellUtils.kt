@@ -32,7 +32,7 @@ object CellUtils {
             ServiceState.FREQUENCY_RANGE_MID -> "MID"
             ServiceState.FREQUENCY_RANGE_HIGH -> "HIGH"
             ServiceState.FREQUENCY_RANGE_MMWAVE -> "MMWAVE"
-            else -> Integer.toString(range)
+            else -> range.toString()
         }
     }
 
