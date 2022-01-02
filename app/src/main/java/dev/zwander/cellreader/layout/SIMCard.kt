@@ -3,19 +3,13 @@ package dev.zwander.cellreader.layout
 import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
-import android.view.animation.AnticipateInterpolator
 import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -25,13 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
@@ -142,6 +138,10 @@ fun SIMCard(
 
                 val scroll = rememberCarouselScrollState()
 
+                var subSize by remember {
+                    mutableStateOf(IntSize.Zero)
+                }
+
                 AnimatedVisibility(
                     visible = expanded,
                     enter = fadeIn() + expandVertically(
@@ -170,7 +170,7 @@ fun SIMCard(
                         )
 
                         Box(
-                            modifier = Modifier.height(300.dp)
+                            modifier = Modifier.heightIn(max = 300.dp)
                         ) {
                             var target by remember {
                                 mutableStateOf(0f)
@@ -188,17 +188,22 @@ fun SIMCard(
 
                             Box(
                                 modifier = Modifier
-                                    .fillMaxHeight()
+                                    .height(min(subSize.height.asDp(), 300.dp))
                                     .verticalScroll(scroll)
                             ) {
-                                AdvancedSubInfo(subId = telephony.subscriptionIdCompat)
+                                AdvancedSubInfo(
+                                    subId = telephony.subscriptionIdCompat,
+                                    modifier = Modifier.onSizeChanged {
+                                        subSize = it
+                                    }
+                                )
                             }
 
                             Carousel(
                                 state = scroll,
                                 modifier = Modifier
                                     .width(2.dp)
-                                    .fillMaxHeight()
+                                    .height(min(subSize.height.asDp(), 300.dp))
                                     .alpha(scrollAlphaState)
                                     .align(Alignment.CenterEnd),
                                 colors = CarouselDefaults.colors(thumbColor = Color.White, backgroundColor = Color.Transparent)
