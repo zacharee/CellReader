@@ -2,10 +2,15 @@ package dev.zwander.cellreader.layout
 
 import android.annotation.SuppressLint
 import android.telephony.*
-import androidx.compose.animation.AnimatedVisibility
+import android.view.animation.AnticipateInterpolator
+import android.view.animation.AnticipateOvershootInterpolator
+import android.view.animation.OvershootInterpolator
+import androidx.compose.animation.*
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -32,6 +37,7 @@ import dev.zwander.cellreader.R
 import dev.zwander.cellreader.serviceStates
 import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.angledGradient
+import dev.zwander.cellreader.utils.anticipateDecelerateInterpolator
 import dev.zwander.cellreader.utils.asMccMnc
 import kotlinx.coroutines.delay
 
@@ -89,7 +95,15 @@ fun SIMCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { onShowingCells(!showingCells) }) {
-                        val rotation by animateFloatAsState(targetValue = if (showingCells) 180f else 0f)
+                        val rotation by animateFloatAsState(
+                            targetValue = if (showingCells) 180f else 0f,
+                            animationSpec = tween(
+                                durationMillis = 400,
+                                easing = {
+                                    AnticipateOvershootInterpolator().getInterpolation(it)
+                                }
+                            )
+                        )
 
                         Icon(
                             painter = painterResource(id = R.drawable.arrow_down),
@@ -119,7 +133,23 @@ fun SIMCard(
                 val scroll = rememberCarouselScrollState()
 
                 AnimatedVisibility(
-                    visible = expanded
+                    visible = expanded,
+                    enter = fadeIn() + expandVertically(
+                        animationSpec = tween(
+                            durationMillis = 400,
+                            easing = {
+                                OvershootInterpolator().getInterpolation(it)
+                            }
+                        )
+                    ),
+                    exit = fadeOut() + shrinkVertically(
+                        animationSpec = tween(
+                            durationMillis = 400,
+                            easing = {
+                                anticipateDecelerateInterpolator(it)
+                            }
+                        )
+                    )
                 ) {
                     Column {
                         val topAlpha by animateFloatAsState(targetValue = if (scroll.value > 0) 1f else 0f)

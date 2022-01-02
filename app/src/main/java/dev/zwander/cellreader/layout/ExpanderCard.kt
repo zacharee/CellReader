@@ -1,6 +1,10 @@
 package dev.zwander.cellreader.layout
 
-import androidx.compose.animation.AnimatedVisibility
+import android.view.animation.AnticipateInterpolator
+import android.view.animation.AnticipateOvershootInterpolator
+import android.view.animation.OvershootInterpolator
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
@@ -15,6 +19,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.utils.angledGradient
+import dev.zwander.cellreader.utils.anticipateDecelerateInterpolator
 
 @Composable
 fun ExpanderSignalCard(
@@ -77,7 +82,25 @@ fun ExpanderSignalCard(
                         }
 
                         expandedInfo?.let {
-                            AnimatedVisibility(visible = expanded) {
+                            AnimatedVisibility(
+                                visible = expanded,
+                                enter = fadeIn() + expandVertically(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = {
+                                            OvershootInterpolator().getInterpolation(it)
+                                        }
+                                    )
+                                ),
+                                exit = fadeOut() + shrinkVertically(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = {
+                                            anticipateDecelerateInterpolator(it)
+                                        }
+                                    )
+                                )
+                            ) {
                                 Column {
                                     PaddedDivider()
 
