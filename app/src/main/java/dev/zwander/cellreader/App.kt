@@ -2,10 +2,7 @@ package dev.zwander.cellreader
 
 import android.app.Application
 import android.telephony.*
-import androidx.collection.ArraySet
 import androidx.compose.runtime.*
-import dev.zwander.cellreader.data.CellInfoWrapper
-import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.utils.CellUtils
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
