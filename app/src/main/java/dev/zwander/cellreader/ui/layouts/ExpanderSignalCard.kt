@@ -1,7 +1,5 @@
-package dev.zwander.cellreader.layout
+package dev.zwander.cellreader.ui.layouts
 
-import android.view.animation.AnticipateInterpolator
-import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -18,6 +16,7 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
+import dev.zwander.cellreader.ui.components.*
 import dev.zwander.cellreader.utils.angledGradient
 import dev.zwander.cellreader.utils.anticipateDecelerateInterpolator
 

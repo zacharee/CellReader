@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.layout
+package dev.zwander.cellreader.ui.layouts
 
 import android.os.Build
 import android.telephony.*

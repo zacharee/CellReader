@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.layout
+package dev.zwander.cellreader.ui.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image

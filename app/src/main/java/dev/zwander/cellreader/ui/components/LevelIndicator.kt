@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.layout
+package dev.zwander.cellreader.ui.components
 
 import android.telephony.CellSignalStrength
 import androidx.compose.foundation.Image

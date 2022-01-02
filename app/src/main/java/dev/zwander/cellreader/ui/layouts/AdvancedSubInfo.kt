@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.layout
+package dev.zwander.cellreader.ui.layouts
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -16,6 +16,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.ui.components.PaddedDivider
 import dev.zwander.cellreader.serviceStates
 import dev.zwander.cellreader.signalStrengths
 import dev.zwander.cellreader.subInfos

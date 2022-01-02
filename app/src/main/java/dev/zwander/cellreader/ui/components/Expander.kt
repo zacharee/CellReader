@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.layout
+package dev.zwander.cellreader.ui.components
 
 import android.view.animation.AnticipateOvershootInterpolator
 import androidx.compose.animation.core.animateFloatAsState
