@@ -81,7 +81,7 @@ fun Content() {
                         item(t) {
                             SIMCard(
                                 telephony = telephonies[t]!!,
-                                subInfo = subInfos[t]!!,
+                                subInfo = subInfos[t],
                                 expanded = expanded[t.toString()] ?: false,
                                 onExpand = { expanded[t.toString()] = it },
                                 showingCells = showingCells[t] ?: true,

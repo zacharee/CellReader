@@ -43,7 +43,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SIMCard(
     telephony: TelephonyManager,
-    subInfo: SubscriptionInfo,
+    subInfo: SubscriptionInfo?,
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
     showingCells: Boolean,
@@ -82,7 +82,7 @@ fun SIMCard(
                             ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
                             ?.registeredPlmn.asMccMnc
                     } else {
-                        subInfo.run { "$mcc-$mnc" }
+                        subInfo?.run { "$mcc-$mnc" } ?: "000-000"
                     }
                 }
 
@@ -91,10 +91,10 @@ fun SIMCard(
                     mainAxisAlignment = FlowMainAxisAlignment.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    subInfo.createIconBitmap(context)?.asImageBitmap()?.let {
+                    subInfo?.createIconBitmap(context)?.asImageBitmap()?.let {
                         Image(bitmap = it, contentDescription = null)
                     }
-                    Text(text = "${subInfo.carrierName}")
+                    Text(text = "${subInfo?.carrierName}")
                 }
 
                 Row(

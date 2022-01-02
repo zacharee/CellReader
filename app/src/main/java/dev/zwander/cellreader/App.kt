@@ -16,7 +16,7 @@ val sortedSubIds by derivedStateOf {
 val cellInfos = mutableStateMapOf<Int, List<CellInfo>>()
 val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrength>>()
 val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
-val subInfos = mutableStateMapOf<Int, SubscriptionInfo>()
+val subInfos = mutableStateMapOf<Int, SubscriptionInfo?>()
 val serviceStates = mutableStateMapOf<Int, ServiceState?>()
 val telephonies = mutableStateMapOf<Int, TelephonyManager>()
 
@@ -24,8 +24,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            HiddenApiBypass.setHiddenApiExemptions("")
-        }
+        HiddenApiBypass.setHiddenApiExemptions("")
     }
 }

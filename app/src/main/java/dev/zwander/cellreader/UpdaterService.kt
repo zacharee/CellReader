@@ -1,5 +1,6 @@
 package dev.zwander.cellreader
 
+import android.annotation.Nullable
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
@@ -84,6 +85,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         } else {
             subs.addOnSubscriptionsChangedListener(subsListener)
         }
+
+        if (subs.allSubscriptionInfoList.isEmpty()) {
+            init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -116,24 +121,24 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun init(subscriptions: List<SubscriptionInfo>) {
+    private fun init(subscriptions: List<Int>) {
         telephonies.putAll(
             subscriptions.map {
-                cellInfos[it.subscriptionId] = listOf()
-                strengthInfos[it.subscriptionId] = listOf()
-                subInfos[it.subscriptionId] = it
-                subIds.add(it.subscriptionId)
+                cellInfos[it] = listOf()
+                strengthInfos[it] = listOf()
+                subInfos[it] = subs.getActiveSubscriptionInfo(it)
+                subIds.add(it)
 
-                it.subscriptionId to telephony.createForSubscriptionId(it.subscriptionId).also { telephony ->
+                it to telephony.createForSubscriptionId(it).also { telephony ->
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val callback = callbacks[it.subscriptionId] ?: TelephonyListener(it.subscriptionId).apply {
-                            callbacks[it.subscriptionId] = this
+                        val callback = callbacks[it] ?: TelephonyListener(it).apply {
+                            callbacks[it] = this
                         }
 
                         telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
                     } else {
-                        val listener = listeners[it.subscriptionId] ?: StateListener(it.subscriptionId).apply {
-                            listeners[it.subscriptionId] = this
+                        val listener = listeners[it] ?: StateListener(it).apply {
+                            listeners[it] = this
                         }
 
                         telephony.listen(
@@ -150,8 +155,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
     private fun update(subId: Int, infos: MutableList<CellInfo>) {
         infos.sortWith(CellUtils.CellInfoComparator)
-
-        Log.e("CellReader", "update $infos")
 
         val foundIDs = mutableListOf<String>()
         val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
@@ -250,7 +253,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
                 launch(Dispatchers.Main) {
                     deinit()
-                    init(newList)
+                    init(newIds)
                 }
             }
         }
