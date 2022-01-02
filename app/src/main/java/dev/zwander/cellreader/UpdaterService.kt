@@ -1,6 +1,5 @@
 package dev.zwander.cellreader
 
-import android.annotation.Nullable
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
@@ -148,6 +147,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
                                     PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
                         )
                     }
+
+                    update(it, telephony.allCellInfo)
+                    updateSignal(it, telephony.signalStrength)
+                    updateServiceState(it, telephony.serviceState)
                 }
             }
         )
