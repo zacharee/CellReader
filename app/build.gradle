@@ -55,7 +55,11 @@ dependencies {
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:3.0'
     implementation 'androidx.glance:glance:1.0.0-alpha01'
     implementation 'androidx.glance:glance-appwidget:1.0.0-alpha01'
+
     implementation "com.google.accompanist:accompanist-flowlayout:0.21.5-rc"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.22.0-rc"
+    implementation "com.google.accompanist:accompanist-insets:0.22.0-rc"
+    implementation "com.google.accompanist:accompanist-insets-ui:0.22.0-rc"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

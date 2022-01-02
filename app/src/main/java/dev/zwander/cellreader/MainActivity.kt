@@ -15,9 +15,15 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dev.zwander.cellreader.layout.*
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.*
@@ -36,6 +42,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         with(PermissionUtils.getMissingPermissions(this)) {
             if (isNotEmpty()) {
                 permReq.launch(this)
@@ -49,6 +57,10 @@ class MainActivity : ComponentActivity() {
         startForegroundService(Intent(this, UpdaterService::class.java))
 
         setContent {
+            val sysUiController = rememberSystemUiController()
+            sysUiController.setStatusBarColor(Color.Transparent)
+            sysUiController.setNavigationBarColor(Color.Transparent)
+
             Content()
         }
     }
@@ -66,75 +78,85 @@ fun Content() {
     }
 
     CellReaderTheme {
-        SelectionContainer {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colors.background
-            ) {
-                val state = rememberLazyListState()
-
-                LazyColumn(
-                    contentPadding = PaddingValues(8.dp),
-                    state = state,
+        ProvideWindowInsets {
+            SelectionContainer {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
                 ) {
-                    sortedSubIds.forEach { t ->
-                        item(t) {
-                            SIMCard(
-                                telephony = telephonies[t]!!,
-                                subInfo = subInfos[t],
-                                expanded = expanded[t.toString()] ?: false,
-                                onExpand = { expanded[t.toString()] = it },
-                                showingCells = showingCells[t] ?: true,
-                                onShowingCells = { showingCells[t] = it },
-                                modifier = Modifier
-                                    .animateItemPlacement()
-                                    .padding(bottom = 8.dp)
-                            )
-                        }
+                    val state = rememberLazyListState()
 
-                        val lastCellIndex = cellInfos[t]!!.lastIndex
-                        val lastStrengthIndex = strengthInfos[t]!!.lastIndex
-                        val strengthsEmpty = strengthInfos[t]!!.isEmpty()
-
-                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                            AnimatedVisibility(
-                                visible = showingCells[t] != false,
-                                modifier = Modifier
-                                    .animateItemPlacement()
-                                    .padding(bottom = 8.dp),
-                                enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
-                                exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
-                            ) {
-                                val key = remember(item.cellIdentity) {
-                                    "$t:${item.cellIdentity}"
-                                }
-
-                                SignalCard(
-                                    cellInfo = item,
-                                    expanded = expanded[key] ?: false,
-                                    isFinal = index == lastCellIndex && strengthsEmpty,
-                                    onExpand = { expanded[key] = it },
+                    LazyColumn(
+                        contentPadding = rememberInsetsPaddingValues(
+                            insets = LocalWindowInsets.current.systemBars,
+                            applyTop = true,
+                            applyBottom = true,
+                            additionalStart = 8.dp,
+                            additionalTop = 8.dp,
+                            additionalEnd = 8.dp,
+                            additionalBottom = 8.dp
+                        ),
+                        state = state,
+                    ) {
+                        sortedSubIds.forEach { t ->
+                            item(t) {
+                                SIMCard(
+                                    telephony = telephonies[t]!!,
+                                    subInfo = subInfos[t],
+                                    expanded = expanded[t.toString()] ?: false,
+                                    onExpand = { expanded[t.toString()] = it },
+                                    showingCells = showingCells[t] ?: true,
+                                    onShowingCells = { showingCells[t] = it },
                                     modifier = Modifier
-                                        .fillMaxWidth()
+                                        .animateItemPlacement()
+                                        .padding(bottom = 8.dp)
                                 )
                             }
-                        }
 
-                        itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
-                            AnimatedVisibility(
-                                visible = showingCells[t] != false,
-                                modifier = Modifier
-                                    .animateItemPlacement()
-                                    .padding(bottom = 8.dp),
-                                enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
-                                exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
-                            ) {
-                                SignalStrength(
-                                    cellSignalStrength = item,
-                                    isFinal = index == lastStrengthIndex,
+                            val lastCellIndex = cellInfos[t]!!.lastIndex
+                            val lastStrengthIndex = strengthInfos[t]!!.lastIndex
+                            val strengthsEmpty = strengthInfos[t]!!.isEmpty()
+
+                            itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                                AnimatedVisibility(
+                                    visible = showingCells[t] != false,
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                )
+                                        .animateItemPlacement()
+                                        .padding(bottom = 8.dp),
+                                    enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                    exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                                ) {
+                                    val key = remember(item.cellIdentity) {
+                                        "$t:${item.cellIdentity}"
+                                    }
+
+                                    SignalCard(
+                                        cellInfo = item,
+                                        expanded = expanded[key] ?: false,
+                                        isFinal = index == lastCellIndex && strengthsEmpty,
+                                        onExpand = { expanded[key] = it },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
+                                AnimatedVisibility(
+                                    visible = showingCells[t] != false,
+                                    modifier = Modifier
+                                        .animateItemPlacement()
+                                        .padding(bottom = 8.dp),
+                                    enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                    exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                                ) {
+                                    SignalStrength(
+                                        cellSignalStrength = item,
+                                        isFinal = index == lastStrengthIndex,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }
