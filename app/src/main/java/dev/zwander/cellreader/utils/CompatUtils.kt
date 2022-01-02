@@ -97,3 +97,10 @@ val CellIdentity.mncStringCompat: String?
             .apply { isAccessible = true }
             .get(this)?.toString()
     }
+
+val UiccAccessRule.accessTypeCompat: Long
+    @SuppressLint("SoonBlockedPrivateApi")
+    get() = UiccAccessRule::class.java
+        .getDeclaredField("mAccessType")
+        .apply { isAccessible = true }
+        .getLong(this)

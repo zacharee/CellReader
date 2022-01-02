@@ -52,7 +52,8 @@ fun AdvancedSubInfo(
                 }
 
                 PaddedDivider(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp)
                 )
 
@@ -152,7 +153,8 @@ fun AdvancedSubInfo(
                     }
 
                     PaddedDivider(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(start = 16.dp, end = 16.dp)
                     )
 
@@ -290,7 +292,8 @@ fun AdvancedSubInfo(
 
                 subInfos[subId]?.apply {
                     PaddedDivider(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(start = 16.dp, end = 16.dp)
                     )
 
@@ -355,7 +358,6 @@ fun AdvancedSubInfo(
                         }
                         FormatText(R.string.card_id_format, cardIdCompat)
                         FormatText(R.string.data_roaming_format, "$dataRoaming")
-                        FormatText(R.string.access_rules_format, "$allAccessRulesCompat")
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
                         } else {
@@ -364,6 +366,33 @@ fun AdvancedSubInfo(
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
+                        }
+
+                        if (allAccessRulesCompat.isNotEmpty()) {
+                            Text(
+                                text = stringResource(id = R.string.access_rules),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            allAccessRulesCompat.forEach { rule ->
+                                Card(
+                                    elevation = 0.dp,
+                                    backgroundColor = Color.Transparent,
+                                    border = BorderStroke(1.dp, Color.White),
+                                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+                                ) {
+                                    FlowRow(
+                                        mainAxisSize = SizeMode.Expand,
+                                        mainAxisAlignment = MainAxisAlignment.SpaceAround,
+                                        mainAxisSpacing = 16.dp,
+                                        modifier = Modifier.padding(8.dp)
+                                    ) {
+                                        FormatText(R.string.package_name_format, rule.packageName ?: "null")
+                                        FormatText(R.string.access_type_format, rule.accessTypeCompat.toString())
+                                        FormatText(R.string.certificate_format, rule.certificateHexString)
+                                    }
+                                }
+                            }
                         }
                     }
                 }

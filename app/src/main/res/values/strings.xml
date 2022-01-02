@@ -7,6 +7,7 @@
     <string name="service_state">Service State</string>
     <string name="network_registrations">Network Registrations</string>
     <string name="subscription_info">Subscription Info</string>
+    <string name="access_rules">Access Rules</string>
     <string name="gsm">GSM</string>
     <string name="cdma">CDMA</string>
     <string name="wcdma">WCDMA</string>
@@ -129,8 +130,10 @@
     <string name="country_iso_format">Country ISO: %s</string>
     <string name="card_string_format">Card String: %s</string>
     <string name="card_id_format">Card ID: %s</string>
-    <string name="access_rules_format">Access Rules: %s</string>
     <string name="uicc_apps_format">UICC Apps: %s</string>
     <string name="data_roaming_format">Data Roaming: %s</string>
     <string name="cell_connection_status_format">Status: %s</string>
+    <string name="certificate_format">Certificate: %s</string>
+    <string name="access_type_format">Access Type: %s</string>
+    <string name="package_name_format">Package: %s</string>
 </resources>
