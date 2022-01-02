@@ -3,10 +3,12 @@ package dev.zwander.cellreader
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.animation.AnticipateOvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*

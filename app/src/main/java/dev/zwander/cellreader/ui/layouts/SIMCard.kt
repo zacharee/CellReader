@@ -3,6 +3,7 @@ package dev.zwander.cellreader.ui.layouts
 import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
+import android.view.animation.AnticipateInterpolator
 import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.*
@@ -63,7 +64,12 @@ fun SIMCard(
                     ),
                     87f
                 )
-                .padding(8.dp),
+                .padding(
+                    start = 8.dp,
+                    top = 8.dp,
+                    end = 8.dp,
+                    bottom = 0.dp
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column {
@@ -140,7 +146,7 @@ fun SIMCard(
                 val scroll = rememberCarouselScrollState()
 
                 var subSize by remember {
-                    mutableStateOf(IntSize.Zero)
+                    mutableStateOf(IntSize(0, context.dpAsPx(50).toInt()))
                 }
 
                 AnimatedVisibility(
@@ -149,7 +155,7 @@ fun SIMCard(
                         animationSpec = tween(
                             durationMillis = 400,
                             easing = {
-                                OvershootInterpolator().getInterpolation(it)
+                                anticipateDecelerateInterpolator(it)
                             }
                         )
                     ),
@@ -172,6 +178,7 @@ fun SIMCard(
 
                         Box(
                             modifier = Modifier.heightIn(max = 300.dp)
+                                .animateContentSize()
                         ) {
                             var target by remember {
                                 mutableStateOf(0f)

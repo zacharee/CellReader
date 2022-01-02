@@ -60,7 +60,12 @@ fun ExpanderSignalCard(
                             colors,
                             87f
                         )
-                        .padding(8.dp)
+                        .padding(
+                            start = 8.dp,
+                            top = 8.dp,
+                            end = 8.dp,
+                            bottom = if (expandedInfo != null) 0.dp else 8.dp
+                        )
                         .fillMaxWidth(),
                 ) {
                     Column {
@@ -87,7 +92,7 @@ fun ExpanderSignalCard(
                                     animationSpec = tween(
                                         durationMillis = 400,
                                         easing = {
-                                            OvershootInterpolator().getInterpolation(it)
+                                            anticipateDecelerateInterpolator(it)
                                         }
                                     )
                                 ),

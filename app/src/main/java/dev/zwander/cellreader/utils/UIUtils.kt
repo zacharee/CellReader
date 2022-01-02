@@ -1,12 +1,14 @@
 package dev.zwander.cellreader.utils
 
 import android.content.Context
+import android.util.TypedValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import kotlin.math.*
@@ -41,4 +43,13 @@ fun Modifier.angledGradient(colors: List<Pair<Float, Color>>, degrees: Float) = 
 
 @Composable
 fun Number.asDp() =
-    (toFloat() / LocalDensity.current.density).dp
+    (dpAsPx()).dp
+
+@Composable
+fun Number.dpAsPx() = toFloat() / LocalDensity.current.density
+
+fun Context.dpAsPx(number: Number) = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    number.toFloat(),
+    resources.displayMetrics
+)
