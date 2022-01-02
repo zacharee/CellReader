@@ -1,6 +1,7 @@
 package dev.zwander.cellreader
 
 import android.app.Application
+import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.*
 import dev.zwander.cellreader.utils.CellUtils
@@ -23,6 +24,8 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        HiddenApiBypass.setHiddenApiExemptions("")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            HiddenApiBypass.setHiddenApiExemptions("")
+        }
     }
 }

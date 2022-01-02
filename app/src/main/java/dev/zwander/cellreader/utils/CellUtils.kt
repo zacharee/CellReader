@@ -1,6 +1,7 @@
 package dev.zwander.cellreader.utils
 
 import android.telephony.*
+import android.telephony.NetworkRegistrationInfo.NRState
 import androidx.compose.runtime.Composable
 import kotlin.math.absoluteValue
 
@@ -11,6 +12,26 @@ object CellUtils {
             CellInfo.CONNECTION_SECONDARY_SERVING -> "Secondary Serving"
             CellInfo.CONNECTION_PRIMARY_SERVING -> "Primary Serving"
             else -> "Unknown"
+        }
+    }
+
+    fun nrStateToString(@NRState nrState: Int): String {
+        return when (nrState) {
+            NetworkRegistrationInfo.NR_STATE_RESTRICTED -> "RESTRICTED"
+            NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED -> "NOT_RESTRICTED"
+            NetworkRegistrationInfo.NR_STATE_CONNECTED -> "CONNECTED"
+            else -> "NONE"
+        }
+    }
+
+    fun frequencyRangeToString(@ServiceState.FrequencyRange range: Int): String {
+        return when (range) {
+            ServiceState.FREQUENCY_RANGE_UNKNOWN -> "UNKNOWN"
+            ServiceState.FREQUENCY_RANGE_LOW -> "LOW"
+            ServiceState.FREQUENCY_RANGE_MID -> "MID"
+            ServiceState.FREQUENCY_RANGE_HIGH -> "HIGH"
+            ServiceState.FREQUENCY_RANGE_MMWAVE -> "MMWAVE"
+            else -> Integer.toString(range)
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.layout
 
+import android.os.Build
 import android.telephony.*
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -49,13 +50,13 @@ fun SignalStrength(
         basicInfo = {
             with(cellSignalStrength) {
                 FormatText(R.string.type_format, stringResource(
-                    when (this) {
-                        is CellSignalStrengthGsm -> R.string.gsm
-                        is CellSignalStrengthWcdma -> R.string.wcdma
-                        is CellSignalStrengthCdma -> R.string.cdma
-                        is CellSignalStrengthTdscdma -> R.string.tdscdma
-                        is CellSignalStrengthLte -> R.string.lte
-                        is CellSignalStrengthNr -> R.string.nr
+                    when {
+                        this is CellSignalStrengthGsm -> R.string.gsm
+                        this is CellSignalStrengthWcdma -> R.string.wcdma
+                        this is CellSignalStrengthCdma -> R.string.cdma
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdma -> R.string.tdscdma
+                        this is CellSignalStrengthLte -> R.string.lte
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> R.string.nr
                         else -> R.string.unknown
                     }
                 ))

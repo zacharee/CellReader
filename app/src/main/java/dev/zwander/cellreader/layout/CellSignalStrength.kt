@@ -1,9 +1,11 @@
 package dev.zwander.cellreader.layout
 
+import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.Composable
 import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.FormatText
+import dev.zwander.cellreader.utils.bitErrorRateCompat
 import dev.zwander.cellreader.utils.cast
 import dev.zwander.cellreader.utils.onAvail
 
@@ -16,11 +18,13 @@ fun CellSignalStrength(
     with (cellSignalStrength) {
         cast<CellSignalStrengthGsm>()?.apply {
             if (advanced) {
-                rssi.onAvail {
-                    FormatText(R.string.rssi_format, "$rssi")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    rssi.onAvail {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    }
                 }
-                bitErrorRate.onAvail {
-                    FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
+                bitErrorRateCompat.onAvail {
+                    FormatText(R.string.bit_error_rate_format, "$it")
                 }
                 timingAdvance.onAvail {
                     FormatText(R.string.timing_advance_format, "$timingAdvance")
@@ -45,44 +49,52 @@ fun CellSignalStrength(
                 evdoSnr.onAvail {
                     FormatText(R.string.snr_format, "$evdoSnr")
                 }
-                evdoAsuLevel.onAvail {
-                    FormatText(R.string.evdo_asu_format, "$evdoAsuLevel")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    evdoAsuLevel.onAvail {
+                        FormatText(R.string.evdo_asu_format, "$evdoAsuLevel")
+                    }
                 }
             }
         }
 
         cast<CellSignalStrengthWcdma>()?.apply {
             if (advanced) {
-                rssi.onAvail {
-                    FormatText(R.string.rssi_format, "$rssi")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    rssi.onAvail {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    }
                 }
 
-                bitErrorRate.onAvail {
+                bitErrorRateCompat.onAvail {
                     FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
                 }
 
-                rscp.onAvail {
-                    FormatText(R.string.rscp_format, "$rscp")
-                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    rscp.onAvail {
+                        FormatText(R.string.rscp_format, "$rscp")
+                    }
 
-                ecNo.onAvail {
-                    FormatText(R.string.ecno_format, "$ecNo")
+                    ecNo.onAvail {
+                        FormatText(R.string.ecno_format, "$ecNo")
+                    }
                 }
             }
         }
 
-        cast<CellSignalStrengthTdscdma>()?.apply {
-            if (advanced) {
-                rssi.onAvail {
-                    FormatText(R.string.rssi_format, "$rssi")
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            cast<CellSignalStrengthTdscdma>()?.apply {
+                if (advanced) {
+                    rssi.onAvail {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    }
 
-                bitErrorRate.onAvail {
-                    FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
-                }
+                    bitErrorRate.onAvail {
+                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
+                    }
 
-                rscp.onAvail {
-                    FormatText(R.string.rscp_format, "$rscp")
+                    rscp.onAvail {
+                        FormatText(R.string.rscp_format, "$rscp")
+                    }
                 }
             }
         }
@@ -93,14 +105,18 @@ fun CellSignalStrength(
             }
 
             if (advanced) {
-                rssi.onAvail {
-                    FormatText(R.string.rssi_format, "$rssi")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    rssi.onAvail {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    }
                 }
                 cqi.onAvail {
                     FormatText(R.string.cqi_format, "$cqi")
                 }
-                cqiTableIndex.onAvail {
-                    FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    cqiTableIndex.onAvail {
+                        FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
+                    }
                 }
                 rssnr.onAvail {
                     FormatText(R.string.rssnr_format, "$rssnr")
@@ -111,32 +127,40 @@ fun CellSignalStrength(
             }
         }
 
-        cast<CellSignalStrengthNr>()?.apply {
-            if (simple) {
-                ssRsrq.onAvail {
-                    FormatText(R.string.ss_rsrq_format, it.toString())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            cast<CellSignalStrengthNr>()?.apply {
+                if (simple) {
+                    ssRsrq.onAvail {
+                        FormatText(R.string.ss_rsrq_format, it.toString())
+                    }
+                    csiRsrq.onAvail {
+                        FormatText(R.string.csi_rsrq_format, it.toString())
+                    }
                 }
-                csiRsrq.onAvail {
-                    FormatText(R.string.csi_rsrq_format, it.toString())
-                }
-            }
 
-            if (advanced) {
-                if (csiCqiReport.isNotEmpty()) {
-                    FormatText(R.string.csi_cqi_report_format, csiCqiReport.joinToString(", "))
-                }
-                csiCqiTableIndex.onAvail {
-                    FormatText(R.string.csi_cqi_table_index_format, "$csiCqiTableIndex")
-                }
-                ssSinr.onAvail {
-                    FormatText(R.string.ss_sinr_format, "$ssSinr")
+                if (advanced) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        if (csiCqiReport.isNotEmpty()) {
+                            FormatText(R.string.csi_cqi_report_format, csiCqiReport.joinToString(", "))
+                        }
+
+                        csiCqiTableIndex.onAvail {
+                            FormatText(R.string.csi_cqi_table_index_format, "$csiCqiTableIndex")
+                        }
+                    }
+                    ssSinr.onAvail {
+                        FormatText(R.string.ss_sinr_format, "$ssSinr")
+                    }
                 }
             }
         }
 
         if (advanced) {
             FormatText(R.string.asu_format, "$asuLevel")
-            FormatText(R.string.valid_format, "$isValid")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                FormatText(R.string.valid_format, "$isValid")
+            }
         }
     }
 }

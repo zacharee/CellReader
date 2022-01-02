@@ -1,6 +1,7 @@
 package dev.zwander.cellreader.layout
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.telephony.*
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.AnticipateOvershootInterpolator
@@ -35,10 +36,7 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
 import dev.zwander.cellreader.serviceStates
-import dev.zwander.cellreader.utils.FormatText
-import dev.zwander.cellreader.utils.angledGradient
-import dev.zwander.cellreader.utils.anticipateDecelerateInterpolator
-import dev.zwander.cellreader.utils.asMccMnc
+import dev.zwander.cellreader.utils.*
 import kotlinx.coroutines.delay
 
 @SuppressLint("MissingPermission")
@@ -72,11 +70,20 @@ fun SIMCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column {
-                val properInfo = remember(serviceStates[telephony.subscriptionId]) {
-                    serviceStates[telephony.subscriptionId]?.getNetworkRegistrationInfoListForTransportType(
-                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN
-                    )
-                    ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                var rplmn by remember(serviceStates[telephony.subscriptionIdCompat]) {
+                    mutableStateOf("000-000")
+                }
+
+                LaunchedEffect(key1 = serviceStates[telephony.subscriptionIdCompat]) {
+                    rplmn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        serviceStates[telephony.subscriptionIdCompat]?.getNetworkRegistrationInfoListForTransportType(
+                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                        )
+                            ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                            ?.registeredPlmn.asMccMnc
+                    } else {
+                        subInfo.run { "$mcc-$mnc" }
+                    }
                 }
 
                 FlowRow(
@@ -120,13 +127,16 @@ fun SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.rplmn_format, properInfo?.registeredPlmn.asMccMnc)
+                        FormatText(R.string.rplmn_format, rplmn)
                         FormatText(R.string.network_type_format, telephony.networkTypeName)
-                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[telephony.subscriptionId]?.isUsingCarrierAggregation}")
-                        FormatText(R.string.nr_state_format, "${NetworkRegistrationInfo.nrStateToString(
-                            serviceStates[telephony.subscriptionId]?.nrState ?: -100)}/" +
-                                ServiceState.frequencyRangeToString(serviceStates[telephony.subscriptionId]?.nrFrequencyRange ?: -100)
-                        )
+                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[telephony.subscriptionIdCompat]?.isUsingCarrierAggregation}")
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            FormatText(R.string.nr_state_format, "${CellUtils.nrStateToString(
+                                serviceStates[telephony.subscriptionIdCompat]?.nrState ?: -100)}/" +
+                                    CellUtils.frequencyRangeToString(serviceStates[telephony.subscriptionIdCompat]?.nrFrequencyRange ?: -100)
+                            )
+                        }
                     }
                 }
 
@@ -181,7 +191,7 @@ fun SIMCard(
                                     .fillMaxHeight()
                                     .verticalScroll(scroll)
                             ) {
-                                AdvancedSubInfo(subId = telephony.subscriptionId)
+                                AdvancedSubInfo(subId = telephony.subscriptionIdCompat)
                             }
 
                             Carousel(

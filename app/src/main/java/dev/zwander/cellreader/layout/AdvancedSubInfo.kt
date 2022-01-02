@@ -1,6 +1,7 @@
 package dev.zwander.cellreader.layout
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.telephony.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -37,7 +38,10 @@ fun AdvancedSubInfo(subId: Int) {
                 )
 
                 FormatText(R.string.level_format, "$level")
-                FormatText(R.string.timestamp_format, "$timestampMillis")
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    FormatText(R.string.timestamp_format, "$timestampMillis")
+                }
             }
 
             PaddedDivider(
@@ -54,26 +58,36 @@ fun AdvancedSubInfo(subId: Int) {
 
                 FormatText(
                     R.string.operator_format,
-                    setOf(
+                    mutableSetOf(
                         operatorAlphaShort,
                         operatorAlpha,
                         operatorAlphaLong,
-                        operatorAlphaShortRaw,
-                        operatorAlphaLongRaw,
                         operatorNumeric,
                         dataOperatorAlphaShort,
                         dataOperatorNumeric,
                         voiceOperatorAlphaLong,
                         voiceOperatorAlphaShort,
                         voiceOperatorNumeric
-                    ).joinToString("/")
+                    ).apply {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            add(operatorAlphaShortRaw)
+                            add(operatorAlphaLongRaw)
+                        }
+                    }.joinToString("/")
                 )
 
-                FormatText(
-                    R.string.roaming_type_format,
-                    HashSet(networkRegistrationInfoList.map { it.roamingType })
-                        .joinToString("/") { ServiceState.roamingTypeToString(it) }
-                )
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                    FormatText(
+                        R.string.roaming_type_format,
+                        HashSet(networkRegistrationInfoList.map { it.roamingType })
+                            .joinToString("/") { ServiceState.roamingTypeToString(it) }
+                    )
+                } else {
+                    FormatText(
+                        R.string.roaming_format,
+                        roaming.toString()
+                    )
+                }
                 FormatText(R.string.data_roaming_from_reg_format, "$dataRoamingFromRegistration")
 
                 FormatText(
@@ -97,10 +111,14 @@ fun AdvancedSubInfo(subId: Int) {
                 FormatText(R.string.duplex_format, duplexModeToString(duplexMode))
                 FormatText(R.string.channel_format, "$channelNumber")
 
-                FormatText(R.string.searching_format, "$isSearching")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    FormatText(R.string.searching_format, "$isSearching")
+                }
                 FormatText(R.string.manual_format, "$isManualSelection")
 
-                FormatText(R.string.iwlan_preferred_format, "$isIwlanPreferred")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    FormatText(R.string.iwlan_preferred_format, "$isIwlanPreferred")
+                }
                 FormatText(R.string.cssi_format, "$cssIndicator")
 
                 cdmaSystemId.onNegAvail {
@@ -109,6 +127,7 @@ fun AdvancedSubInfo(subId: Int) {
                 cdmaNetworkId.onNegAvail {
                     FormatText(R.string.cdma_network_id_format, "$cdmaNetworkId")
                 }
+
                 cdmaRoamingIndicator.onNegAvail {
                     FormatText(
                         R.string.cdma_roaming_indicator_format,
@@ -121,7 +140,9 @@ fun AdvancedSubInfo(subId: Int) {
                         "${cdmaEriIconMode}/${cdmaEriIconIndex}"
                     )
                 }
-                FormatText(R.string.arfcn_rsrp_boost_format, "$arfcnRsrpBoost")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    FormatText(R.string.arfcn_rsrp_boost_format, "$arfcnRsrpBoost")
+                }
 
                 PaddedDivider(
                     modifier = Modifier.fillMaxWidth()
@@ -134,113 +155,125 @@ fun AdvancedSubInfo(subId: Int) {
                     textAlign = TextAlign.Center
                 )
 
-                networkRegistrationInfoList.forEach { networkRegistrationInfo ->
-                    Card(
-                        elevation = 0.dp,
-                        backgroundColor = Color.Transparent,
-                        border = BorderStroke(1.dp, Color.White),
-                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                    ) {
-                        FlowRow(
-                            mainAxisSize = SizeMode.Expand,
-                            mainAxisAlignment = MainAxisAlignment.SpaceBetween,
-                            mainAxisSpacing = 16.dp,
-                            modifier = Modifier.padding(8.dp)
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                    networkRegistrationInfoList.forEach { networkRegistrationInfo ->
+                        Card(
+                            elevation = 0.dp,
+                            backgroundColor = Color.Transparent,
+                            border = BorderStroke(1.dp, Color.White),
+                            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                         ) {
-                            with(networkRegistrationInfo) {
-                                this.dataSpecificInfo?.apply {
-                                    FormatText(R.string.endc_available_format, "$isEnDcAvailable")
-                                    FormatText(R.string.nr_available_format, "$isNrAvailable")
-                                    FormatText(R.string.dcnr_restricted_format, "$isDcNrRestricted")
+                            FlowRow(
+                                mainAxisSize = SizeMode.Expand,
+                                mainAxisAlignment = MainAxisAlignment.SpaceBetween,
+                                mainAxisSpacing = 16.dp,
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                with(networkRegistrationInfo) {
+                                    this.dataSpecificInfo?.apply {
+                                        FormatText(R.string.endc_available_format, "$isEnDcAvailable")
+                                        FormatText(R.string.nr_available_format, "$isNrAvailable")
+                                        FormatText(R.string.dcnr_restricted_format, "$isDcNrRestricted")
 
-                                    vopsSupportInfo?.apply {
-                                        FormatText(
-                                            R.string.vops_supported_format,
-                                            "$isVopsSupported"
-                                        )
-                                        FormatText(
-                                            R.string.vops_emergency_service_supported_format,
-                                            "$isEmergencyServiceSupported"
-                                        )
-                                        FormatText(
-                                            R.string.vops_emergency_service_fallback_supported_format,
-                                            "$isEmergencyServiceFallbackSupported"
-                                        )
-                                    }
-                                }
-
-                                this.voiceSpecificInfo?.apply {
-                                    FormatText(R.string.prl_format, "$systemIsInPrl")
-
-                                    roamingIndicator.onNegAvail {
-                                        FormatText(
-                                            R.string.roaming_indicator_format,
-                                            "$roamingIndicator/$defaultRoamingIndicator"
-                                        )
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            vopsSupportInfo?.apply {
+                                                FormatText(
+                                                    R.string.vops_supported_format,
+                                                    "$isVopsSupported"
+                                                )
+                                                FormatText(
+                                                    R.string.vops_emergency_service_supported_format,
+                                                    "$isEmergencyServiceSupported"
+                                                )
+                                                FormatText(
+                                                    R.string.vops_emergency_service_fallback_supported_format,
+                                                    "$isEmergencyServiceFallbackSupported"
+                                                )
+                                            }
+                                        }
                                     }
 
-                                    FormatText(R.string.css_format, "$cssSupported")
-                                }
+                                    this.voiceSpecificInfo?.apply {
+                                        FormatText(R.string.prl_format, "$systemIsInPrl")
 
-                                FormatText(
-                                    R.string.transport_format,
-                                    AccessNetworkConstants.transportTypeToString(
-                                        transportType
-                                    )
-                                )
-                                FormatText(
-                                    R.string.access_format,
-                                    ServiceState.rilRadioTechnologyToString(
-                                        ServiceState.networkTypeToRilRadioTechnology(
-                                            accessNetworkTechnology
+                                        roamingIndicator.onNegAvail {
+                                            FormatText(
+                                                R.string.roaming_indicator_format,
+                                                "$roamingIndicator/$defaultRoamingIndicator"
+                                            )
+                                        }
+
+                                        FormatText(R.string.css_format, "$cssSupported")
+                                    }
+
+                                    FormatText(
+                                        R.string.transport_format,
+                                        AccessNetworkConstants.transportTypeToString(
+                                            transportType
                                         )
                                     )
-                                )
-
-                                FormatText(R.string.registered_format, "$isRegistered")
-                                FormatText(R.string.in_service_format, "$isInService")
-                                FormatText(R.string.emergency_enabled_format, "$isEmergencyEnabled")
-                                FormatText(R.string.searching_format, "$isSearching")
-                                FormatText(
-                                    R.string.roaming_format,
-                                    ServiceState.roamingTypeToString(
-                                        roamingType
-                                    )
-                                )
-
-                                FormatText(
-                                    R.string.registration_state_format,
-                                    NetworkRegistrationInfo.registrationStateToString(
-                                        registrationState
-                                    )
-                                )
-                                FormatText(R.string.reject_cause_format, "$rejectCause")
-
-                                FormatText(R.string.rplmn_format, registeredPlmn.asMccMnc)
-
-                                FormatText(
-                                    R.string.services_format,
-                                    availableServices.joinToString(", ") {
-                                        NetworkRegistrationInfo.serviceTypeToString(
-                                            it
+                                    FormatText(
+                                        R.string.access_format,
+                                        ServiceState.rilRadioTechnologyToString(
+                                            ServiceState.networkTypeToRilRadioTechnology(
+                                                accessNetworkTechnology
+                                            )
                                         )
-                                    })
-                                FormatText(R.string.domain_format, domainToString(domain))
-                                FormatText(
-                                    R.string.carrier_aggregation_format,
-                                    isUsingCarrierAggregation.toString()
-                                )
-                                FormatText(
-                                    R.string.nr_state_format,
-                                    NetworkRegistrationInfo.nrStateToString(nrState).toString()
-                                )
-
-                                cellIdentity?.apply {
-                                    CellIdentity(
-                                        cellIdentity = this,
-                                        simple = true,
-                                        advanced = true
                                     )
+
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        FormatText(R.string.registered_format, "$isRegistered")
+                                    }
+                                    FormatText(R.string.in_service_format, "$isInService")
+                                    FormatText(R.string.emergency_enabled_format, "$isEmergencyEnabled")
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        FormatText(R.string.searching_format, "$isSearching")
+                                    }
+                                    FormatText(
+                                        R.string.roaming_format,
+                                        ServiceState.roamingTypeToString(
+                                            roamingType
+                                        )
+                                    )
+
+                                    FormatText(
+                                        R.string.registration_state_format,
+                                        NetworkRegistrationInfo.registrationStateToString(
+                                            registrationState
+                                        )
+                                    )
+                                    FormatText(R.string.reject_cause_format, "$rejectCause")
+
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        FormatText(R.string.rplmn_format, registeredPlmn.asMccMnc)
+                                    }
+
+                                    FormatText(
+                                        R.string.services_format,
+                                        availableServices.joinToString(", ") {
+                                            NetworkRegistrationInfo.serviceTypeToString(
+                                                it
+                                            )
+                                        })
+                                    FormatText(R.string.domain_format, domainToString(domain))
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        FormatText(
+                                            R.string.carrier_aggregation_format,
+                                            isUsingCarrierAggregation.toString()
+                                        )
+                                    }
+                                    FormatText(
+                                        R.string.nr_state_format,
+                                        CellUtils.nrStateToString(nrState)
+                                    )
+
+                                    cellIdentity?.apply {
+                                        CellIdentity(
+                                            cellIdentity = this,
+                                            simple = true,
+                                            advanced = true
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -270,44 +303,61 @@ fun AdvancedSubInfo(subId: Int) {
                     FormatText(R.string.number_format, number)
                     FormatText(R.string.display_name_format, "$displayName")
                     FormatText(R.string.carrier_name_format, "$carrierName")
-                    FormatText(R.string.carrier_id_format, "$carrierId")
-                    FormatText(
-                        R.string.subscription_type_format,
-                        subscriptionTypeToString(subscriptionType)
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FormatText(R.string.carrier_id_format, "$carrierId")
+                        FormatText(
+                            R.string.subscription_type_format,
+                            subscriptionTypeToString(subscriptionType)
+                        )
+                    }
                     FormatText(R.string.subscription_id_format, "$subscriptionId")
-                    FormatText(
-                        R.string.profile_class_format,
-                        profileClassToString(profileClass)
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FormatText(
+                            R.string.profile_class_format,
+                            profileClassToString(profileClass)
+                        )
+                    }
                     FormatText(R.string.name_source_format, nameSourceToString(nameSource))
-                    FormatText(R.string.opportunistic_format, "$isOpportunistic")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FormatText(R.string.opportunistic_format, "$isOpportunistic")
+                    }
                     FormatText(R.string.embedded_format, "$isEmbedded")
                     if (iccId.isNotBlank()) {
                         FormatText(R.string.icc_id_format, iccId)
                     }
-                    if (hplmns.isNotEmpty()) {
-                        FormatText(R.string.hplmns_format, hplmns.joinToString(", ") { it.asMccMnc })
-                    }
-                    if (ehplmns.isNotEmpty()) {
-                        FormatText(R.string.ehplmns_format, ehplmns.joinToString(", ") { it.asMccMnc })
-                    }
-                    FormatText(R.string.group_disabled_format, "$isGroupDisabled")
-                    this.groupUuid?.apply {
-                        FormatText(R.string.group_uuid_format, "$this")
-                    }
-                    this.groupOwner?.apply {
-                        FormatText(R.string.group_owner_format, this)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (hplmns.isNotEmpty()) {
+                            FormatText(R.string.hplmns_format, hplmns.joinToString(", ") { it.asMccMnc })
+                        }
+                        if (ehplmns.isNotEmpty()) {
+                            FormatText(R.string.ehplmns_format, ehplmns.joinToString(", ") { it.asMccMnc })
+                        }
+                        FormatText(R.string.group_disabled_format, "$isGroupDisabled")
+                        this.groupUuid?.apply {
+                            FormatText(R.string.group_uuid_format, "$this")
+                        }
+                        this.groupOwner?.apply {
+                            FormatText(R.string.group_owner_format, this)
+                        }
                     }
                     FormatText(R.string.country_iso_format, countryIso)
-                    if (cardString.isNotBlank()) {
-                        FormatText(R.string.card_string_format, cardString)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (cardString.isNotBlank()) {
+                            FormatText(R.string.card_string_format, cardString)
+                        }
                     }
-                    FormatText(R.string.card_id_format, "$cardId")
+                    FormatText(R.string.card_id_format, cardIdCompat)
                     FormatText(R.string.data_roaming_format, "$dataRoaming")
-                    FormatText(R.string.access_rules_format, "$allAccessRules")
-                    FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
-                    FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
+                    FormatText(R.string.access_rules_format, "$allAccessRulesCompat")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        FormatText(R.string.mcc_mnc_format, "$mccString-$mncString")
+                    } else {
+                        FormatText(R.string.mcc_mnc_format, "$mcc-$mnc")
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        FormatText(R.string.uicc_apps_format, "${areUiccApplicationsEnabled()}")
+                    }
                 }
             }
         }

@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.telephony.*
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -22,7 +25,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
-    private val callbacks = HashMap<Int, TelephonyCallback>()
+    private val callbacks by lazy { HashMap<Int, TelephonyCallback>() }
+    private val listeners = HashMap<Int, PhoneStateListener>()
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -75,7 +79,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
         startForeground(100, n)
 
-        subs.addOnSubscriptionsChangedListener(Dispatchers.IO.asExecutor(), subsListener)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            subs.addOnSubscriptionsChangedListener(Dispatchers.IO.asExecutor(), subsListener)
+        } else {
+            subs.addOnSubscriptionsChangedListener(subsListener)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -92,7 +100,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
     private fun deinit() {
         telephonies.forEach { (subId, telephony) ->
-            telephony.unregisterTelephonyCallback(callbacks[subId])
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                telephony.unregisterTelephonyCallback(callbacks[subId])
+            } else {
+                telephony.listen(listeners[subId], PhoneStateListener.LISTEN_NONE)
+            }
         }
 
         subIds.clear()
@@ -112,12 +124,25 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
                 subInfos[it.subscriptionId] = it
                 subIds.add(it.subscriptionId)
 
-                val callback = callbacks[it.subscriptionId] ?: TelephonyListener(it.subscriptionId).apply {
-                    callbacks[it.subscriptionId] = this
-                }
-
                 it.subscriptionId to telephony.createForSubscriptionId(it.subscriptionId).also { telephony ->
-                    telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val callback = callbacks[it.subscriptionId] ?: TelephonyListener(it.subscriptionId).apply {
+                            callbacks[it.subscriptionId] = this
+                        }
+
+                        telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
+                    } else {
+                        val listener = listeners[it.subscriptionId] ?: StateListener(it.subscriptionId).apply {
+                            listeners[it.subscriptionId] = this
+                        }
+
+                        telephony.listen(
+                            listener,
+                            PhoneStateListener.LISTEN_SERVICE_STATE or
+                                    PhoneStateListener.LISTEN_CELL_INFO or
+                                    PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                        )
+                    }
                 }
             }
         )
@@ -125,6 +150,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
 
     private fun update(subId: Int, infos: MutableList<CellInfo>) {
         infos.sortWith(CellUtils.CellInfoComparator)
+
+        Log.e("CellReader", "update $infos")
 
         val foundIDs = mutableListOf<String>()
         val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
@@ -137,7 +164,27 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     }
 
     private fun updateSignal(subId: Int, strength: SignalStrength?) {
-        val newInfo = (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
+        val newInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
+        } else {
+            mutableListOf<CellSignalStrength>().apply {
+                strength?.let { strength ->
+                    if (strength.gsmSignalStrength != Int.MAX_VALUE) {
+                        add(CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE))
+                    }
+                    if (strength.cdmaDbm != Int.MAX_VALUE) {
+                        add(CellSignalStrengthCdma(-strength.cdmaDbm, -strength.cdmaEcio, -strength.evdoDbm, -strength.evdoEcio, -strength.evdoSnr))
+                    }
+                    if (strength.wcdmaAsuLevel != 255) {
+                        add(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE))
+                    }
+                    if (strength.lteSignalStrength != Int.MAX_VALUE) {
+                        add(CellSignalStrengthLte::class.java.getConstructor(Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java)
+                            .newInstance(strength.lteSignalStrength, strength.lteRsrp, strength.lteRsrq, strength.lteRssnr, strength.lteCqi, Int.MAX_VALUE))
+                    }
+                }
+            }
+        }
 
         launch(Dispatchers.Main) {
             signalStrengths[subId] = strength
@@ -153,10 +200,25 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private inner class TelephonyListener(private val subId: Int) : TelephonyCallback(),
         TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener,
         TelephonyCallback.ServiceStateListener {
         @SuppressLint("MissingPermission")
+        override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
+            update(subId, cellInfo ?: mutableListOf())
+        }
+
+        override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
+            updateSignal(subId, signalStrength)
+        }
+
+        override fun onServiceStateChanged(serviceState: ServiceState?) {
+            updateServiceState(subId, serviceState)
+        }
+    }
+
+    private inner class StateListener(private val subId: Int) : PhoneStateListener() {
         override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
             update(subId, cellInfo ?: mutableListOf())
         }

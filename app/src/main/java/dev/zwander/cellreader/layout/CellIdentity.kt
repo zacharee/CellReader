@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.layout
 
+import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -49,11 +50,14 @@ fun CellIdentity(
                 FormatText(R.string.channel_format, it.toString())
             }
 
-            globalCellId?.apply {
-                FormatText(R.string.gci_format, this)
-            }
-            plmn?.apply {
-                FormatText(R.string.plmn_format, asMccMnc)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                globalCellId?.apply {
+                    FormatText(R.string.gci_format, this)
+                }
+
+                plmn?.apply {
+                    FormatText(R.string.plmn_format, asMccMnc)
+                }
             }
         }
 
@@ -76,11 +80,13 @@ fun CellIdentity(
                         FormatText(R.string.operator_format, this)
                     }
                 }
-                if (!additionalPlmns.isNullOrEmpty()) {
-                    FormatText(
-                        R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ") { it.asMccMnc }
-                    )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (!additionalPlmns.isNullOrEmpty()) {
+                        FormatText(
+                            R.string.additional_plmns_format,
+                            additionalPlmns.joinToString(", ") { it.asMccMnc }
+                        )
+                    }
                 }
             }
         }
@@ -121,20 +127,22 @@ fun CellIdentity(
                         FormatText(R.string.operator_format, this)
                     }
                 }
-                if (!additionalPlmns.isNullOrEmpty()) {
-                    FormatText(
-                        R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ") { it.asMccMnc }
-                    )
-                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (!additionalPlmns.isNullOrEmpty()) {
+                        FormatText(
+                            R.string.additional_plmns_format,
+                            additionalPlmns.joinToString(", ") { it.asMccMnc }
+                        )
+                    }
 
-                this.closedSubscriberGroupInfo?.apply {
-                    FormatText(R.string.csg_id_format, csgIdentity.toString())
-                    FormatText(
-                        R.string.csg_indicator_format,
-                        csgIndicator.toString()
-                    )
-                    FormatText(R.string.home_node_b_name_format, homeNodebName)
+                    this.closedSubscriberGroupInfo?.apply {
+                        FormatText(R.string.csg_id_format, csgIdentity.toString())
+                        FormatText(
+                            R.string.csg_indicator_format,
+                            csgIndicator.toString()
+                        )
+                        FormatText(R.string.home_node_b_name_format, homeNodebName)
+                    }
                 }
             }
         }
@@ -150,36 +158,44 @@ fun CellIdentity(
                 cpid.onAvail {
                     FormatText(R.string.cpid_format, it.toString())
                 }
-                uarfcn.onAvail {
-                    FormatText(R.string.uarfcn_format, it.toString())
-                }
-                mobileNetworkOperator?.apply {
-                    if (isNotBlank()) {
-                        FormatText(R.string.operator_format, this)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    uarfcn.onAvail {
+                        FormatText(R.string.uarfcn_format, it.toString())
+                    }
+
+                    mobileNetworkOperator?.apply {
+                        if (isNotBlank()) {
+                            FormatText(R.string.operator_format, this)
+                        }
                     }
                 }
-                if (!additionalPlmns.isNullOrEmpty()) {
-                    FormatText(
-                        R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ") { it.asMccMnc }
-                    )
-                }
 
-                this.closedSubscriberGroupInfo?.apply {
-                    FormatText(R.string.csg_id_format, csgIdentity.toString())
-                    FormatText(
-                        R.string.csg_indicator_format,
-                        csgIndicator.toString()
-                    )
-                    FormatText(R.string.home_node_b_name_format, homeNodebName)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (!additionalPlmns.isNullOrEmpty()) {
+                        FormatText(
+                            R.string.additional_plmns_format,
+                            additionalPlmns.joinToString(", ") { it.asMccMnc }
+                        )
+                    }
+
+                    this.closedSubscriberGroupInfo?.apply {
+                        FormatText(R.string.csg_id_format, csgIdentity.toString())
+                        FormatText(
+                            R.string.csg_indicator_format,
+                            csgIndicator.toString()
+                        )
+                        FormatText(R.string.home_node_b_name_format, homeNodebName)
+                    }
                 }
             }
         }
 
         cast<CellIdentityLte>()?.apply {
             if (simple) {
-                if (bands.isNotEmpty()) {
-                    FormatText(R.string.bands_format, bands.joinToString(", "))
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (bands.isNotEmpty()) {
+                        FormatText(R.string.bands_format, bands.joinToString(", "))
+                    }
                 }
                 bandwidth.onAvail {
                     FormatText(R.string.bandwidth_format, it.toString())
@@ -204,58 +220,68 @@ fun CellIdentity(
                         FormatText(R.string.operator_format, this)
                     }
                 }
-                if (!additionalPlmns.isNullOrEmpty()) {
-                    FormatText(
-                        R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ") { it.asMccMnc }
-                    )
-                }
 
-                this.closedSubscriberGroupInfo?.apply {
-                    FormatText(R.string.csg_id_format, csgIdentity.toString())
-                    FormatText(
-                        R.string.csg_indicator_format,
-                        csgIndicator.toString()
-                    )
-                    FormatText(R.string.home_node_b_name_format, homeNodebName)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (!additionalPlmns.isNullOrEmpty()) {
+                        FormatText(
+                            R.string.additional_plmns_format,
+                            additionalPlmns.joinToString(", ") { it.asMccMnc }
+                        )
+                    }
+
+                    this.closedSubscriberGroupInfo?.apply {
+                        FormatText(R.string.csg_id_format, csgIdentity.toString())
+                        FormatText(
+                            R.string.csg_indicator_format,
+                            csgIndicator.toString()
+                        )
+                        FormatText(R.string.home_node_b_name_format, homeNodebName)
+                    }
                 }
             }
         }
 
-        cast<CellIdentityNr>()?.apply {
-            if (simple) {
-                if (bands.isNotEmpty()) {
-                    FormatText(
-                        textId = R.string.bands_format,
-                        bands.joinToString(", ")
-                    )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            cast<CellIdentityNr>()?.apply {
+                if (simple) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        if (bands.isNotEmpty()) {
+                            FormatText(
+                                textId = R.string.bands_format,
+                                bands.joinToString(", ")
+                            )
+                        }
+                    }
                 }
-            }
 
-            if (advanced) {
-                tac.onAvail {
-                    FormatText(R.string.tac_format, it.toString())
-                }
-                nci.onAvail {
-                    FormatText(R.string.nci_format, it.toString())
-                }
-                pci.onAvail {
-                    FormatText(
-                        textId = R.string.pci_format,
-                        it.toString()
-                    )
-                }
-                nrarfcn.onAvail {
-                    FormatText(
-                        textId = R.string.nrarfcn_format,
-                        it.toString()
-                    )
-                }
-                if (!additionalPlmns.isNullOrEmpty()) {
-                    FormatText(
-                        textId = R.string.additional_plmns_format,
-                        additionalPlmns.joinToString(", ") { it.asMccMnc }
-                    )
+                if (advanced) {
+                    tac.onAvail {
+                        FormatText(R.string.tac_format, it.toString())
+                    }
+                    nci.onAvail {
+                        FormatText(R.string.nci_format, it.toString())
+                    }
+                    pci.onAvail {
+                        FormatText(
+                            textId = R.string.pci_format,
+                            it.toString()
+                        )
+                    }
+                    nrarfcn.onAvail {
+                        FormatText(
+                            textId = R.string.nrarfcn_format,
+                            it.toString()
+                        )
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        if (!additionalPlmns.isNullOrEmpty()) {
+                            FormatText(
+                                textId = R.string.additional_plmns_format,
+                                additionalPlmns.joinToString(", ") { it.asMccMnc }
+                            )
+                        }
+                    }
                 }
             }
         }
