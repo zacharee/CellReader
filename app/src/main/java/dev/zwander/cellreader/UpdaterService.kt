@@ -153,7 +153,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         )
     }
 
+    @SuppressLint("MissingPermission")
     private fun update(subId: Int, infos: MutableList<CellInfo>) {
+        if (infos.isEmpty()) {
+            infos.addAll(telephonies[subId]!!.allCellInfo)
+        }
+
         infos.sortWith(CellUtils.CellInfoComparator)
 
         val foundIDs = mutableListOf<String>()
