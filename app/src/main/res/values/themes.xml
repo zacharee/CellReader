@@ -3,7 +3,6 @@
     <style name="Theme.CellReader" parent="android:Theme.Material.NoActionBar">
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:navigationBarColor">@color/background</item>
-        <item name="android:background">@color/background</item>
         <item name="android:colorBackground">@color/background</item>
     </style>
 </resources>
