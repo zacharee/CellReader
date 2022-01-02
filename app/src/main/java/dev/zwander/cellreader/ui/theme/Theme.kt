@@ -5,18 +5,19 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
-
-private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200,
-    surface = Color(0xff343434)
-)
+import dev.zwander.cellreader.R
 
 @Composable
 fun CellReaderTheme(content: @Composable () -> Unit) {
-    val colors = DarkColorPalette
+    val colors = darkColors(
+        primary = colorResource(id = R.color.purple_500),
+        primaryVariant = colorResource(id = R.color.purple_200),
+        secondary = colorResource(id = R.color.teal_200),
+        surface = colorResource(id = R.color.surface),
+        background = colorResource(id = R.color.background)
+    )
 
     MaterialTheme(
         colors = colors,
