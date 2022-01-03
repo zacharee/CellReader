@@ -10,6 +10,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.ui.layouts.cellsignalstrength.CellSignalStrength
 import dev.zwander.cellreader.utils.*
 
 @Composable
@@ -32,7 +33,7 @@ fun SignalStrength(
 }
 
 @Composable
-fun CellSignalStrength(
+fun CellSignalStrengthCard(
     cellSignalStrength: CellSignalStrength,
     isFinal: Boolean,
     modifier: Modifier = Modifier

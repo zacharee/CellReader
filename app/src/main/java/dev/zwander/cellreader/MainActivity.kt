@@ -31,7 +31,8 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dev.zwander.cellreader.data.ProvideCellModel
-import dev.zwander.cellreader.ui.layouts.CellSignalStrength
+import dev.zwander.cellreader.ui.layouts.CellSignalStrengthCard
+import dev.zwander.cellreader.ui.layouts.cellsignalstrength.CellSignalStrength
 import dev.zwander.cellreader.ui.layouts.SIMCard
 import dev.zwander.cellreader.ui.layouts.SignalCard
 import dev.zwander.cellreader.ui.theme.CellReaderTheme
@@ -161,7 +162,7 @@ fun Content() {
                                         enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                                         exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                                     ) {
-                                        CellSignalStrength(
+                                        CellSignalStrengthCard(
                                             cellSignalStrength = item,
                                             isFinal = index == lastStrengthIndex,
                                             modifier = Modifier

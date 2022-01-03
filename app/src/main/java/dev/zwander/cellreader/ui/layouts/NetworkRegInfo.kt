@@ -15,6 +15,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.ui.layouts.cellIdentity.CellIdentity
 import dev.zwander.cellreader.utils.*
 
 @Composable

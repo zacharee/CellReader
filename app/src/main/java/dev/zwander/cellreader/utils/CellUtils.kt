@@ -159,6 +159,10 @@ inline fun <reified T : CellInfo> CellInfo.cast() = castGeneric<T>()
 inline fun <reified T : CellIdentity> CellIdentity.cast() = castGeneric<T>()
 inline fun <reified T : CellSignalStrength> CellSignalStrength.cast() = castGeneric<T>()
 
+inline fun <reified T : CellInfo> CellInfo.onCast(block: T.() -> Unit) = cast<T>()?.let(block)
+inline fun <reified T : CellIdentity> CellIdentity.onCast(block: T.() -> Unit) = cast<T>()?.let(block)
+inline fun <reified T : CellSignalStrength> CellSignalStrength.onCast(block: T.() -> Unit) = cast<T>()?.let(block)
+
 inline fun <reified T : Any> Any.castGeneric(): T? {
     return if (this is T) this
             else null
