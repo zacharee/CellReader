@@ -263,6 +263,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
                     deinit()
                     init(newIds)
                 }
+            } else {
+                launch(Dispatchers.Main) {
+                    newList.forEach { subInfo ->
+                        subInfos[subInfo.subscriptionId] = subInfo
+                    }
+                }
             }
         }
     }
