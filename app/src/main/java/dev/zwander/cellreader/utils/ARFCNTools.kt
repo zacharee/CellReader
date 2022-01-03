@@ -2,6 +2,7 @@ package dev.zwander.cellreader.utils
 
 
 import java.util.*
+import kotlin.math.absoluteValue
 
 //https://5g-tools.com/4g-lte-earfcn-calculator/
 //https://www.sqimway.com/lte_band.php
@@ -10,32 +11,47 @@ import java.util.*
 //https://www.rfwireless-world.com/Terminology/UMTS-UARFCN-to-frequency-conversion.html
 //https://www.sqimway.com/umts_band.php
 
-object ARFCNTools {
-    val earfcnTable = EARFCNTable
-    val earfcnList = earfcnTable.keys.toList()
+//https://www.sqimway.com/umts_tdscdma.php
 
-    val uarfcnTable = UARFCNTable
-    val uarfcnList = uarfcnTable.keys.toList()
+object ARFCNTools {
+    private val earfcnTable = EARFCNTable
+    private val earfcnList = earfcnTable.keys.toList()
+
+    private val uarfcnTable = UARFCNTable
+    private val uarfcnList = uarfcnTable.keys.toList()
+
+    private val gsmarfcnTable = GSMARFCNTable
+    private val gsmarfcnList = gsmarfcnTable.keys.toList()
+
+    private val nrarfcnRefTable = NRARFCNRefTable
+    private val nrarfcnRefList = nrarfcnRefTable.keys.toList()
+
+    private val nrarfcnTable = NRARFCNTable
+    private val nrarfcnList = nrarfcnTable.keys.toList()
+
+    private val tdscdmaArfcnTable = TDSCDMAARFCNTable
+    private val tdscdmaArfcnList = tdscdmaArfcnTable.keys.toList()
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val earfcn = 8665
+        val earfcn = 65537
         val uarfcn = 4390
+        val gsmarfcn = 666
+        val nrarfcn = 470009
+        val tdscdmaarfcn = 9590
 
         println(earfcnToInfo(earfcn))
         println(uarfcnToInfo(uarfcn))
+        println(gsmArfcnToInfo(gsmarfcn))
+        println(nrArfcnToInfo(nrarfcn))
+        println(tdscdmaArfcnToInfo(tdscdmaarfcn))
     }
 
-    fun earfcnToInfo(earfcn: Int): ARFCNInfo {
-        val container = Collections.binarySearch(earfcnList, earfcn..earfcn) { o1, o2 ->
-            if (o1.first >= o2.first && o1.last <= o2.last || o2.first >= o1.first && o2.last <= o1.last) {
-                0
-            } else {
-                o1.first.compareTo(o2.first)
-            }
-        }
+    fun earfcnToInfo(earfcn: Int): List<ARFCNInfo> {
+        val containers = earfcnList.filter { it.contains(earfcn) }
+            .map { it to earfcnTable[it]!! }
 
-        return calculateEarfcnInfo(earfcn, earfcnTable[earfcnList[container]]!!)
+        return calculateEarfcnInfo(earfcn, containers)
     }
 
     fun uarfcnToInfo(uarfcn: Int): List<ARFCNInfo> {
@@ -45,19 +61,44 @@ object ARFCNTools {
         return calculateUarfcnInfo(uarfcn, containers)
     }
 
-    private fun calculateEarfcnInfo(earfcn: Int, container: ARFCNContainer): ARFCNInfo {
-        val fdl = container.dlLow.toDouble() + 0.1 * (earfcn - container.dlOffset.toDouble())
-        // The normal formula is F-ul = F-ul-low + 0.1 * (EARFCN-ul - EARFCN-offset-ul).
-        // Since we only have the dl EARFCN-dl, we need to calculate the EARFCN-ul, which is
-        // EARFCN-ul = EARFCN-dl + (EARFCN-offset-ul - EARFCN-offset-dl). That simplifies
-        // to what's below.
-        val ful = if (container.ulLow != -1) {
-            container.ulLow.toDouble() + 0.1 * (earfcn - container.dlOffset.toDouble())
-        } else {
-            -1
-        }
+    fun gsmArfcnToInfo(gsmarfcn: Int): List<GSMARFCNInfo> {
+        val containers = gsmarfcnList.filter { it.contains(gsmarfcn) }
+            .map { it to gsmarfcnTable[it]!! }
 
-        return ARFCNInfo(container.band, fdl, ful)
+        return calculateGsmArfcnInfo(gsmarfcn, containers)
+    }
+
+    fun nrArfcnToInfo(nrarfcn: Int): List<ARFCNInfo> {
+        val refContainer = nrarfcnRefTable[nrarfcnRefList.find { it.contains(nrarfcn) } ?: return emptyList()]!!
+        val containers = nrarfcnList.filter { it.first.contains(nrarfcn) || it.second.contains(nrarfcn) }
+            .map { it to nrarfcnTable[it]!! }
+
+        return calculateNrArfcnInfo(nrarfcn, refContainer, containers)
+    }
+
+    fun tdscdmaArfcnToInfo(tdscdmaArfcn: Int): List<TDSCDMAARFCNInfo> {
+        val containers = tdscdmaArfcnList.filter { it.contains(tdscdmaArfcn) }
+            .map { it to tdscdmaArfcnTable[it]!! }
+
+        return calculateTdscdmaArfcnInfo(tdscdmaArfcn, containers)
+    }
+
+    private fun calculateEarfcnInfo(earfcn: Int, containers: List<Pair<IntRange, ARFCNContainer>>): List<ARFCNInfo> {
+        return containers.map { (_, info) ->
+            ARFCNInfo(
+                info.band,
+                info.dlLow.toDouble() + 0.1 * (earfcn - info.dlOffset.toDouble()),
+                // The normal formula is F-ul = F-ul-low + 0.1 * (EARFCN-ul - EARFCN-offset-ul).
+                // Since we only have the dl EARFCN-dl, we need to calculate the EARFCN-ul, which is
+                // EARFCN-ul = EARFCN-dl + (EARFCN-offset-ul - EARFCN-offset-dl). That simplifies
+                // to what's below.
+                if (info.ulLow != -1) {
+                    info.ulLow.toDouble() + 0.1 * (earfcn - info.dlOffset.toDouble())
+                } else {
+                    -1
+                }
+            )
+        }
     }
 
     private fun calculateUarfcnInfo(uarfcn: Int, containers: List<Pair<IntRange, ARFCNContainer>>): List<ARFCNInfo> {
@@ -69,6 +110,52 @@ object ARFCNTools {
             )
         }
     }
+
+    private fun calculateGsmArfcnInfo(gsmarfcn: Int, containers: List<Pair<IntRange, GSMARFCNContainer>>): List<GSMARFCNInfo> {
+        return containers.map { (_, info) ->
+            val ful = info.fulEq(gsmarfcn)
+            val fdl = info.fdlEq(ful)
+
+            GSMARFCNInfo(
+                info.band,
+                fdl, ful
+            )
+        }
+    }
+
+    private fun calculateNrArfcnInfo(nrarfcn: Int, refContainer: NRARFCNRefContainer, containers: List<Pair<Pair<IntRange, IntRange>, ARFCNContainer>>): List<ARFCNInfo> {
+        return containers.map { (ranges, info) ->
+            val (dlRange, ulRange) = ranges
+            val firstDl = dlRange.first
+            val firstUl = ulRange.first
+
+            val fdl = if (firstDl != -1) {
+                refContainer.fRefOff.toDouble() + refContainer.dfGlobal.toDouble() * (nrarfcn - refContainer.nRefOff.toDouble())
+            } else {
+                -1
+            }
+            val ful = if (firstUl != -1) {
+                refContainer.fRefOff.toDouble() + refContainer.dfGlobal.toDouble() * ((firstDl - firstUl).absoluteValue + nrarfcn - refContainer.nRefOff.toDouble())
+            } else {
+                -1
+            }
+
+            ARFCNInfo(
+                info.band,
+                fdl,
+                ful
+            )
+        }
+    }
+
+    private fun calculateTdscdmaArfcnInfo(tdscdmaArfcn: Int, containers: List<Pair<IntRange, TDSCDMAARFCNContainer>>): List<TDSCDMAARFCNInfo> {
+        return containers.map { (_, info) ->
+            TDSCDMAARFCNInfo(
+                info.band,
+                tdscdmaArfcn / 5.0
+            )
+        }
+    }
 }
 
 data class ARFCNInfo(
@@ -77,66 +164,83 @@ data class ARFCNInfo(
     val ulFreq: Number,
 )
 
+data class GSMARFCNInfo(
+    val band: String,
+    val dlFreq: Number,
+    val ulFreq: Number,
+)
+
+data class TDSCDMAARFCNInfo(
+    val band: String,
+    val freq: Number
+)
+
 data class ARFCNContainer(
-    val dlLow: Number,
-    val dlOffset: Number,
-    val ulLow: Number,
-    val ulOffset: Number,
+    val dlLow: Number = 0,
+    val dlOffset: Number = 0,
+    val ulLow: Number = 0,
+    val ulOffset: Number = 0,
     val band: Int,
     val ulRange: IntRange = IntRange(0, 0)
 )
 
-data class NRARFCNContainer(
-    val band: Int
+data class GSMARFCNContainer(
+    val fulEq: (Number) -> Number,
+    val fdlEq: (Number) -> Number,
+    val band: String
+)
+
+data class TDSCDMAARFCNContainer(
+    val fLow: Number,
+    val fHigh: Number,
+    val band: String
 )
 
 data class NRARFCNRefContainer(
     val frRange: IntRange,
-    val dfGlobal: Int,
+    val dfGlobal: Number,
     val fRefOff: Number,
     val nRefOff: Int
 )
 
-object EARFCNTable : TreeMap<IntRange, ARFCNContainer>(
-    { o1, o2 -> o1.first.compareTo(o2.first) }
-) {
+object EARFCNTable : TreeMap<IntRange, ARFCNContainer>(IntRangeComparator) {
     init {
         putAll(
             listOf(
                 0..599 to ARFCNContainer(
                     2110, 0,
                     1920, 18000,
-                    1
+                    1,
                 ),
                 600..1199 to ARFCNContainer(
                     1930, 600,
                     1850, 18600,
-                    2
+                    2,
                 ),
                 1200..1949 to ARFCNContainer(
                     1805, 1200,
                     1710, 19200,
-                    3
+                    3,
                 ),
                 1950..2399 to ARFCNContainer(
                     2110, 1950,
                     1710, 19950,
-                    4
+                    4,
                 ),
                 2400..2649 to ARFCNContainer(
                     869, 2400,
                     824, 20400,
-                    5
+                    5,
                 ),
                 2750..3449 to ARFCNContainer(
                     2620, 2750,
                     2500, 20750,
-                    7
+                    7,
                 ),
                 3450..3799 to ARFCNContainer(
                     925, 3450,
                     880, 21450,
-                    8
+                    8,
                 ),
                 3800..4149 to ARFCNContainer(
                     1844.9, 3800,
@@ -428,9 +532,7 @@ object EARFCNTable : TreeMap<IntRange, ARFCNContainer>(
     }
 }
 
-object UARFCNTable : TreeMap<IntRange, ARFCNContainer>(
-    { o1, o2 -> o1.first.compareTo(o2.first) }
-) {
+object UARFCNTable : TreeMap<IntRange, ARFCNContainer>(IntRangeComparator) {
     init {
         putAll(listOf(
             10562..10838 to ARFCNContainer(
@@ -558,64 +660,176 @@ object UARFCNTable : TreeMap<IntRange, ARFCNContainer>(
                 -1, -1,
                 32
             ),
-//            9500..9600 to ARFCNContainer(
-//                1900, 9500,
-//                1900, 9500,
-//                33
-//            ),
-//            10050..10125 to ARFCNContainer(
-//                2010, 10050,
-//                2010, 10050,
-//                34
-//            ),
-//            9250..9550 to ARFCNContainer(
-//                1850, 9250,
-//                1850, 9250,
-//                35
-//            ),
-//            9650..9950 to ARFCNContainer(
-//                1930, 9650,
-//                1930, 9650,
-//                36
-//            ),
-//            9550..9650 to ARFCNContainer(
-//                1910, 9550,
-//                1910, 9550,
-//                37
-//            ),
-//            12850..13100 to ARFCNContainer(
-//                2570, 12850,
-//                2570, 12850,
-//                38
-//            ),
-//            9400..9600 to ARFCNContainer(
-//                1880, 9400,
-//                1880, 9400,
-//                39
-//            ),
-//            11500..12000 to ARFCNContainer(
-//                2300, 11500,
-//                2300, 11500,
-//                40
-//            )
         ))
     }
 }
 
-object NRARFCNRefTable : TreeMap<IntRange, NRARFCNRefContainer>() {
+object TDSCDMAARFCNTable : TreeMap<IntRange, TDSCDMAARFCNContainer>(IntRangeComparator) {
     init {
         putAll(listOf(
-            0..599999 to NRARFCNRefContainer(
-                0..3000, 5, 0, 0
+            9500..9600 to TDSCDMAARFCNContainer(
+                1900, 1920, "A (low)"
             ),
-            600000..2016666 to NRARFCNRefContainer(
-                3000..24250, 15, 3000, 600000
+            10050..10125 to TDSCDMAARFCNContainer(
+                2010, 2025, "A (high)"
             ),
-            2016667..3279165 to NRARFCNRefContainer(
-                24250..100000, 60, 24250.8, 2016667
+            9250..9550 to TDSCDMAARFCNContainer(
+                1850, 1910, "B (low)"
+            ),
+            9650..9950 to TDSCDMAARFCNContainer(
+                1930, 1990, "B (high)"
+            ),
+            9550..9650 to TDSCDMAARFCNContainer(
+                1910, 1930, "C"
+            ),
+            12850..13100 to TDSCDMAARFCNContainer(
+                2570, 2620, "D"
+            ),
+            9400..9600 to TDSCDMAARFCNContainer(
+                1880, 1920, "F"
+            ),
+            11500..12000 to TDSCDMAARFCNContainer(
+                2300, 2400, "E"
             )
         ))
     }
 }
 
-//object NRARFCNTable : TreeMap<IntRange,
+object NRARFCNRefTable : TreeMap<IntRange, NRARFCNRefContainer>(IntRangeComparator) {
+    init {
+        putAll(listOf(
+            0..599999 to NRARFCNRefContainer(
+                0..3000, 0.005, 0, 0
+            ),
+            600000..2016666 to NRARFCNRefContainer(
+                3000..24250, 0.015, 3000, 600000
+            ),
+            2016667..3279165 to NRARFCNRefContainer(
+                24250..100000, 0.060, 24250.8, 2016667
+            )
+        ))
+    }
+}
+
+object NRARFCNTable : TreeMap<Pair<IntRange, IntRange>, ARFCNContainer>(IntRangePairComparator) {
+    init {
+        putAll(
+            listOf(
+                (422000..434000 to 384000..396000) to ARFCNContainer(band = 1),
+                (386000..392000 to 370000..382000) to ARFCNContainer(band = 2),
+                (361000..376000 to 342000..357000) to ARFCNContainer(band = 3),
+                (173800..178800 to 164800..169800) to ARFCNContainer(band = 5),
+                (524000..538000 to 500000..514000) to ARFCNContainer(band = 7),
+                (185000..192000 to 176000..183000) to ARFCNContainer(band = 8),
+                (145800..149200 to 139800..143200) to ARFCNContainer(band = 12),
+                (149200..151200 to 155400..157400) to ARFCNContainer(band = 13),
+                (151600..153600 to 157600..159600) to ARFCNContainer(band = 14),
+                (172000..173500 to 163000..166000) to ARFCNContainer(band = 18),
+                (158200..164200 to 166400..172400) to ARFCNContainer(band = 20),
+                (305000..311800 to 325300..332100) to ARFCNContainer(band = 24),
+                (386000..399000 to 370000..383000) to ARFCNContainer(band = 25),
+                (171800..178800 to 162800..169800) to ARFCNContainer(band = 26),
+                (151600..160600 to 140600..149600) to ARFCNContainer(band = 28),
+                (143400..145600 to -1..-1) to ARFCNContainer(band = 29),
+                (470000..472000 to 461000..463000) to ARFCNContainer(band = 30),
+                (402000..405000 to 402000..405000) to ARFCNContainer(band = 34),
+                (514000..524000 to 514000..524000) to ARFCNContainer(band = 38),
+                (376000..384000 to 376000..384000) to ARFCNContainer(band = 39),
+                (460000..480000 to 460000..480000) to ARFCNContainer(band = 40),
+                (499200..537999 to 499200..537999) to ARFCNContainer(band = 41),
+                (743333..795000 to 743333..795000) to ARFCNContainer(band = 46),
+                (636667..646666 to 636667..646666) to ARFCNContainer(band = 48),
+                (286400..303400 to 286400..303400) to ARFCNContainer(band = 50),
+                (285400..286400 to 285400..286400) to ARFCNContainer(band = 51),
+                (496700..499000 to 496700..499000) to ARFCNContainer(band = 53),
+                (422000..440000 to 384000..402000) to ARFCNContainer(band = 65),
+                (422000..440000 to 342000..356000) to ARFCNContainer(band = 66),
+                (147600..151600 to -1..-1) to ARFCNContainer(band = 67),
+                (399000..404000 to 339000..342000) to ARFCNContainer(band = 70),
+                (123400..130400 to 132600..139600) to ARFCNContainer(band = 71),
+                (295000..303600 to 285400..294000) to ARFCNContainer(band = 74),
+                (286400..303400 to -1..-1) to ARFCNContainer(band = 75),
+                (285400..286400 to -1..-1) to ARFCNContainer(band = 76),
+                (620000..680000 to 620000..680000) to ARFCNContainer(band = 77),
+                (620000..653333 to 620000..653333) to ARFCNContainer(band = 78),
+                (693334..733333 to 693334..733333) to ARFCNContainer(band = 79),
+                (-1..-1 to 342000..357000) to ARFCNContainer(band = 80),
+                (-1..-1 to 176000..183000) to ARFCNContainer(band = 81),
+                (-1..-1 to 166400..172400) to ARFCNContainer(band = 82),
+                (-1..-1 to 140600..149600) to ARFCNContainer(band = 83),
+                (-1..-1 to 384000..396000) to ARFCNContainer(band = 84),
+                (145600..149200 to 139600..143200) to ARFCNContainer(band = 85),
+                (-1..-1 to 342000..356000) to ARFCNContainer(band = 86),
+                (-1..-1 to 164800..169800) to ARFCNContainer(band = 89),
+                (499200..537999 to 499200..537999) to ARFCNContainer(band = 90),
+                (285400..286400 to 166400..172400) to ARFCNContainer(band = 91),
+                (286400..303400 to 166400..172400) to ARFCNContainer(band = 92),
+                (285400..286400 to 176000..183000) to ARFCNContainer(band = 93),
+                (286400..303400 to 176000..183000) to ARFCNContainer(band = 94),
+                (-1..-1 to 402000..405000) to ARFCNContainer(band = 95),
+                (795000..875000 to 795000..875000) to ARFCNContainer(band = 96),
+                (-1..-1 to 460000..480000) to ARFCNContainer(band = 97),
+                (-1..-1 to 376000..384000) to ARFCNContainer(band = 98),
+                (-1..-1 to 325300..332100) to ARFCNContainer(band = 99),
+                (2054166..2104165 to 2054166..2104165) to ARFCNContainer(band = 257),
+                (2016667..2070832 to 2016667..2070832) to ARFCNContainer(band = 258),
+                (2270832..2337499 to 2270832..2337499) to ARFCNContainer(band = 259),
+                (2229166..2279165 to 2229166..2279165) to ARFCNContainer(band = 260),
+                (2070833..2084999 to 2070833..2084999) to ARFCNContainer(band = 261),
+                (2399166..2415832 to 2399166..2415832) to ARFCNContainer(band = 262)
+            )
+        )
+    }
+}
+
+object GSMARFCNTable : TreeMap<IntRange, GSMARFCNContainer>(IntRangeComparator) {
+    init {
+        putAll(listOf(
+            259..293 to GSMARFCNContainer(
+                { 450.6 + 0.2 * (it.toDouble() - 259) },
+                { it.toDouble() + 10 },
+                "GSM 450"
+            ),
+            306..340 to GSMARFCNContainer(
+                { 479+0.2*(it.toDouble()-306) },
+                { it.toDouble() + 10 },
+                "GSM 480"
+            ),
+            438..511 to GSMARFCNContainer(
+                { 747.2 + 0.2*(it.toDouble()-438) },
+                { it.toDouble() + 30 },
+                "GSM 750"
+            ),
+            128..251 to GSMARFCNContainer(
+                { 824.2+0.2*(it.toDouble()-128) },
+                { it.toDouble() + 45 },
+                "GSM 850"
+            ),
+            1..124 to GSMARFCNContainer(
+                { 890 + 0.2 * it.toDouble() },
+                { it.toDouble() + 45 },
+                "P-GSM"
+            ),
+            975..1023 to GSMARFCNContainer(
+                { 890+0.2*(it.toDouble()-1024) },
+                { it.toDouble() + 45 },
+                "E-GSM"
+            ),
+            955..1023 to GSMARFCNContainer(
+                { 890+0.2*(it.toDouble()-1024) },
+                { it.toDouble() + 45 },
+                "GSM-R"
+            ),
+            512..885 to GSMARFCNContainer(
+                { 1710.2+0.2*(it.toDouble()-512) },
+                { it.toDouble() + 95 },
+                "DCS 1800"
+            ),
+            512..810 to GSMARFCNContainer(
+                { 1850.2 + 0.2*(it.toDouble()-512) },
+                { it.toDouble() + 80 },
+                "PCS 1900"
+            )
+        ))
+    }
+}

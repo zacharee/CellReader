@@ -66,7 +66,7 @@
     <string name="lac_format">LAC: %s</string>
     <string name="cid_format">CID: %s</string>
     <string name="bsic_format">BSIC: %s</string>
-    <string name="arfcn_format">ARFCN</string>
+    <string name="arfcn_format">ARFCN: %s</string>
     <string name="additional_plmns_format">Additional PLMNs: %s</string>
     <string name="lat_lon_format">Lat/Lon: %s</string>
     <string name="basestation_id_format">Basestation ID: %s</string>
@@ -136,4 +136,7 @@
     <string name="certificate_format">Certificate: %s</string>
     <string name="access_type_format">Access Type: %s</string>
     <string name="package_name_format">Package: %s</string>
+    <string name="dl_freqs_format">DL Freqs: %s</string>
+    <string name="ul_freqs_format">UL Freqs: %s</string>
+    <string name="freqs_format">Freqs: %s</string>
 </resources>

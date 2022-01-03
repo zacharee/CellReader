@@ -3,6 +3,7 @@ package dev.zwander.cellreader.ui.layouts
 import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.*
@@ -59,6 +60,21 @@ fun CellIdentity(
         }
 
         cast<CellIdentityGsm>()?.apply {
+            val arfcnInfo = remember(arfcn) {
+                ARFCNTools.gsmArfcnToInfo(arfcn)
+            }
+
+            if (simple) {
+                val bands = remember(arfcn) { arfcnInfo.map { it.band } }
+
+                if (bands.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.bands_format,
+                        bands.joinToString(", ")
+                    )
+                }
+            }
+
             if (advanced) {
                 lac.onAvail {
                     FormatText(R.string.lac_format, "$it")
@@ -77,6 +93,24 @@ fun CellIdentity(
                         FormatText(R.string.operator_format, this)
                     }
                 }
+
+                val dlFreqs = remember(arfcn) { arfcnInfo.map { it.dlFreq } }
+                val ulFreqs = remember(arfcn) { arfcnInfo.map { it.ulFreq } }
+
+                if (dlFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.dl_freqs_format,
+                        dlFreqs.joinToString(", ")
+                    )
+                }
+
+                if (ulFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.ul_freqs_format,
+                        ulFreqs.joinToString(", ")
+                    )
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (!additionalPlmns.isNullOrEmpty()) {
                         FormatText(
@@ -109,8 +143,13 @@ fun CellIdentity(
         }
 
         cast<CellIdentityWcdma>()?.apply {
+            val arfcnInfo = remember(uarfcn) {
+                ARFCNTools.uarfcnToInfo(uarfcn)
+            }
+
             if (simple) {
-                FormatText(R.string.bands_format, ARFCNTools.uarfcnToInfo(uarfcn).joinToString(", ") { it.band.toString() })
+                val bands = remember(uarfcn) { arfcnInfo.map { it.band } }
+                FormatText(R.string.bands_format, bands.joinToString(", "))
             }
 
             if (advanced) {
@@ -128,6 +167,24 @@ fun CellIdentity(
                         FormatText(R.string.operator_format, this)
                     }
                 }
+
+                val dlFreqs = remember(uarfcn) { arfcnInfo.map { it.dlFreq } }
+                val ulFreqs = remember(uarfcn) { arfcnInfo.map { it.ulFreq } }
+
+                if (dlFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.dl_freqs_format,
+                        dlFreqs.joinToString(", ")
+                    )
+                }
+
+                if (ulFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.ul_freqs_format,
+                        ulFreqs.joinToString(", ")
+                    )
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (!additionalPlmns.isNullOrEmpty()) {
                         FormatText(
@@ -149,6 +206,29 @@ fun CellIdentity(
         }
 
         cast<CellIdentityTdscdma>()?.apply {
+            val arfcnInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                remember(uarfcn) {
+                    ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
+                }
+            } else {
+                null
+            }
+
+            if (simple) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val bands = remember(uarfcn) {
+                        arfcnInfo!!.map { it.band }
+                    }
+
+                    if (bands.isNotEmpty()) {
+                        FormatText(
+                            textId = R.string.bands_format,
+                            bands.joinToString(", ")
+                        )
+                    }
+                }
+            }
+
             if (advanced) {
                 lac.onAvail {
                     FormatText(R.string.lac_format, it.toString())
@@ -168,6 +248,15 @@ fun CellIdentity(
                         if (isNotBlank()) {
                             FormatText(R.string.operator_format, this)
                         }
+                    }
+
+                    val freqs = remember(uarfcn) { arfcnInfo!!.map { it.freq } }
+
+                    if (freqs.isNotEmpty()) {
+                        FormatText(
+                            textId = R.string.freqs_format,
+                            freqs.joinToString(", ")
+                        )
                     }
                 }
 
@@ -192,13 +281,19 @@ fun CellIdentity(
         }
 
         cast<CellIdentityLte>()?.apply {
+            val arfcnInfo = remember(earfcn) {
+                ARFCNTools.earfcnToInfo(earfcn)
+            }
+
             if (simple) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (bands.isNotEmpty()) {
                         FormatText(R.string.bands_format, bands.joinToString(", "))
                     }
                 } else {
-                    FormatText(R.string.bands_format, ARFCNTools.earfcnToInfo(earfcn).band.toString())
+                    val bands = remember(earfcn) { arfcnInfo.map { it.band } }
+
+                    FormatText(R.string.bands_format, bands.joinToString(", "))
                 }
                 bandwidth.onAvail {
                     FormatText(R.string.bandwidth_format, it.toString())
@@ -224,6 +319,23 @@ fun CellIdentity(
                     }
                 }
 
+                val dlFreqs = remember(earfcn) { arfcnInfo.map { it.dlFreq } }
+                val ulFreqs = remember(earfcn) { arfcnInfo.map { it.ulFreq } }
+
+                if (dlFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.dl_freqs_format,
+                        dlFreqs.joinToString(", ")
+                    )
+                }
+
+                if (ulFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.ul_freqs_format,
+                        ulFreqs.joinToString(", ")
+                    )
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (!additionalPlmns.isNullOrEmpty()) {
                         FormatText(
@@ -246,8 +358,21 @@ fun CellIdentity(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             cast<CellIdentityNr>()?.apply {
+                val arfcnInfo = remember(nrarfcn) {
+                    ARFCNTools.nrArfcnToInfo(nrarfcn = nrarfcn)
+                }
+
                 if (simple) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        if (bands.isNotEmpty()) {
+                            FormatText(
+                                textId = R.string.bands_format,
+                                bands.joinToString(", ")
+                            )
+                        }
+                    } else {
+                        val bands = remember(nrarfcn) { arfcnInfo.map { it.band } }
+
                         if (bands.isNotEmpty()) {
                             FormatText(
                                 textId = R.string.bands_format,
@@ -274,6 +399,23 @@ fun CellIdentity(
                         FormatText(
                             textId = R.string.nrarfcn_format,
                             it.toString()
+                        )
+                    }
+
+                    val dlFreqs = remember(nrarfcn) { arfcnInfo.map { it.dlFreq } }
+                    val ulFreqs = remember(nrarfcn) { arfcnInfo.map { it.ulFreq } }
+
+                    if (dlFreqs.isNotEmpty()) {
+                        FormatText(
+                            textId = R.string.dl_freqs_format,
+                            dlFreqs.joinToString(", ")
+                        )
+                    }
+
+                    if (ulFreqs.isNotEmpty()) {
+                        FormatText(
+                            textId = R.string.ul_freqs_format,
+                            ulFreqs.joinToString(", ")
                         )
                     }
 
