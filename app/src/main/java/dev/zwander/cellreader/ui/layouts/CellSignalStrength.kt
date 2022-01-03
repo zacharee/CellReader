@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.ui.layouts
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.Composable

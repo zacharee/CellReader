@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 object PermissionUtils {
-    val permissions = arrayOf(
+    private val permissions = arrayOf(
         android.Manifest.permission.ACCESS_NETWORK_STATE,
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.READ_PHONE_STATE,

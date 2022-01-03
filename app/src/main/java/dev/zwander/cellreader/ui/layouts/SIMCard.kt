@@ -2,10 +2,10 @@ package dev.zwander.cellreader.ui.layouts
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.telephony.*
-import android.view.animation.AnticipateInterpolator
+import android.telephony.AccessNetworkConstants
+import android.telephony.SubscriptionInfo
+import android.telephony.TelephonyManager
 import android.view.animation.AnticipateOvershootInterpolator
-import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -32,14 +32,14 @@ import androidx.compose.ui.unit.min
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.ui.components.*
-import dev.zwander.cellreader.serviceStates
 import dev.zwander.cellreader.utils.*
 import kotlinx.coroutines.delay
 
 @SuppressLint("MissingPermission")
 @Composable
-fun SIMCard(
+fun CellModel.SIMCard(
     telephony: TelephonyManager,
     subInfo: SubscriptionInfo?,
     expanded: Boolean,
@@ -85,7 +85,10 @@ fun SIMCard(
                             ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
                             ?.registeredPlmn.asMccMnc
                     } else {
-                        subInfo?.run { "$mcc-$mnc" } ?: "000-000"
+                        @Suppress("DEPRECATION")
+                        subInfo?.run {
+                            "$mcc-$mnc"
+                        } ?: "000-000"
                     }
                 }
 

@@ -17,7 +17,6 @@ import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.R
 import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.accessTypeCompat
-import dev.zwander.cellreader.utils.allAccessRulesCompat
 
 @Composable
 fun AccessRules(

@@ -9,17 +9,18 @@ import android.telephony.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.*
-import androidx.glance.appwidget.*
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
+import androidx.glance.appwidget.updateAll
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
+import dev.zwander.cellreader.data.ProvideCellModel
 import dev.zwander.cellreader.utils.ARFCNTools
 import dev.zwander.cellreader.utils.cellIdentityCompat
 import dev.zwander.cellreader.utils.cellSignalStrengthCompat
@@ -34,27 +35,29 @@ class SignalWidget : GlanceAppWidget() {
     override fun Content() {
         val context = LocalContext.current
 
-        Box(
-            modifier = GlanceModifier.cornerRadius(8.dp)
-                .background(Color(0xff121212))
-                .fillMaxSize()
-        ) {
-            LazyColumn(
-                modifier = GlanceModifier.fillMaxSize()
+        ProvideCellModel {
+            Box(
+                modifier = GlanceModifier.cornerRadius(8.dp)
+                    .background(Color(0xff121212))
+                    .fillMaxSize()
             ) {
-                sortedSubIds.forEach { t ->
-                    item(t.toLong()) {
-                        Box(
-                            modifier = GlanceModifier.height(48.dp)
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = context.resources.getString(R.string.sim_slot_format, t.toString()))
+                LazyColumn(
+                    modifier = GlanceModifier.fillMaxSize()
+                ) {
+                    sortedSubIds.forEach { t ->
+                        item(t.toLong()) {
+                            Box(
+                                modifier = GlanceModifier.height(48.dp)
+                                    .fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = context.resources.getString(R.string.sim_slot_format, t.toString()))
+                            }
                         }
-                    }
 
-                    itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}".hashCode().toLong() }) { _, item ->
-                        SignalCard(cellInfo = item)
+                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}".hashCode().toLong() }) { _, item ->
+                            SignalCard(cellInfo = item)
+                        }
                     }
                 }
             }

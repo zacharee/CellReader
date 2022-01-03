@@ -1,30 +1,24 @@
 package dev.zwander.cellreader.ui.layouts
 
 import android.annotation.SuppressLint
-import android.os.Build
-import android.telephony.*
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
-import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.CellModel
 import dev.zwander.cellreader.ui.components.PaddedDivider
-import dev.zwander.cellreader.serviceStates
-import dev.zwander.cellreader.signalStrengths
-import dev.zwander.cellreader.subInfos
-import dev.zwander.cellreader.utils.*
 
 @SuppressLint("MissingPermission")
 @Composable
-fun AdvancedSubInfo(
+fun CellModel.AdvancedSubInfo(
     subId: Int,
     modifier: Modifier = Modifier
 ) {

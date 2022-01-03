@@ -1,6 +1,5 @@
 package dev.zwander.cellreader.ui.layouts
 
-import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*

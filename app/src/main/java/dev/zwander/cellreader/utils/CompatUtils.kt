@@ -59,6 +59,7 @@ val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
     }
 
 val CellInfo.cellIdentityCompat: CellIdentity
+    @SuppressLint("NewApi")
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         cellIdentity
     } else {
@@ -68,6 +69,7 @@ val CellInfo.cellIdentityCompat: CellIdentity
     }
 
 val CellInfo.cellSignalStrengthCompat: CellSignalStrength
+    @SuppressLint("NewApi")
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         cellSignalStrength
     } else {

@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.utils
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import android.telephony.NetworkRegistrationInfo.NRState
@@ -163,19 +164,24 @@ inline fun <reified T : Any> Any.castGeneric(): T? {
             else null
 }
 
+@SuppressLint("InlinedApi")
 fun Int.avail() = this != CellInfo.UNAVAILABLE
+@SuppressLint("InlinedApi")
 fun Long.avail() = this != CellInfo.UNAVAILABLE_LONG
 
+@SuppressLint("ComposableNaming")
 @Composable
 fun Int.onAvail(block: @Composable()(Int) -> Unit) {
     if (avail()) block(this)
 }
 
+@SuppressLint("ComposableNaming")
 @Composable
 fun Long.onAvail(block: @Composable()(Long) -> Unit) {
     if (avail()) block(this)
 }
 
+@SuppressLint("ComposableNaming")
 @Composable
 fun Int.onNegAvail(block: @Composable()(Int) -> Unit) {
     if (this != -1) block(this)
@@ -194,18 +200,6 @@ fun domainToString(@NetworkRegistrationInfo.Domain domain: Int): String {
         NetworkRegistrationInfo.DOMAIN_CS -> "CS"
         NetworkRegistrationInfo.DOMAIN_PS -> "PS"
         NetworkRegistrationInfo.DOMAIN_CS_PS -> "CS_PS"
-        else -> "UNKNOWN"
-    }
-}
-
-fun typeToString(type: Int): String {
-    return when (type) {
-        CellInfo.TYPE_GSM -> "GSM"
-        CellInfo.TYPE_CDMA -> "CDMA"
-        CellInfo.TYPE_TDSCDMA -> "TDSCDMA"
-        CellInfo.TYPE_WCDMA -> "WCDMA"
-        CellInfo.TYPE_LTE -> "LTE"
-        CellInfo.TYPE_NR -> "NR"
         else -> "UNKNOWN"
     }
 }
