@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.telephony.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
+import dev.zwander.cellreader.utils.ARFCNTools
 import dev.zwander.cellreader.utils.cellIdentityCompat
 import dev.zwander.cellreader.utils.cellSignalStrengthCompat
 import dev.zwander.cellreader.utils.onAvail
@@ -147,11 +149,66 @@ class SignalWidget : GlanceAppWidget() {
 
                         with (cellInfo.cellIdentityCompat) {
                             when {
+                                this is CellIdentityGsm -> {
+                                    val arfcnInfo = remember(arfcn) {
+                                        ARFCNTools.gsmArfcnToInfo(arfcn)
+                                    }
+                                    val bands = remember(arfcn) {
+                                        arfcnInfo.map { it.band }
+                                    }
+
+                                    if (bands.isNotEmpty()) {
+                                        Spacer(GlanceModifier.size(8.dp))
+
+                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    }
+                                }
+                                this is CellIdentityWcdma -> {
+                                    val arfcnInfo = remember(uarfcn) {
+                                        ARFCNTools.uarfcnToInfo(uarfcn)
+                                    }
+                                    val bands = remember(uarfcn) {
+                                        arfcnInfo.map { it.band }
+                                    }
+
+                                    if (bands.isNotEmpty()) {
+                                        Spacer(GlanceModifier.size(8.dp))
+
+                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    }
+                                }
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdma -> {
+                                    val arfcnInfo = remember(uarfcn) {
+                                        ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
+                                    }
+                                    val bands = remember(uarfcn) {
+                                        arfcnInfo.map { it.band }
+                                    }
+
+                                    if (bands.isNotEmpty()) {
+                                        Spacer(GlanceModifier.size(8.dp))
+
+                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    }
+                                }
                                 this is CellIdentityLte -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                         Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    } else {
+                                        val arfcnInfo = remember(earfcn) {
+                                            ARFCNTools.earfcnToInfo(earfcn)
+                                        }
+                                        val bands = remember(earfcn) {
+                                            arfcnInfo.map { it.band }
+                                        }
+
+                                        if (bands.isNotEmpty()) {
+                                            Spacer(GlanceModifier.size(8.dp))
+
+                                            Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                        }
                                     }
                                 }
                                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNr -> {
@@ -159,6 +216,19 @@ class SignalWidget : GlanceAppWidget() {
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                         Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                    } else {
+                                        val arfcnInfo = remember(nrarfcn) {
+                                            ARFCNTools.nrArfcnToInfo(nrarfcn)
+                                        }
+                                        val bands = remember(nrarfcn) {
+                                            arfcnInfo.map { it.band }
+                                        }
+
+                                        if (bands.isNotEmpty()) {
+                                            Spacer(GlanceModifier.size(8.dp))
+
+                                            Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                        }
                                     }
                                 }
                             }
