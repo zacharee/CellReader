@@ -90,7 +90,7 @@ val CellIdentity.mccStringCompat: String?
 val CellIdentity.mncStringCompat: String?
     @SuppressLint("SoonBlockedPrivateApi")
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        mccString
+        mncString
     } else {
         CellIdentity::class.java
             .getDeclaredField("mMncStr")
