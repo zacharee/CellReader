@@ -13,6 +13,10 @@ import kotlin.math.absoluteValue
 
 //https://www.sqimway.com/umts_tdscdma.php
 
+/**
+ * TODO: This really needs to be stress-tested and
+ * TODO: reviewed by people who know how this works.
+ */
 object ARFCNTools {
     private val earfcnTable = EARFCNTable
     private val earfcnList = earfcnTable.keys.toList()
