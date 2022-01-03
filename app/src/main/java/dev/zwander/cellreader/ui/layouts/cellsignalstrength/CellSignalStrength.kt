@@ -21,7 +21,7 @@ fun CellSignalStrength(
             CellSignalStrengthCdma(simple = simple, advanced = advanced)
         }
 
-        cast<CellSignalStrengthWcdma>()?.apply {
+        onCast<CellSignalStrengthWcdma> {
             CellSignalStrengthWcdma(simple = simple, advanced = advanced)
         }
 
@@ -36,7 +36,7 @@ fun CellSignalStrength(
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            cast<CellSignalStrengthNr>()?.apply {
+            onCast<CellSignalStrengthNr> {
                 CellSignalStrengthNr(simple = simple, advanced = advanced)
             }
         }
