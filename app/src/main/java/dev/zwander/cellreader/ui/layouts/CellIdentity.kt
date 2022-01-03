@@ -109,6 +109,10 @@ fun CellIdentity(
         }
 
         cast<CellIdentityWcdma>()?.apply {
+            if (simple) {
+                FormatText(R.string.bands_format, ARFCNTools.uarfcnToInfo(uarfcn).joinToString(", ") { it.band.toString() })
+            }
+
             if (advanced) {
                 lac.onAvail {
                     FormatText(R.string.lac_format, it.toString())
@@ -193,6 +197,8 @@ fun CellIdentity(
                     if (bands.isNotEmpty()) {
                         FormatText(R.string.bands_format, bands.joinToString(", "))
                     }
+                } else {
+                    FormatText(R.string.bands_format, ARFCNTools.earfcnToInfo(earfcn).band.toString())
                 }
                 bandwidth.onAvail {
                     FormatText(R.string.bandwidth_format, it.toString())
