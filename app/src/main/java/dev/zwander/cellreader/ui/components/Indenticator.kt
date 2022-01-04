@@ -21,8 +21,13 @@ fun BoxScope.IndenticatorLine(size: IntSize, isFinal: Boolean) {
         modifier = Modifier
             .height(size.height.asDp())
             .width(16.dp)
-            .padding(start = 13.5.dp, bottom = if (isFinal) (size.height / 2f).asDp() else 0.dp)
-            .background(Color.White, RoundedCornerShape(1.25.dp))
+            .padding(start = 13.503.dp, bottom = if (isFinal) (size.height / 2f + 13).asDp() else 0.dp)
+            .background(Color.White, RoundedCornerShape(
+                topStart = 1.25.dp,
+                topEnd = 1.25.dp,
+                bottomStart = if (isFinal) 0.dp else 1.25.dp,
+                bottomEnd = if (isFinal) 0.dp else 1.25.dp
+            ))
             .align(Alignment.TopStart)
             .animateContentSize()
     )
