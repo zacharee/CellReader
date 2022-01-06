@@ -16,6 +16,7 @@
     <string name="nr">NR</string>
     <string name="unknown">Unknown</string>
     <string name="exit">Exit</string>
+    <string name="supporters">Supporters</string>
 
     <string name="level_format">Level: %s</string>
     <string name="timestamp_format">Timestamp: %s</string>
