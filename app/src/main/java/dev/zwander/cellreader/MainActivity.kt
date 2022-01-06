@@ -24,8 +24,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.ProvideWindowInsets
@@ -33,6 +35,7 @@ import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dev.zwander.cellreader.data.ProvideCellModel
 import dev.zwander.cellreader.ui.components.Expander
+import dev.zwander.cellreader.ui.components.LinkIcon
 import dev.zwander.cellreader.ui.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.ui.layouts.cellsignalstrength.CellSignalStrength
 import dev.zwander.cellreader.ui.layouts.SIMCard
@@ -126,6 +129,26 @@ fun Content() {
                             ) {
                                 Spacer(Modifier.weight(1f))
 
+                                LinkIcon(
+                                    icon = painterResource(id = R.drawable.website),
+                                    link = "https://zwander.dev",
+                                    desc = stringResource(id = R.string.website)
+                                )
+
+                                LinkIcon(
+                                    icon = painterResource(id = R.drawable.github),
+                                    link = "https://github.com/zacharee",
+                                    desc = stringResource(id = R.string.github)
+                                )
+                                
+                                LinkIcon(
+                                    icon = painterResource(id = R.drawable.patreon),
+                                    link = "https://patreon.com/zacharywander",
+                                    desc = stringResource(id = R.string.patreon)
+                                )
+
+                                Spacer(Modifier.size(16.dp))
+
                                 IconButton(
                                     onClick = {
                                         whichDialog = if (whichDialog == 0) -1 else 0
@@ -137,6 +160,17 @@ fun Content() {
                                     )
                                 }
 
+                                IconButton(
+                                    onClick = {
+                                        whichDialog = if (whichDialog == 1) -1 else 1
+                                    }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.about),
+                                        contentDescription = stringResource(id = R.string.about)
+                                    )
+                                }
+
                                 Spacer(Modifier.weight(1f))
                             }
                         }
@@ -144,7 +178,10 @@ fun Content() {
                         val context = LocalContext.current
 
                         AnimatedVisibility(visible = whichDialog != -1) {
-                            Crossfade(targetState = whichDialog) {
+                            Crossfade(
+                                targetState = whichDialog,
+                                modifier = Modifier.animateContentSize()
+                            ) {
                                 when (it) {
                                     0 -> {
                                         val supporters = remember {
@@ -166,7 +203,8 @@ fun Content() {
                                                     modifier = Modifier.fillMaxWidth()
                                                 ) {
                                                     Box(
-                                                        modifier = Modifier.fillMaxWidth()
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
                                                             .heightIn(min = 48.dp)
                                                             .clickable {
                                                                 context.launchUrl(item.link)
@@ -178,6 +216,25 @@ fun Content() {
                                                     }
                                                 }
                                             }
+                                        }
+                                    }
+                                    1 -> {
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(8.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.app_name),
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+
+                                            Spacer(Modifier.size(4.dp))
+
+                                            Text(
+                                                text = "v${BuildConfig.VERSION_NAME}"
+                                            )
                                         }
                                     }
                                 }
