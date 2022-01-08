@@ -2,6 +2,7 @@ package dev.zwander.cellreader.ui.components
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,6 +48,7 @@ fun MainContent() {
                     additionalBottom = 8.dp + 24.dp
                 ),
                 state = state,
+                modifier = Modifier.fillMaxHeight()
             ) {
                 sortedSubIds.forEach { t ->
                     item(t) {
