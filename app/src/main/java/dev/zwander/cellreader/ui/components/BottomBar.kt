@@ -117,73 +117,80 @@ fun BoxScope.BottomBar() {
 
         val context = LocalContext.current
 
-        AnimatedVisibility(
-            visible = whichDialog != null,
-            enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopStart),
-            exit = fadeOut() + shrinkOut(clip = false, shrinkTowards = Alignment.TopStart)
+        Box(
+            modifier = Modifier.animateContentSize()
         ) {
-            Crossfade(
-                targetState = whichDialog,
-                modifier = Modifier.animateContentSize()
+            androidx.compose.animation.AnimatedVisibility(
+                visible = whichDialog == BottomDialogPage.SUPPORTERS,
+                enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopStart),
+                exit = fadeOut() + shrinkOut(clip = false, shrinkTowards = Alignment.TopStart)
             ) {
-                when (it) {
-                    BottomDialogPage.SUPPORTERS -> {
-                        val supporters = remember {
-                            mutableStateListOf<SupporterInfo>()
-                        }
+                val supporters = remember {
+                    mutableStateListOf<SupporterInfo>()
+                }
 
-                        LaunchedEffect(key1 = null) {
-                            supporters.clear()
-                            supporters.addAll(DataParser.getInstance(context).parseSupporters())
-                        }
+                LaunchedEffect(key1 = null) {
+                    supporters.clear()
+                    supporters.addAll(DataParser.getInstance(context).parseSupporters())
+                }
 
-                        LazyColumn(
-                            modifier = Modifier.heightIn(max = 300.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(8.dp)
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 300.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    itemsIndexed(supporters, { _, item -> item.hashCode() }) { _, item ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            itemsIndexed(supporters, { _, item -> item.hashCode() }) { _, item ->
-                                Card(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(min = 48.dp)
-                                            .clickable {
-                                                context.launchUrl(item.link)
-                                            }
-                                            .padding(8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(text = item.name)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .clickable {
+                                        context.launchUrl(item.link)
                                     }
-                                }
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = item.name)
                             }
-                        }
-                    }
-                    BottomDialogPage.ABOUT -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.app_name),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            Spacer(Modifier.size(4.dp))
-
-                            Text(
-                                text = "v${BuildConfig.VERSION_NAME}"
-                            )
                         }
                     }
                 }
             }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = whichDialog == BottomDialogPage.ABOUT,
+                enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopStart),
+                exit = fadeOut() + shrinkOut(clip = false, shrinkTowards = Alignment.TopStart)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(Modifier.size(4.dp))
+
+                    Text(
+                        text = "v${BuildConfig.VERSION_NAME}"
+                    )
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = whichDialog != null,
+
+        ) {
+
         }
     }
 }
