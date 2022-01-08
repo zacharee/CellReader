@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,7 +43,13 @@ fun BoxScope.BottomBar() {
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colors.primarySurface)
+            .background(
+                MaterialTheme.colors.primarySurface,
+                MaterialTheme.shapes.large.copy(
+                    bottomStart = CornerSize(0.dp),
+                    bottomEnd = CornerSize(0.dp)
+                )
+            )
             .padding(
                 rememberInsetsPaddingValues(
                     insets = LocalWindowInsets.current.systemBars,
