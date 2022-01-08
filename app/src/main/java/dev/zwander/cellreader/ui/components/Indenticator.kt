@@ -26,7 +26,7 @@ fun IndenticatorLine(
 
     Canvas(
         modifier = Modifier
-            .padding(start = 9.5.dp)
+            .padding(start = 1.5.dp)
             .width(3.dp)
             .height((size.height / density.density).dp),
     ) {
@@ -49,7 +49,7 @@ fun IndenticatorArrow() {
         painter = painterResource(id = R.drawable.indent_arrow),
         contentDescription = null,
         modifier = Modifier
-            .padding(start = 8.dp, end = 4.dp)
+            .padding(start = 0.dp, end = 4.dp)
             .width(24.dp)
             .height(24.dp),
         contentScale = ContentScale.Fit,
