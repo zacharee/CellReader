@@ -63,16 +63,17 @@ fun CellModel.SIMCard(
                         1.0f to colorResource(id = R.color.sim_card_1)
                     ),
                     87f
-                )
-                .padding(
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                modifier = Modifier.padding(
                     start = 8.dp,
                     top = 8.dp,
                     end = 8.dp,
                     bottom = 0.dp
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Column {
+                )
+            ) {
                 var rplmn by remember(serviceStates[telephony.subscriptionIdCompat]) {
                     mutableStateOf("000-000")
                 }
@@ -226,15 +227,15 @@ fun CellModel.SIMCard(
                         )
                     }
                 }
-
-                Expander(
-                    expanded = expanded,
-                    onExpand = onExpand,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp)
-                )
             }
+
+            Expander(
+                expanded = expanded,
+                onExpand = onExpand,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+            )
         }
     }
 }

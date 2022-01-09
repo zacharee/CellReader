@@ -59,64 +59,69 @@ fun ExpanderSignalCard(
                             colors,
                             87f
                         )
-                        .padding(
-                            start = 8.dp,
-                            top = 8.dp,
-                            end = 8.dp,
-                            bottom = if (expandedInfo != null) 0.dp else 8.dp
-                        )
                         .fillMaxWidth(),
                 ) {
                     Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                        Column(
+                            modifier = Modifier.padding(
+                                start = 8.dp,
+                                top = 8.dp,
+                                end = 8.dp,
+                                bottom = if (expandedInfo != null) 0.dp else 8.dp
+                            )
                         ) {
-                            LevelIndicator(level, dBm)
-
-                            Spacer(Modifier.size(8.dp))
-
-                            FlowRow(
-                                mainAxisSpacing = 16.dp,
-                                mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
-                                mainAxisSize = SizeMode.Expand
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                basicInfo?.invoke()
+                                LevelIndicator(level, dBm)
+
+                                Spacer(Modifier.size(8.dp))
+
+                                FlowRow(
+                                    mainAxisSpacing = 16.dp,
+                                    mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
+                                    mainAxisSize = SizeMode.Expand
+                                ) {
+                                    basicInfo?.invoke()
+                                }
+                            }
+
+                            expandedInfo?.let {
+                                AnimatedVisibility(
+                                    visible = expanded,
+                                    enter = fadeIn() + expandVertically(
+                                        animationSpec = tween(
+                                            durationMillis = 400,
+                                            easing = {
+                                                anticipateDecelerateInterpolator(it)
+                                            }
+                                        )
+                                    ),
+                                    exit = fadeOut() + shrinkVertically(
+                                        animationSpec = tween(
+                                            durationMillis = 400,
+                                            easing = {
+                                                anticipateDecelerateInterpolator(it)
+                                            }
+                                        )
+                                    )
+                                ) {
+                                    Column {
+                                        PaddedDivider()
+
+                                        FlowRow(
+                                            mainAxisSpacing = 16.dp,
+                                            mainAxisAlignment = MainAxisAlignment.SpaceBetween,
+                                            mainAxisSize = SizeMode.Expand
+                                        ) {
+                                            expandedInfo()
+                                        }
+                                    }
+                                }
                             }
                         }
 
                         expandedInfo?.let {
-                            AnimatedVisibility(
-                                visible = expanded,
-                                enter = fadeIn() + expandVertically(
-                                    animationSpec = tween(
-                                        durationMillis = 400,
-                                        easing = {
-                                            anticipateDecelerateInterpolator(it)
-                                        }
-                                    )
-                                ),
-                                exit = fadeOut() + shrinkVertically(
-                                    animationSpec = tween(
-                                        durationMillis = 400,
-                                        easing = {
-                                            anticipateDecelerateInterpolator(it)
-                                        }
-                                    )
-                                )
-                            ) {
-                                Column {
-                                    PaddedDivider()
-
-                                    FlowRow(
-                                        mainAxisSpacing = 16.dp,
-                                        mainAxisAlignment = MainAxisAlignment.SpaceBetween,
-                                        mainAxisSize = SizeMode.Expand
-                                    ) {
-                                        expandedInfo()
-                                    }
-                                }
-                            }
-
                             Expander(
                                 expanded = expanded,
                                 onExpand = onExpand,
