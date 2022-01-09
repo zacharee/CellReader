@@ -50,7 +50,7 @@ fun MainContent() {
                 state = state,
                 modifier = Modifier.fillMaxHeight()
             ) {
-                sortedSubIds.forEach { t ->
+                sortedSubIds.forEachIndexed { subIndex, t ->
                     item(t) {
                         SIMCard(
                             telephony = telephonies[t]!!,
@@ -70,11 +70,13 @@ fun MainContent() {
                     val strengthsEmpty = strengthInfos[t]!!.isEmpty()
 
                     itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}" }) { index, item ->
+                        val isFinal = index == lastCellIndex && strengthsEmpty
+
                         AnimatedVisibility(
                             visible = showingCells[t] != false,
                             modifier = Modifier
                                 .animateItemPlacement()
-                                .padding(bottom = 8.dp),
+                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
                             enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                             exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                         ) {
@@ -85,7 +87,7 @@ fun MainContent() {
                             SignalCard(
                                 cellInfo = item,
                                 expanded = expanded[key] ?: false,
-                                isFinal = index == lastCellIndex && strengthsEmpty,
+                                isFinal = isFinal,
                                 onExpand = { expanded[key] = it },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -94,17 +96,19 @@ fun MainContent() {
                     }
 
                     itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
+                        val isFinal = index == lastStrengthIndex
+
                         AnimatedVisibility(
                             visible = showingCells[t] != false,
                             modifier = Modifier
                                 .animateItemPlacement()
-                                .padding(bottom = 8.dp),
+                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
                             enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                             exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                         ) {
                             CellSignalStrengthCard(
                                 cellSignalStrength = item,
-                                isFinal = index == lastStrengthIndex,
+                                isFinal = isFinal,
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )
