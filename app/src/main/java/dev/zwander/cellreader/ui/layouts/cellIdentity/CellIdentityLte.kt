@@ -5,30 +5,15 @@ import android.telephony.CellIdentityLte
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.utils.ARFCNTools
-import dev.zwander.cellreader.utils.FormatText
-import dev.zwander.cellreader.utils.asMccMnc
-import dev.zwander.cellreader.utils.onAvail
+import dev.zwander.cellreader.utils.*
 
 @Composable
 fun CellIdentityLte.CellIdentityLte(
+    arfcnInfo: List<ARFCNInfo>,
     simple: Boolean,
     advanced: Boolean
 ) {
-    val arfcnInfo = remember(earfcn) {
-        ARFCNTools.earfcnToInfo(earfcn)
-    }
-
     if (simple) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (bands.isNotEmpty()) {
-                FormatText(R.string.bands_format, bands.joinToString(", "))
-            }
-        } else {
-            val bands = remember(earfcn) { arfcnInfo.map { it.band } }
-
-            FormatText(R.string.bands_format, bands.joinToString(", "))
-        }
         bandwidth.onAvail {
             FormatText(R.string.bandwidth_format, it.toString())
         }

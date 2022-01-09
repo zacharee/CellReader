@@ -1,6 +1,8 @@
 package dev.zwander.cellreader.utils
 
 
+import android.telephony.CellIdentity
+import android.telephony.CellInfo
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -51,6 +53,17 @@ object ARFCNTools {
         println(tdscdmaArfcnToInfo(tdscdmaarfcn))
     }
 
+    fun getInfo(arfcn: Int, type: Int): List<ARFCNInfo> {
+        return when (type) {
+            CellInfo.TYPE_GSM -> gsmArfcnToInfo(arfcn)
+            CellInfo.TYPE_WCDMA -> uarfcnToInfo(arfcn)
+            CellInfo.TYPE_TDSCDMA -> tdscdmaArfcnToInfo(arfcn)
+            CellInfo.TYPE_LTE -> earfcnToInfo(arfcn)
+            CellInfo.TYPE_NR -> nrArfcnToInfo(arfcn)
+            else -> listOf()
+        }
+    }
+
     fun earfcnToInfo(earfcn: Int): List<ARFCNInfo> {
         val containers = earfcnList.filter { it.contains(earfcn) }
             .map { it to earfcnTable[it]!! }
@@ -65,7 +78,7 @@ object ARFCNTools {
         return calculateUarfcnInfo(uarfcn, containers)
     }
 
-    fun gsmArfcnToInfo(gsmarfcn: Int): List<GSMARFCNInfo> {
+    fun gsmArfcnToInfo(gsmarfcn: Int): List<ARFCNInfo> {
         val containers = gsmarfcnList.filter { it.contains(gsmarfcn) }
             .map { it to gsmarfcnTable[it]!! }
 
@@ -80,7 +93,7 @@ object ARFCNTools {
         return calculateNrArfcnInfo(nrarfcn, refContainer, containers)
     }
 
-    fun tdscdmaArfcnToInfo(tdscdmaArfcn: Int): List<TDSCDMAARFCNInfo> {
+    fun tdscdmaArfcnToInfo(tdscdmaArfcn: Int): List<ARFCNInfo> {
         val containers = tdscdmaArfcnList.filter { it.contains(tdscdmaArfcn) }
             .map { it to tdscdmaArfcnTable[it]!! }
 
@@ -90,7 +103,7 @@ object ARFCNTools {
     private fun calculateEarfcnInfo(earfcn: Int, containers: List<Pair<IntRange, ARFCNContainer>>): List<ARFCNInfo> {
         return containers.map { (_, info) ->
             ARFCNInfo(
-                info.band,
+                info.band.toString(),
                 info.dlLow.toDouble() + 0.1 * (earfcn - info.dlOffset.toDouble()),
                 // The normal formula is F-ul = F-ul-low + 0.1 * (EARFCN-ul - EARFCN-offset-ul).
                 // Since we only have the dl EARFCN-dl, we need to calculate the EARFCN-ul, which is
@@ -108,19 +121,19 @@ object ARFCNTools {
     private fun calculateUarfcnInfo(uarfcn: Int, containers: List<Pair<IntRange, ARFCNContainer>>): List<ARFCNInfo> {
         return containers.map { (dlRange, info) ->
             ARFCNInfo(
-                info.band,
+                info.band.toString(),
                 info.dlOffset.toDouble() + 0.2 * uarfcn,
                 info.ulOffset.toDouble() + 0.2 * ((uarfcn - dlRange.first) + info.ulRange.first)
             )
         }
     }
 
-    private fun calculateGsmArfcnInfo(gsmarfcn: Int, containers: List<Pair<IntRange, GSMARFCNContainer>>): List<GSMARFCNInfo> {
+    private fun calculateGsmArfcnInfo(gsmarfcn: Int, containers: List<Pair<IntRange, GSMARFCNContainer>>): List<ARFCNInfo> {
         return containers.map { (_, info) ->
             val ful = info.fulEq(gsmarfcn)
             val fdl = info.fdlEq(ful)
 
-            GSMARFCNInfo(
+            ARFCNInfo(
                 info.band,
                 fdl, ful
             )
@@ -145,17 +158,18 @@ object ARFCNTools {
             }
 
             ARFCNInfo(
-                info.band,
+                info.band.toString(),
                 fdl,
                 ful
             )
         }
     }
 
-    private fun calculateTdscdmaArfcnInfo(tdscdmaArfcn: Int, containers: List<Pair<IntRange, TDSCDMAARFCNContainer>>): List<TDSCDMAARFCNInfo> {
+    private fun calculateTdscdmaArfcnInfo(tdscdmaArfcn: Int, containers: List<Pair<IntRange, TDSCDMAARFCNContainer>>): List<ARFCNInfo> {
         return containers.map { (_, info) ->
-            TDSCDMAARFCNInfo(
+            ARFCNInfo(
                 info.band,
+                tdscdmaArfcn / 5.0,
                 tdscdmaArfcn / 5.0
             )
         }
@@ -163,20 +177,9 @@ object ARFCNTools {
 }
 
 data class ARFCNInfo(
-    val band: Int,
-    val dlFreq: Number,
-    val ulFreq: Number,
-)
-
-data class GSMARFCNInfo(
     val band: String,
     val dlFreq: Number,
-    val ulFreq: Number,
-)
-
-data class TDSCDMAARFCNInfo(
-    val band: String,
-    val freq: Number
+    val ulFreq: Number
 )
 
 data class ARFCNContainer(

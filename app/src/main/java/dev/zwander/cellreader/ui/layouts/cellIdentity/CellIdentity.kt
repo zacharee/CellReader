@@ -15,6 +15,13 @@ fun CellIdentity(
     advanced: Boolean
 ) {
     with (cellIdentity) {
+        val arfcnInfo = remember(channelNumber) {
+            ARFCNTools.getInfo(channelNumber, type)
+        }
+        val bands = remember(channelNumber) {
+            getBands(arfcnInfo)
+        }
+
         if (simple) {
             FormatText(R.string.type_format, stringResource(
                 when (type) {
@@ -27,6 +34,13 @@ fun CellIdentity(
                     else -> R.string.unknown
                 }
             ))
+
+            if (bands.isNotEmpty()) {
+                FormatText(
+                    R.string.bands_format,
+                    bands.joinToString(", ")
+                )
+            }
 
             if (!operatorAlphaLong.isNullOrBlank() || !operatorAlphaShort.isNullOrBlank()) {
                 FormatText(
@@ -60,7 +74,7 @@ fun CellIdentity(
         }
 
         onCast<CellIdentityGsm> {
-            CellIdentityGsm(simple = simple, advanced = advanced)
+            CellIdentityGsm(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
         }
 
         onCast<CellIdentityCdma> {
@@ -68,20 +82,20 @@ fun CellIdentity(
         }
 
         onCast<CellIdentityWcdma> {
-            CellIdentityWcdma(simple = simple, advanced = advanced)
+            CellIdentityWcdma(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
         }
 
         onCast<CellIdentityTdscdma> {
-            CellIdentityTdscdma(simple = simple, advanced = advanced)
+            CellIdentityTdscdma(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
         }
 
         onCast<CellIdentityLte> {
-            CellIdentityLte(simple = simple, advanced = advanced)
+            CellIdentityLte(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             onCast<CellIdentityNr> {
-                CellIdentityNr(simple = simple, advanced = advanced)
+                CellIdentityNr(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
             }
         }
     }

@@ -6,41 +6,15 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.utils.ARFCNTools
-import dev.zwander.cellreader.utils.FormatText
-import dev.zwander.cellreader.utils.asMccMnc
-import dev.zwander.cellreader.utils.onAvail
+import dev.zwander.cellreader.utils.*
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun CellIdentityNr.CellIdentityNr(
+    arfcnInfo: List<ARFCNInfo>,
     simple: Boolean,
     advanced: Boolean
 ) {
-    val arfcnInfo = remember(nrarfcn) {
-        ARFCNTools.nrArfcnToInfo(nrarfcn = nrarfcn)
-    }
-
-    if (simple) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (bands.isNotEmpty()) {
-                FormatText(
-                    textId = R.string.bands_format,
-                    bands.joinToString(", ")
-                )
-            }
-        } else {
-            val bands = remember(nrarfcn) { arfcnInfo.map { it.band } }
-
-            if (bands.isNotEmpty()) {
-                FormatText(
-                    textId = R.string.bands_format,
-                    bands.joinToString(", ")
-                )
-            }
-        }
-    }
-
     if (advanced) {
         tac.onAvail {
             FormatText(R.string.tac_format, it.toString())

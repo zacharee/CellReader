@@ -5,25 +5,14 @@ import android.telephony.CellIdentityWcdma
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.utils.ARFCNTools
-import dev.zwander.cellreader.utils.FormatText
-import dev.zwander.cellreader.utils.asMccMnc
-import dev.zwander.cellreader.utils.onAvail
+import dev.zwander.cellreader.utils.*
 
 @Composable
 fun CellIdentityWcdma.CellIdentityWcdma(
+    arfcnInfo: List<ARFCNInfo>,
     simple: Boolean,
     advanced: Boolean
 ) {
-    val arfcnInfo = remember(uarfcn) {
-        ARFCNTools.uarfcnToInfo(uarfcn)
-    }
-
-    if (simple) {
-        val bands = remember(uarfcn) { arfcnInfo.map { it.band } }
-        FormatText(R.string.bands_format, bands.joinToString(", "))
-    }
-
     if (advanced) {
         lac.onAvail {
             FormatText(R.string.lac_format, it.toString())
