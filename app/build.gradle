@@ -55,12 +55,12 @@ dependencies {
     implementation 'androidx.glance:glance:1.0.0-alpha01'
     implementation 'androidx.glance:glance-appwidget:1.0.0-alpha01'
 
-    implementation "com.google.accompanist:accompanist-flowlayout:0.21.5-rc"
+    implementation 'com.google.accompanist:accompanist-flowlayout:0.22.0-rc'
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.22.0-rc"
     implementation "com.google.accompanist:accompanist-insets:0.22.0-rc"
     implementation "com.google.accompanist:accompanist-insets-ui:0.22.0-rc"
 
-    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:3.0'
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.2'
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 
     testImplementation 'junit:junit:4.13.2'
