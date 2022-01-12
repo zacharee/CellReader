@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.utils
 
 
-import android.telephony.CellIdentity
 import android.telephony.CellInfo
 import java.util.*
 import kotlin.math.absoluteValue

@@ -3,7 +3,6 @@ package dev.zwander.cellreader.ui.layouts.cellIdentity
 import android.telephony.CellIdentityCdma
 import androidx.compose.runtime.Composable
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.utils.ARFCNInfo
 import dev.zwander.cellreader.utils.FormatText
 import dev.zwander.cellreader.utils.onAvail
 
