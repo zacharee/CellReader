@@ -3,6 +3,7 @@ package dev.zwander.cellreader.ui.components
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -32,14 +33,64 @@ private enum class BottomDialogPage {
 }
 
 @Composable
-fun BoxScope.BottomBar() {
-    var optionsExpanded by remember {
+fun BoxScope.BottomBarScrimContainer() {
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+    var scrimFullSize by remember {
         mutableStateOf(false)
     }
     var whichDialog by remember {
         mutableStateOf<BottomDialogPage?>(null)
     }
 
+    val showFullSize by derivedStateOf {
+        scrimFullSize || expanded
+    }
+
+    val bg by animateColorAsState(
+        if (expanded) {
+            Color.Black.copy(alpha = 0.5f)
+        } else {
+            Color.Transparent
+        }
+    ) {
+        scrimFullSize = it != Color.Transparent
+    }
+
+    Box(
+        modifier = Modifier
+            .background(bg)
+            .align(Alignment.BottomCenter)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {
+                    whichDialog = null
+                    expanded = false
+                }
+            )
+            .then(
+                if (showFullSize) Modifier.fillMaxSize()
+                else Modifier.size(0.dp)
+            ),
+    )
+
+    BottomBar(
+        optionsExpanded = expanded,
+        expandStateChanged = { expanded = it },
+        whichDialog = whichDialog,
+        onDialogChange = { whichDialog = it }
+    )
+}
+
+@Composable
+private fun BoxScope.BottomBar(
+    optionsExpanded: Boolean,
+    expandStateChanged: (Boolean) -> Unit,
+    whichDialog: BottomDialogPage?,
+    onDialogChange: (BottomDialogPage?) -> Unit
+) {
     Column(
         modifier = Modifier
             .background(
@@ -61,10 +112,10 @@ fun BoxScope.BottomBar() {
         Expander(
             expanded = !optionsExpanded,
             onExpand = {
-                optionsExpanded = !it
-                if (!optionsExpanded) {
-                    whichDialog = null
+                if (it) {
+                    onDialogChange(null)
                 }
+                expandStateChanged(!it)
             },
             modifier = Modifier.height(24.dp)
         )
@@ -98,7 +149,9 @@ fun BoxScope.BottomBar() {
 
                 IconButton(
                     onClick = {
-                        whichDialog = if (whichDialog == BottomDialogPage.SUPPORTERS) null else BottomDialogPage.SUPPORTERS
+                        onDialogChange(
+                            if (whichDialog == BottomDialogPage.SUPPORTERS) null else BottomDialogPage.SUPPORTERS
+                        )
                     },
                 ) {
                     Icon(
@@ -109,7 +162,9 @@ fun BoxScope.BottomBar() {
 
                 IconButton(
                     onClick = {
-                        whichDialog = if (whichDialog == BottomDialogPage.ABOUT) null else BottomDialogPage.ABOUT
+                        onDialogChange(
+                            if (whichDialog == BottomDialogPage.ABOUT) null else BottomDialogPage.ABOUT
+                        )
                     }
                 ) {
                     Icon(
