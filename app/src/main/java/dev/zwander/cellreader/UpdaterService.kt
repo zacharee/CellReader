@@ -7,18 +7,17 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
 import dev.zwander.cellreader.data.CellModel
+import dev.zwander.cellreader.data.TelephonyListenerCallback
 import dev.zwander.cellreader.utils.CellUtils
 import dev.zwander.cellreader.utils.cellIdentityCompat
 import kotlinx.coroutines.*
-import kotlin.collections.HashMap
 
-class UpdaterService : Service(), CoroutineScope by MainScope() {
+class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
     companion object {
         const val ACTION_EXIT = "${BuildConfig.APPLICATION_ID}.EXIT"
     }
@@ -26,9 +25,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
-    private val callbacks by lazy { HashMap<Int, TelephonyCallback>() }
-    @Suppress("DEPRECATION")
-    private val listeners = HashMap<Int, PhoneStateListener>()
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,72 +98,22 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         super.onDestroy()
 
         cancel()
-        deinit()
+        CellModel.destroy()
         subs.removeOnSubscriptionsChangedListener(subsListener)
-    }
-
-    private fun deinit() {
-        with (CellModel) {
-            telephonies.forEach { (subId, telephony) ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    telephony.unregisterTelephonyCallback(callbacks[subId])
-                } else {
-                    @Suppress("DEPRECATION")
-                    telephony.listen(listeners[subId], PhoneStateListener.LISTEN_NONE)
-                }
-            }
-
-            subIds.clear()
-            cellInfos.clear()
-            strengthInfos.clear()
-            subInfos.clear()
-            serviceStates.clear()
-            telephonies.clear()
-        }
     }
 
     @SuppressLint("MissingPermission")
     private fun init(subscriptions: List<Int>) {
-        with (CellModel) {
-            telephonies.putAll(
-                subscriptions.map {
-                    cellInfos[it] = listOf()
-                    strengthInfos[it] = listOf()
-                    subInfos[it] = subs.getActiveSubscriptionInfo(it)
-                    subIds.add(it)
-
-                    it to telephony.createForSubscriptionId(it).also { telephony ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            val callback = callbacks[it] ?: TelephonyListener(it).apply {
-                                callbacks[it] = this
-                            }
-
-                            telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
-                        } else {
-                            val listener = listeners[it] ?: StateListener(it).apply {
-                                listeners[it] = this
-                            }
-
-                            @Suppress("DEPRECATION")
-                            telephony.listen(
-                                listener,
-                                PhoneStateListener.LISTEN_SERVICE_STATE or
-                                        PhoneStateListener.LISTEN_CELL_INFO or
-                                        PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
-                            )
-                        }
-
-                        update(it, telephony.allCellInfo)
-                        updateSignal(it, telephony.signalStrength)
-                        updateServiceState(it, telephony.serviceState)
-                    }
-                }
-            )
-        }
+        CellModel.create(
+            telephony,
+            subs,
+            subscriptions,
+            this
+        )
     }
 
     @SuppressLint("MissingPermission")
-    private fun update(subId: Int, infos: MutableList<CellInfo>) {
+    override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (CellModel) {
             if (infos.isEmpty()) {
                 infos.addAll(telephonies[subId]!!.allCellInfo)
@@ -186,7 +132,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun updateSignal(subId: Int, strength: SignalStrength?) {
+    override fun updateSignal(subId: Int, strength: SignalStrength?) {
         @Suppress("DEPRECATION")
         val newInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
@@ -220,7 +166,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun updateServiceState(subId: Int, serviceState: ServiceState?) {
+    override fun updateServiceState(subId: Int, serviceState: ServiceState?) {
         with (CellModel) {
             launch(Dispatchers.Main) {
                 serviceStates[subId] = serviceState
@@ -228,65 +174,30 @@ class UpdaterService : Service(), CoroutineScope by MainScope() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private inner class TelephonyListener(private val subId: Int) : TelephonyCallback(),
-        TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener,
-        TelephonyCallback.ServiceStateListener {
-        @SuppressLint("MissingPermission")
-        override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
-            update(subId, cellInfo ?: mutableListOf())
-        }
-
-        override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
-            updateSignal(subId, signalStrength)
-        }
-
-        override fun onServiceStateChanged(serviceState: ServiceState?) {
-            updateServiceState(subId, serviceState)
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private inner class StateListener(private val subId: Int) : PhoneStateListener() {
-        override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
-            update(subId, cellInfo ?: mutableListOf())
-        }
-
-        override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
-            updateSignal(subId, signalStrength)
-        }
-
-        override fun onServiceStateChanged(serviceState: ServiceState?) {
-            updateServiceState(subId, serviceState)
-        }
-    }
-
     private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) : SubscriptionManager.OnSubscriptionsChangedListener() {
         override fun onSubscriptionsChanged() {
-            with (CellModel) {
-                val newList = subs.allSubscriptionInfoList
-                val newIds = newList.map { it.subscriptionId }
-                val currentIds = currentList.map { it.subscriptionId }
+            val newList = subs.allSubscriptionInfoList
+            val newIds = newList.map { it.subscriptionId }
+            val currentIds = currentList.map { it.subscriptionId }
 
-                val defaultId = SubscriptionManager.getDefaultSubscriptionId()
+            val defaultId = SubscriptionManager.getDefaultSubscriptionId()
+
+            launch(Dispatchers.Main) {
+                CellModel.primaryCell = defaultId
+            }
+
+            if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
+                currentList.clear()
+                currentList.addAll(newList)
 
                 launch(Dispatchers.Main) {
-                    primaryCell = defaultId
+                    CellModel.destroy()
+                    init(newIds)
                 }
-
-                if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
-                    currentList.clear()
-                    currentList.addAll(newList)
-
-                    launch(Dispatchers.Main) {
-                        deinit()
-                        init(newIds)
-                    }
-                } else {
-                    launch(Dispatchers.Main) {
-                        newList.forEach { subInfo ->
-                            subInfos[subInfo.subscriptionId] = subInfo
-                        }
+            } else {
+                launch(Dispatchers.Main) {
+                    newList.forEach { subInfo ->
+                        CellModel.subInfos[subInfo.subscriptionId] = subInfo
                     }
                 }
             }
