@@ -43,20 +43,6 @@ fun CellIdentity(
                     bands.joinToString(", ")
                 )
             }
-
-            if (!operatorAlphaLong.isNullOrBlank() || !operatorAlphaShort.isNullOrBlank()) {
-                FormatText(
-                    R.string.operator_format,
-                    setOf(
-                        operatorAlphaLong,
-                        operatorAlphaShort
-                    ).joinToString("/")
-                )
-            }
-
-            mccStringCompat?.apply {
-                FormatText(R.string.mcc_mnc_format, "${mccStringCompat}-${mncStringCompat}")
-            }
         }
 
         if (advanced) {
@@ -98,6 +84,22 @@ fun CellIdentity(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             onCast<CellIdentityNr> {
                 CellIdentityNr(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
+            }
+        }
+
+        if (simple) {
+            if (!operatorAlphaLong.isNullOrBlank() || !operatorAlphaShort.isNullOrBlank()) {
+                FormatText(
+                    R.string.operator_format,
+                    setOf(
+                        operatorAlphaLong,
+                        operatorAlphaShort
+                    ).joinToString("/")
+                )
+            }
+
+            mccStringCompat?.apply {
+                FormatText(R.string.mcc_mnc_format, "${mccStringCompat}-${mncStringCompat}")
             }
         }
     }
