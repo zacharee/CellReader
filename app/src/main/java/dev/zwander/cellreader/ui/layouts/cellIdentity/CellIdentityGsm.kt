@@ -5,6 +5,7 @@ import android.telephony.CellIdentityGsm
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.utils.*
 
 @Composable

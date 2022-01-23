@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.utils
+package dev.zwander.cellreader.data
 
 object IntRangeComparator : Comparator<IntRange> {
     override fun compare(o1: IntRange, o2: IntRange): Int {

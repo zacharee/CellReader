@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.utils
+package dev.zwander.cellreader.data
 
 
 import android.telephony.CellInfo

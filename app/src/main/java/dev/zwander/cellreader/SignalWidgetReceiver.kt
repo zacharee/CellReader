@@ -20,8 +20,8 @@ import androidx.glance.appwidget.updateAll
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
+import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.ProvideCellModel
-import dev.zwander.cellreader.utils.ARFCNTools
 import dev.zwander.cellreader.utils.cellIdentityCompat
 import dev.zwander.cellreader.utils.cellSignalStrengthCompat
 import dev.zwander.cellreader.utils.onAvail

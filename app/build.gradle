@@ -60,8 +60,14 @@ dependencies {
     implementation "com.google.accompanist:accompanist-insets:0.22.0-rc"
     implementation "com.google.accompanist:accompanist-insets-ui:0.22.0-rc"
 
+    implementation "com.google.android.gms:play-services-wearable:17.1.0"
+
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.2'
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
+
+    implementation project(":data")
+
+    wearApp project(":wear")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

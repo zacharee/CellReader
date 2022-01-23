@@ -17,3 +17,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "CellReader"
 include ':app'
+include ':wear'
+include ':data'

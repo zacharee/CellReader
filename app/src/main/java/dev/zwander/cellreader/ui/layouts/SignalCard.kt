@@ -6,6 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.endcAvailable
+import dev.zwander.cellreader.data.timeStampMillisCompat
 import dev.zwander.cellreader.ui.layouts.cellIdentity.CellIdentity
 import dev.zwander.cellreader.ui.layouts.cellsignalstrength.CellSignalStrength
 import dev.zwander.cellreader.utils.*
@@ -54,8 +56,7 @@ fun SignalCard(
             with(cellInfo) {
                 FormatText(R.string.registered_format, isRegistered.toString())
                 FormatText(R.string.cell_connection_status_format, CellUtils.connectionStatusToString(cellConnectionStatus))
-                @Suppress("DEPRECATION")
-                FormatText(R.string.timestamp_format, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) timestampMillis else (timeStamp / 1000000))
+                FormatText(R.string.timestamp_format, timeStampMillisCompat)
 
                 CellSignalStrength(
                     cellSignalStrength = cellSignalStrengthCompat,

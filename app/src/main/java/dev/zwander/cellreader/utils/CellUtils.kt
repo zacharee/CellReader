@@ -135,12 +135,6 @@ object CellUtils {
     }
 }
 
-val CellConfigLte.endcAvailable: Boolean
-    get() = this::class.java
-        .getDeclaredMethod("isEndcAvailable")
-        .apply { isAccessible = true }
-        .invoke(this) as Boolean
-
 val String?.asMccMnc: String
     get() = StringBuilder(
         when {
@@ -234,24 +228,5 @@ fun nameSourceToString(source: Int): String {
         SubscriptionManager.NAME_SOURCE_SIM_PNN -> "SIM PNN"
         SubscriptionManager.NAME_SOURCE_USER_INPUT -> "User Input"
         else -> "Unknown"
-    }
-}
-
-fun CellIdentity.getBands(infos: List<ARFCNInfo>): List<String> {
-    return when {
-        this is CellIdentityGsm -> infos.map { it.band }
-        this is CellIdentityWcdma -> infos.map { it.band }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdma -> infos.map { it.band }
-        this is CellIdentityLte -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            bands.map { it.toString() }
-        } else {
-            infos.map { it.band }
-        }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNr -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            bands.map { it.toString() }
-        } else {
-            infos.map { it.band }
-        }
-        else -> listOf()
     }
 }

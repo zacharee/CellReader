@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.utils.*
 
 @RequiresApi(Build.VERSION_CODES.Q)
