@@ -96,7 +96,7 @@
     <string name="ecno_format">EcNo: %s</string>
     <string name="rsrq_format">RSRQ: %s</string>
     <string name="rssi_format">RSSI: %s</string>
-    <string name="rssnr_format">RSSnr: %s</string>
+    <string name="rssnr_format">RSSnR: %s</string>
     <string name="cqi_format">CQI: %s</string>
     <string name="cqi_table_index_format">CQI Index: %s</string>
     <string name="ss_rsrq_format">SS RSRQ: %s</string>
