@@ -119,20 +119,6 @@ object CellUtils {
             return o1.dbm.absoluteValue - o2.dbm.absoluteValue
         }
     }
-
-    class SubsComparator(private val primarySub: Int) : Comparator<Int> {
-        override fun compare(o1: Int, o2: Int): Int {
-            if (o1 == primarySub) {
-                return -1
-            }
-
-            if (o2 == primarySub) {
-                return 1
-            }
-
-            return o1.compareTo(o2)
-        }
-    }
 }
 
 val String?.asMccMnc: String

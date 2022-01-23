@@ -1,11 +1,11 @@
-package dev.zwander.cellreader.data
+package dev.zwander.cellreader.data.data
 
 import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.*
-import dev.zwander.cellreader.utils.CellUtils
+import dev.zwander.cellreader.data.SubsComparator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 
@@ -21,7 +21,7 @@ object CellModel {
     val telephonies = mutableStateMapOf<Int, TelephonyManager>()
 
     val sortedSubIds by derivedStateOf {
-        subIds.sortedWith(CellUtils.SubsComparator(primaryCell))
+        subIds.sortedWith(SubsComparator(primaryCell))
     }
 
     private val telephonyCallbacks = HashMap<Int, TelephonyCallback>()

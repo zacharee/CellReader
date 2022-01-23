@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.min
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.R
-import dev.zwander.cellreader.data.CellModel
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.ui.components.*
 import dev.zwander.cellreader.utils.*
 import kotlinx.coroutines.delay

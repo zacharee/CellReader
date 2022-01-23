@@ -35,7 +35,13 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
     implementation "com.google.android.gms:play-services-wearable:17.1.0"
+    api "androidx.compose.runtime:runtime:1.2.0-alpha01"
+
     api 'io.gsonfire:gson-fire:1.8.5'
+
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

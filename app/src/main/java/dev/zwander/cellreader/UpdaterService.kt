@@ -11,8 +11,13 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
-import dev.zwander.cellreader.data.CellModel
-import dev.zwander.cellreader.data.TelephonyListenerCallback
+import dev.zwander.cellreader.data.BetweenUtils
+import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.TelephonyListenerCallback
+import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
+import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
+import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 import dev.zwander.cellreader.utils.CellUtils
 import dev.zwander.cellreader.utils.cellIdentityCompat
 import kotlinx.coroutines.*
@@ -26,6 +31,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
+    private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_EXIT) {
@@ -124,10 +130,16 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val foundIDs = mutableListOf<String>()
             val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentityCompat.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentityCompat.toString()) } }
 
+            val wrapped = newInfo.map { CellInfoWrapper.newInstance(it) }
+
             launch(Dispatchers.Main) {
                 cellInfos[subId] = newInfo
 
                 SignalWidget().updateAll(this@UpdaterService)
+            }
+
+            launch(Dispatchers.IO) {
+                betweenUtils.sendCellInfos(subId, wrapped)
             }
         }
     }
@@ -156,6 +168,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
         }
 
+        val wrapped = newInfo.map { CellSignalStrengthWrapper.newInstance(it) }
+
         launch(Dispatchers.Main) {
             with (CellModel) {
                 signalStrengths[subId] = strength
@@ -164,12 +178,22 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 SignalWidget().updateAll(this@UpdaterService)
             }
         }
+
+        launch(Dispatchers.IO) {
+            betweenUtils.sendSignalStrengths(subId, wrapped)
+        }
     }
 
     override fun updateServiceState(subId: Int, serviceState: ServiceState?) {
         with (CellModel) {
+            val wrapped = serviceState?.run { ServiceStateWrapper(this) }
+
             launch(Dispatchers.Main) {
                 serviceStates[subId] = serviceState
+            }
+
+            launch(Dispatchers.IO) {
+                betweenUtils.sendServiceState(subId, wrapped)
             }
         }
     }
@@ -195,9 +219,13 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     init(newIds)
                 }
             } else {
-                launch(Dispatchers.Main) {
-                    newList.forEach { subInfo ->
+                newList.forEach { subInfo ->
+                    launch(Dispatchers.Main) {
                         CellModel.subInfos[subInfo.subscriptionId] = subInfo
+                    }
+
+                    launch(Dispatchers.IO) {
+                        betweenUtils.sendSubscriptionInfo(subInfo.subscriptionId, SubscriptionInfoWrapper(subInfo, this@UpdaterService))
                     }
                 }
             }

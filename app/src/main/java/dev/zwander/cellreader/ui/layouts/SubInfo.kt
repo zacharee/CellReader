@@ -14,6 +14,8 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.allAccessRulesCompat
+import dev.zwander.cellreader.data.cardIdCompat
 import dev.zwander.cellreader.ui.components.PaddedDivider
 import dev.zwander.cellreader.utils.*
 

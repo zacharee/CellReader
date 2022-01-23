@@ -4,8 +4,8 @@ import android.os.Build
 import android.telephony.CellSignalStrengthGsm
 import androidx.compose.runtime.Composable
 import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.bitErrorRateCompat
 import dev.zwander.cellreader.utils.FormatText
-import dev.zwander.cellreader.utils.bitErrorRateCompat
 import dev.zwander.cellreader.utils.onAvail
 
 @Suppress("UNUSED_PARAMETER")

@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
-import dev.zwander.cellreader.data.CellModel
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.ui.components.PaddedDivider
 
 @SuppressLint("MissingPermission")
