@@ -21,6 +21,8 @@ import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import dev.zwander.cellreader.data.ARFCNTools
+import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.data.ProvideCellModel
 import dev.zwander.cellreader.utils.cellIdentityCompat
 import dev.zwander.cellreader.utils.cellSignalStrengthCompat
@@ -35,7 +37,7 @@ class SignalWidget : GlanceAppWidget() {
     override fun Content() {
         val context = LocalContext.current
 
-        ProvideCellModel {
+        with (CellModel) {
             Box(
                 modifier = GlanceModifier.cornerRadius(8.dp)
                     .background(Color(0xff121212))

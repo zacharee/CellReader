@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.ProvideCellModel
 import dev.zwander.cellreader.ui.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.ui.layouts.SIMCard
@@ -33,7 +34,7 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
-    ProvideCellModel {
+    with (CellModel) {
         SelectionContainer {
             val state = rememberLazyListState()
 
