@@ -25,18 +25,6 @@ fun CellIdentity(
         }
 
         if (simple) {
-            FormatText(R.string.type_format, stringResource(
-                when (type) {
-                    CellInfo.TYPE_GSM -> R.string.gsm
-                    CellInfo.TYPE_WCDMA -> R.string.wcdma
-                    CellInfo.TYPE_CDMA -> R.string.cdma
-                    CellInfo.TYPE_TDSCDMA -> R.string.tdscdma
-                    CellInfo.TYPE_LTE -> R.string.lte
-                    CellInfo.TYPE_NR -> R.string.nr
-                    else -> R.string.unknown
-                }
-            ))
-
             if (bands.isNotEmpty()) {
                 FormatText(
                     R.string.bands_format,

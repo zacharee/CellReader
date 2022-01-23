@@ -26,6 +26,7 @@ fun ExpanderSignalCard(
     onExpand: (Boolean) -> Unit,
     level: Int,
     dBm: Int,
+    type: String,
     colors: List<Pair<Float, Color>>,
     modifier: Modifier = Modifier,
     basicInfo: (@Composable() () -> Unit)? = null,
@@ -73,13 +74,13 @@ fun ExpanderSignalCard(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                LevelIndicator(level, dBm)
+                                LevelIndicator(level, dBm, type)
 
                                 Spacer(Modifier.size(8.dp))
 
                                 FlowRow(
                                     mainAxisSpacing = 16.dp,
-                                    mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
+                                    mainAxisAlignment = FlowMainAxisAlignment.SpaceAround,
                                     mainAxisSize = SizeMode.Expand
                                 ) {
                                     basicInfo?.invoke()

@@ -44,6 +44,19 @@ fun CellSignalStrengthCard(
         onExpand = {},
         level = cellSignalStrength.level,
         dBm = cellSignalStrength.dbm,
+        type = stringResource(
+            with (cellSignalStrength) {
+                when {
+                    this is CellSignalStrengthGsm -> R.string.gsm
+                    this is CellSignalStrengthWcdma -> R.string.wcdma
+                    this is CellSignalStrengthCdma -> R.string.cdma
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdma -> R.string.tdscdma
+                    this is CellSignalStrengthLte -> R.string.lte
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> R.string.nr
+                    else -> R.string.unknown
+                }
+            }
+        ),
         colors = listOf(
             0.0f to colorResource(id = R.color.signal_strength),
             1.0f to colorResource(id = R.color.signal_strength_1)
@@ -51,18 +64,6 @@ fun CellSignalStrengthCard(
         modifier = modifier,
         basicInfo = {
             with(cellSignalStrength) {
-                FormatText(R.string.type_format, stringResource(
-                    when {
-                        this is CellSignalStrengthGsm -> R.string.gsm
-                        this is CellSignalStrengthWcdma -> R.string.wcdma
-                        this is CellSignalStrengthCdma -> R.string.cdma
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdma -> R.string.tdscdma
-                        this is CellSignalStrengthLte -> R.string.lte
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> R.string.nr
-                        else -> R.string.unknown
-                    }
-                ))
-
                 CellSignalStrength(
                     cellSignalStrength = this,
                     simple = true,
