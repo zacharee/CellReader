@@ -13,6 +13,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
 import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.StateListener
+import dev.zwander.cellreader.data.data.TelephonyListener
 import dev.zwander.cellreader.data.data.TelephonyListenerCallback
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
@@ -103,6 +105,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun onDestroy() {
         super.onDestroy()
 
+        runBlocking {
+            betweenUtils.sendClear()
+        }
         cancel()
         CellModel.destroy()
         subs.removeOnSubscriptionsChangedListener(subsListener)
@@ -110,6 +115,48 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     @SuppressLint("MissingPermission")
     private fun init(subscriptions: List<Int>) {
+        with (CellModel) {
+            telephonies.putAll(
+                subscriptions.map {
+                    cellInfos[it] = listOf()
+                    strengthInfos[it] = listOf()
+                    subInfos[it] = subs.getActiveSubscriptionInfo(it)
+                    subIds.add(it)
+
+                    launch(Dispatchers.IO) {
+                        betweenUtils.sendSubscriptionInfo(it, SubscriptionInfoWrapper(subInfos[it]!!, this@UpdaterService))
+                        betweenUtils.sendNewSubId(it)
+                    }
+
+                    it to telephony.createForSubscriptionId(it).also { telephony ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            val callback = telephonyCallbacks[it] ?: TelephonyListener(it, this@UpdaterService).apply {
+                                telephonyCallbacks[it] = this
+                            }
+
+                            telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
+                        } else {
+                            val listener = telephonyListeners[it] ?: StateListener(it, this@UpdaterService).apply {
+                                telephonyListeners[it] = this
+                            }
+
+                            @Suppress("DEPRECATION")
+                            telephony.listen(
+                                listener,
+                                PhoneStateListener.LISTEN_SERVICE_STATE or
+                                        PhoneStateListener.LISTEN_CELL_INFO or
+                                        PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                            )
+                        }
+
+                        updateCellInfo(it, telephony.allCellInfo)
+                        updateSignal(it, telephony.signalStrength)
+                        updateServiceState(it, telephony.serviceState)
+                    }
+                }
+            )
+        }
+
         CellModel.create(
             telephony,
             subs,
@@ -210,11 +257,16 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 CellModel.primaryCell = defaultId
             }
 
+            launch(Dispatchers.IO) {
+                betweenUtils.sendPrimaryCell(defaultId)
+            }
+
             if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
                 currentList.clear()
                 currentList.addAll(newList)
 
                 launch(Dispatchers.Main) {
+                    betweenUtils.sendClear()
                     CellModel.destroy()
                     init(newIds)
                 }

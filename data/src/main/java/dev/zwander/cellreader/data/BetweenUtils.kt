@@ -26,6 +26,15 @@ class BetweenUtils private constructor(private val context: Context) {
         const val SUB_INFO_PATH = "/sub_info"
         const val SUB_INFO_KEY = "sub_info"
 
+        const val SUB_ID_PATH = "/sub_id"
+        const val SUB_ID_KEY = "sub_id"
+
+        const val CLEAR_PATH = "/clear"
+        const val CLEAR_KEY = "clear"
+
+        const val PRIMARY_CELL_PATH = "/primary_cell"
+        const val PRIMARY_CELL_KEY = "primary_cell"
+
         @SuppressLint("StaticFieldLeak")
         private var instance: BetweenUtils? = null
 
@@ -102,14 +111,132 @@ class BetweenUtils private constructor(private val context: Context) {
     private val cellMutex = Mutex()
     private val signalMutex = Mutex()
     private val stateMutex = Mutex()
-    private val subInfoMutext = Mutex()
+    private val subInfoMutex = Mutex()
+    private val subIdMutex = Mutex()
+    private val clearMutex = Mutex()
+    private val primaryMutex = Mutex()
     
     suspend fun sendCellInfos(subId: Int, wrapped: List<CellInfoWrapper>): DataItem {
-        cellMutex.withLock {
-            val json = gson.toJson(subId to wrapped)
-            val asset = Asset.createFromBytes(json.toByteArray())
-            val request = PutDataMapRequest.create(CELL_INFOS_PATH).apply {
-                dataMap.putAsset(CELL_INFOS_KEY, asset)
+        return cellMutex.sendInfo(
+            CELL_INFOS_PATH,
+            listOf(
+                CELL_INFOS_KEY to (subId to wrapped)
+            )
+        )
+    }
+
+    suspend fun retrieveCellInfos(dataItem: DataItem): Pair<Int, ArrayList<CellInfoWrapper>> {
+        return retrieveInfo(
+            dataItem,
+            CELL_INFOS_KEY,
+            Pair(0, arrayListOf())
+        )
+    }
+
+    suspend fun sendSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>): DataItem {
+        return signalMutex.sendInfo(
+            CELL_SIGNAL_STRENGTHS_PATH,
+            listOf(
+                CELL_SIGNAL_STRENGTHS_KEY to (subId to wrapped)
+            )
+        )
+    }
+
+    suspend fun retrieveSignalStrengths(dataItem: DataItem): Pair<Int, ArrayList<CellSignalStrengthWrapper>> {
+        return retrieveInfo(
+            dataItem,
+            CELL_SIGNAL_STRENGTHS_KEY,
+            Pair(0, arrayListOf())
+        )
+    }
+
+    suspend fun sendServiceState(subId: Int, wrapped: ServiceStateWrapper?): DataItem {
+        return stateMutex.sendInfo(
+            SERVICE_STATE_PATH,
+            listOf(
+                SERVICE_STATE_KEY to (subId to wrapped)
+            )
+        )
+    }
+
+    suspend fun retrieveServiceState(dataItem: DataItem): Pair<Int, ServiceStateWrapper?>? {
+        return retrieveInfo(
+            dataItem,
+            SERVICE_STATE_KEY,
+            null
+        )
+    }
+
+    suspend fun sendSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper): DataItem {
+        return subInfoMutex.sendInfo(
+            SUB_INFO_PATH,
+            listOf(
+                SUB_INFO_KEY to (subId to wrapped)
+            )
+        )
+    }
+
+    suspend fun retrieveSubscriptionInfo(dataItem: DataItem): Pair<Int, SubscriptionInfoWrapper?> {
+        return retrieveInfo(
+            dataItem,
+            SUB_INFO_KEY,
+            Pair(0, null)
+        )
+    }
+
+    suspend fun sendNewSubId(subId: Int): DataItem {
+        return subIdMutex.sendInfo(
+            SUB_ID_PATH,
+            listOf(
+                SUB_ID_KEY to subId
+            )
+        )
+    }
+
+    suspend fun retrieveNewSubId(dataItem: DataItem): Int {
+        return retrieveInfo(
+            dataItem,
+            SUB_ID_KEY,
+            0
+        )
+    }
+
+    suspend fun sendClear(): DataItem {
+        return clearMutex.sendInfo(
+            CLEAR_PATH,
+            listOf(
+                CLEAR_KEY to System.currentTimeMillis()
+            )
+        )
+    }
+
+    suspend fun sendPrimaryCell(subId: Int): DataItem {
+        return primaryMutex.sendInfo(
+            PRIMARY_CELL_PATH,
+            listOf(
+                PRIMARY_CELL_KEY to subId
+            )
+        )
+    }
+
+    suspend fun retrievePrimaryCell(dataItem: DataItem): Int {
+        return retrieveInfo(
+            dataItem,
+            PRIMARY_CELL_KEY,
+            0
+        )
+    }
+
+    private suspend fun Mutex.sendInfo(path: String, pairs: List<Pair<String, Any>>): DataItem {
+        withLock {
+            val mapped = pairs.map {
+                it.first to Asset.createFromBytes(gson.toJson(it.second).toByteArray())
+            }
+
+            val request = PutDataMapRequest.create(path).apply {
+                mapped.forEach { (key, item) ->
+                    dataMap.putAsset(key, item)
+                }
             }.asPutDataRequest()
                 .setUrgent()
 
@@ -117,117 +244,30 @@ class BetweenUtils private constructor(private val context: Context) {
         }
     }
 
-    suspend fun retrieveCellInfos(dataItem: DataItem): Pair<Int, ArrayList<CellInfoWrapper>> {
+    private suspend inline fun <reified T : Any?> retrieveInfo(dataItem: DataItem, key: String, empty: T): T {
         val asset = try {
             DataMapItem.fromDataItem(dataItem)
                 .dataMap
-                .getAsset(CELL_INFOS_KEY)
+                .getAsset(key)
         } catch (e: IllegalArgumentException) {
             Log.e("CellReader", "error", e)
             null
         } catch (e: IllegalStateException) {
             Log.e("CellReader", "error", e)
             null
-        } ?: return Pair(0, arrayListOf())
+        } ?: return empty
 
         val response = dataClient.getFdForAsset(asset).await()
         val json = response.inputStream.bufferedReader().use { input -> input.readText() }
+
         return try {
-            gson.fromJson<Pair<Int, ArrayList<CellInfoWrapper>>>(
+            gson.fromJson(
                 json,
-                object : TypeToken<Pair<Int, ArrayList<CellInfoWrapper>>>() {}.type
-            ) ?: Pair(0, arrayListOf())
+                object : TypeToken<T>() {}.type
+            ) ?: empty
         } catch (e: Exception) {
             Log.e("CellReader", "error", e)
-            Pair(0, arrayListOf())
-        }
-    }
-
-    suspend fun sendSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>): DataItem {
-        signalMutex.withLock {
-            val json = gson.toJson(subId to wrapped)
-            val asset = Asset.createFromBytes(json.toByteArray())
-            val request = PutDataMapRequest.create(CELL_SIGNAL_STRENGTHS_PATH).apply {
-                dataMap.putAsset(CELL_SIGNAL_STRENGTHS_KEY, asset)
-            }.asPutDataRequest()
-
-            return dataClient.putDataItem(request).await()
-        }
-    }
-
-    suspend fun retrieveSignalStrengths(dataItem: DataItem): Pair<Int, ArrayList<CellSignalStrengthWrapper>> {
-        val asset = try {
-            DataMapItem.fromDataItem(dataItem)
-                .dataMap
-                .getAsset(CELL_SIGNAL_STRENGTHS_KEY)
-        } catch (e: IllegalArgumentException) {
-            Log.e("CellReader", "error", e)
-            null
-        } catch (e: IllegalStateException) {
-            Log.e("CellReader", "error", e)
-            null
-        } ?: return Pair(0, arrayListOf())
-
-        val response = dataClient.getFdForAsset(asset).await()
-        val json = response.inputStream.bufferedReader().use { input -> input.readText() }
-        return try {
-            gson.fromJson<Pair<Int, ArrayList<CellSignalStrengthWrapper>>>(
-                json,
-                object : TypeToken<Pair<Int, ArrayList<CellSignalStrengthWrapper>>>() {}.type
-            ) ?: Pair(0, arrayListOf())
-        } catch (e: Exception) {
-            Log.e("CellReader", "error", e)
-            Pair(0, arrayListOf())
-        }
-    }
-
-    suspend fun sendServiceState(subId: Int, wrapped: ServiceStateWrapper?): DataItem {
-        stateMutex.withLock {
-            val json = gson.toJson(subId to wrapped)
-            val asset = Asset.createFromBytes(json.toByteArray())
-            val request = PutDataMapRequest.create(SERVICE_STATE_PATH).apply {
-                dataMap.putAsset(SERVICE_STATE_KEY, asset)
-            }.asPutDataRequest()
-
-            return dataClient.putDataItem(request).await()
-        }
-    }
-
-    suspend fun retrieveServiceState(dataItem: DataItem): Pair<Int, ServiceStateWrapper?>? {
-        val asset = try {
-            DataMapItem.fromDataItem(dataItem)
-                .dataMap
-                .getAsset(SERVICE_STATE_KEY)
-        } catch (e: IllegalArgumentException) {
-            Log.e("CellReader", "error", e)
-            null
-        } catch (e: IllegalStateException) {
-            Log.e("CellReader", "error", e)
-            null
-        } ?: return null
-
-        val response = dataClient.getFdForAsset(asset).await()
-        val json = response.inputStream.bufferedReader().use { input -> input.readText() }
-        return try {
-            gson.fromJson<Pair<Int, ServiceStateWrapper?>>(
-                json,
-                object : TypeToken<Pair<Int, ServiceStateWrapper?>>() {}.type
-            )
-        } catch (e: Exception) {
-            Log.e("CellReader", "error", e)
-            null
-        }
-    }
-
-    suspend fun sendSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper): DataItem {
-        subInfoMutext.withLock {
-            val json = gson.toJson(subId to wrapped)
-            val asset = Asset.createFromBytes(json.toByteArray())
-            val request = PutDataMapRequest.create(SUB_INFO_PATH).apply {
-                dataMap.putAsset(SUB_INFO_KEY, asset)
-            }.asPutDataRequest()
-
-            return dataClient.putDataItem(request).await()
+            empty
         }
     }
 }

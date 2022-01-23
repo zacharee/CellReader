@@ -11,7 +11,7 @@ import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 object CellModelWear {
     var primaryCell by mutableStateOf(0)
 
-    private val subIds = mutableStateListOf<Int>()
+    val subIds = mutableStateListOf<Int>()
     val cellInfos = mutableStateMapOf<Int, List<CellInfoWrapper>>()
     val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrengthWrapper>>()
 //    val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
@@ -22,16 +22,15 @@ object CellModelWear {
         subIds.sortedWith(SubsComparator(primaryCell))
     }
 
-    private fun clear() {
+    fun clear() {
         primaryCell = 0
 
         subIds.clear()
         cellInfos.clear()
         strengthInfos.clear()
 //        signalStrengths.clear()
-//        subInfos.clear()
+        subInfos.clear()
         serviceStates.clear()
-//        telephonies.clear()
     }
 }
 

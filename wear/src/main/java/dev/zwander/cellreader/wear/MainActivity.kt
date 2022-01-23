@@ -11,11 +11,15 @@ import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.wear.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+import java.util.*
 
 class MainActivity : Activity(), CoroutineScope by MainScope() {
-    private var loadCellInfosJob: Job? = null
-    private var loadCellSignalStrengthsJob: Job? = null
-    private var loadServiceStateJob: Job? = null
+    private val loadCellInfosJobs = Collections.synchronizedList(arrayListOf<Job>())
+    private val loadCellSignalStrengthsJobs = Collections.synchronizedList(arrayListOf<Job>())
+    private val loadServiceStateJobs = Collections.synchronizedList(arrayListOf<Job>())
+    private val loadSubInfoJobs = Collections.synchronizedList(arrayListOf<Job>())
+    private val addSubIdJobs = Collections.synchronizedList(arrayListOf<Job>())
+    private var updatePrimaryCellJob: Job? = null
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
@@ -34,6 +38,18 @@ class MainActivity : Activity(), CoroutineScope by MainScope() {
                 }
                 BetweenUtils.SERVICE_STATE_PATH -> {
                     updateServiceState(frozen)
+                }
+                BetweenUtils.SUB_INFO_PATH -> {
+                    updateSubInfo(frozen)
+                }
+                BetweenUtils.SUB_ID_PATH -> {
+                    addSubId(frozen)
+                }
+                BetweenUtils.CLEAR_PATH -> {
+                    clear()
+                }
+                BetweenUtils.PRIMARY_CELL_PATH -> {
+                    updatePrimaryCell(frozen)
                 }
             }
         }
@@ -58,6 +74,15 @@ class MainActivity : Activity(), CoroutineScope by MainScope() {
                         contains(BetweenUtils.SERVICE_STATE_PATH) -> {
                             updateServiceState(it.freeze())
                         }
+                        contains(BetweenUtils.SUB_INFO_PATH) -> {
+                            updateSubInfo(it.freeze())
+                        }
+                        contains(BetweenUtils.SUB_ID_PATH) -> {
+                            addSubId(it.freeze())
+                        }
+                        contains(BetweenUtils.PRIMARY_CELL_PATH) -> {
+                            updatePrimaryCell(it.freeze())
+                        }
                     }
                 }
             }
@@ -72,29 +97,87 @@ class MainActivity : Activity(), CoroutineScope by MainScope() {
     }
 
     private fun updateCellInfos(item: DataItem) {
-        loadCellInfosJob?.cancel()
-        loadCellInfosJob = launch(Dispatchers.IO) {
-            val cellInfos = betweenUtils.retrieveCellInfos(item)
+        loadCellInfosJobs.add(
+            launch(Dispatchers.IO) {
+                val cellInfos = betweenUtils.retrieveCellInfos(item)
 
-            CellModelWear.cellInfos[cellInfos.first] = cellInfos.second
-        }
+                withContext(Dispatchers.Main) {
+                    CellModelWear.cellInfos[cellInfos.first] = cellInfos.second
+                }
+
+                coroutineContext[Job]?.let { loadCellInfosJobs.remove(it) }
+            }
+        )
     }
 
     private fun updateSignalStrengths(item: DataItem) {
-        loadCellSignalStrengthsJob?.cancel()
-        loadCellSignalStrengthsJob = launch(Dispatchers.IO) {
-            val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
+        loadCellSignalStrengthsJobs.add(
+            launch(Dispatchers.IO) {
+                val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
-            CellModelWear.strengthInfos[signalStrengths.first] = signalStrengths.second
-        }
+                withContext(Dispatchers.Main) {
+                    CellModelWear.strengthInfos[signalStrengths.first] = signalStrengths.second
+                }
+
+                coroutineContext[Job]?.let { loadCellSignalStrengthsJobs.remove(it) }
+            }
+        )
     }
 
     private fun updateServiceState(item: DataItem) {
-        loadServiceStateJob?.cancel()
-        loadServiceStateJob = launch(Dispatchers.IO) {
-            val serviceState = betweenUtils.retrieveServiceState(item) ?: return@launch
+        loadServiceStateJobs.add(
+            launch(Dispatchers.IO) {
+                val serviceState = betweenUtils.retrieveServiceState(item) ?: return@launch
 
-            CellModelWear.serviceStates[serviceState.first] = serviceState.second
+                withContext(Dispatchers.Main) {
+                    CellModelWear.serviceStates[serviceState.first] = serviceState.second
+                }
+
+                coroutineContext[Job]?.let { loadServiceStateJobs.remove(it) }
+            }
+        )
+    }
+
+    private fun updateSubInfo(item: DataItem) {
+        loadSubInfoJobs.add(
+            launch(Dispatchers.IO) {
+                val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
+
+                withContext(Dispatchers.Main) {
+                    CellModelWear.subInfos[subInfo.first] = subInfo.second
+                }
+
+                coroutineContext[Job]?.let { loadSubInfoJobs.remove(it) }
+            }
+        )
+    }
+
+    private fun addSubId(item: DataItem) {
+        addSubIdJobs.add(
+            launch(Dispatchers.IO) {
+                val subId = betweenUtils.retrieveNewSubId(item)
+
+                withContext(Dispatchers.Main) {
+                    CellModelWear.subIds.add(subId)
+                }
+
+                coroutineContext[Job]?.let { addSubIdJobs.remove(it) }
+            }
+        )
+    }
+
+    private fun updatePrimaryCell(item: DataItem) {
+        updatePrimaryCellJob?.cancel()
+        updatePrimaryCellJob = launch(Dispatchers.IO) {
+            val primaryCell = betweenUtils.retrievePrimaryCell(item)
+
+            withContext(Dispatchers.Main) {
+                CellModelWear.primaryCell = primaryCell
+            }
         }
+    }
+
+    private fun clear() {
+        CellModelWear.clear()
     }
 }
