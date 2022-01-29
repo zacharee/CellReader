@@ -106,7 +106,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         super.onDestroy()
 
         runBlocking {
-            betweenUtils.sendClear()
+            betweenUtils.queueClear()
         }
         cancel()
         CellModel.destroy()
@@ -124,8 +124,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     subIds.add(it)
 
                     launch(Dispatchers.IO) {
-                        betweenUtils.sendSubscriptionInfo(it, SubscriptionInfoWrapper(subInfos[it]!!, this@UpdaterService))
-                        betweenUtils.sendNewSubId(it)
+                        betweenUtils.queueSubscriptionInfo(it, SubscriptionInfoWrapper(subInfos[it]!!, this@UpdaterService))
+                        betweenUtils.queueNewSubId(it)
                     }
 
                     it to telephony.createForSubscriptionId(it).also { telephony ->
@@ -186,7 +186,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
 
             launch(Dispatchers.IO) {
-                betweenUtils.sendCellInfos(subId, wrapped)
+                betweenUtils.queueCellInfos(subId, wrapped)
             }
         }
     }
@@ -227,7 +227,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
 
         launch(Dispatchers.IO) {
-            betweenUtils.sendSignalStrengths(subId, wrapped)
+            betweenUtils.queueSignalStrengths(subId, wrapped)
         }
     }
 
@@ -240,7 +240,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
 
             launch(Dispatchers.IO) {
-                betweenUtils.sendServiceState(subId, wrapped)
+                betweenUtils.queueServiceState(subId, wrapped)
             }
         }
     }
@@ -258,7 +258,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
 
             launch(Dispatchers.IO) {
-                betweenUtils.sendPrimaryCell(defaultId)
+                betweenUtils.queuePrimaryCell(defaultId)
             }
 
             if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
@@ -266,7 +266,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 currentList.addAll(newList)
 
                 launch(Dispatchers.Main) {
-                    betweenUtils.sendClear()
+                    betweenUtils.queueClear()
                     CellModel.destroy()
                     init(newIds)
                 }
@@ -277,7 +277,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     }
 
                     launch(Dispatchers.IO) {
-                        betweenUtils.sendSubscriptionInfo(subInfo.subscriptionId, SubscriptionInfoWrapper(subInfo, this@UpdaterService))
+                        betweenUtils.queueSubscriptionInfo(subInfo.subscriptionId, SubscriptionInfoWrapper(subInfo, this@UpdaterService))
                     }
                 }
             }

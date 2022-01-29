@@ -2,15 +2,21 @@ package dev.zwander.cellreader.data
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.google.android.gms.wearable.*
 import com.google.gson.reflect.TypeToken
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import io.gsonfire.GsonFireBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
+import java.util.concurrent.ConcurrentHashMap
 
 class BetweenUtils private constructor(private val context: Context) {
     companion object {
@@ -108,6 +114,8 @@ class BetweenUtils private constructor(private val context: Context) {
 
     private val dataClient = Wearable.getDataClient(context)
 
+    private val queueMutex = Mutex()
+
     private val cellMutex = Mutex()
     private val signalMutex = Mutex()
     private val stateMutex = Mutex()
@@ -115,9 +123,18 @@ class BetweenUtils private constructor(private val context: Context) {
     private val subIdMutex = Mutex()
     private val clearMutex = Mutex()
     private val primaryMutex = Mutex()
+
+    private val sendQueue = ConcurrentHashMap<Mutex, suspend () -> Unit>()
+    private var lastSendTime = 0L
     
-    suspend fun sendCellInfos(subId: Int, wrapped: List<CellInfoWrapper>): DataItem {
-        return cellMutex.sendInfo(
+    suspend fun queueCellInfos(subId: Int, wrapped: List<CellInfoWrapper>) {
+        enqueue(cellMutex) {
+            sendCellInfos(subId, wrapped)
+        }
+    }
+
+    private suspend fun sendCellInfos(subId: Int, wrapped: List<CellInfoWrapper>) {
+        cellMutex.sendInfo(
             CELL_INFOS_PATH,
             listOf(
                 CELL_INFOS_KEY to (subId to wrapped)
@@ -133,8 +150,14 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun sendSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>): DataItem {
-        return signalMutex.sendInfo(
+    suspend fun queueSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>) {
+        enqueue(subInfoMutex) {
+            sendSignalStrengths(subId, wrapped)
+        }
+    }
+
+    private suspend fun sendSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>) {
+        signalMutex.sendInfo(
             CELL_SIGNAL_STRENGTHS_PATH,
             listOf(
                 CELL_SIGNAL_STRENGTHS_KEY to (subId to wrapped)
@@ -150,8 +173,14 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun sendServiceState(subId: Int, wrapped: ServiceStateWrapper?): DataItem {
-        return stateMutex.sendInfo(
+    suspend fun queueServiceState(subId: Int, wrapped: ServiceStateWrapper?) {
+        enqueue(stateMutex) {
+            sendServiceState(subId, wrapped)
+        }
+    }
+
+    private suspend fun sendServiceState(subId: Int, wrapped: ServiceStateWrapper?) {
+        stateMutex.sendInfo(
             SERVICE_STATE_PATH,
             listOf(
                 SERVICE_STATE_KEY to (subId to wrapped)
@@ -167,8 +196,14 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun sendSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper): DataItem {
-        return subInfoMutex.sendInfo(
+    suspend fun queueSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper) {
+        enqueue(subInfoMutex) {
+            sendSubscriptionInfo(subId, wrapped)
+        }
+    }
+
+    private suspend fun sendSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper) {
+        subInfoMutex.sendInfo(
             SUB_INFO_PATH,
             listOf(
                 SUB_INFO_KEY to (subId to wrapped)
@@ -184,8 +219,14 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun sendNewSubId(subId: Int): DataItem {
-        return subIdMutex.sendInfo(
+    suspend fun queueNewSubId(subId: Int) {
+        enqueue(subIdMutex) {
+            sendNewSubId(subId)
+        }
+    }
+
+    private suspend fun sendNewSubId(subId: Int) {
+        subIdMutex.sendInfo(
             SUB_ID_PATH,
             listOf(
                 SUB_ID_KEY to subId
@@ -201,8 +242,14 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun sendClear(): DataItem {
-        return clearMutex.sendInfo(
+    suspend fun queueClear() {
+        enqueue(clearMutex) {
+            sendClear()
+        }
+    }
+
+    private suspend fun sendClear() {
+        clearMutex.sendInfo(
             CLEAR_PATH,
             listOf(
                 CLEAR_KEY to System.currentTimeMillis()
@@ -210,8 +257,14 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun sendPrimaryCell(subId: Int): DataItem {
-        return primaryMutex.sendInfo(
+    suspend fun queuePrimaryCell(subId: Int) {
+        enqueue(primaryMutex) {
+            sendPrimaryCell(subId)
+        }
+    }
+
+    private suspend fun sendPrimaryCell(subId: Int) {
+        primaryMutex.sendInfo(
             PRIMARY_CELL_PATH,
             listOf(
                 PRIMARY_CELL_KEY to subId
@@ -225,6 +278,27 @@ class BetweenUtils private constructor(private val context: Context) {
             PRIMARY_CELL_KEY,
             0
         )
+    }
+
+    private suspend fun enqueue(mutex: Mutex, block: suspend () -> Unit) {
+        queueMutex.withLock {
+            sendQueue[mutex] = block
+
+            dispatch()
+        }
+    }
+
+    private suspend fun dispatch() {
+        val currentTime = System.currentTimeMillis()
+
+        if (currentTime - lastSendTime > 1000L) {
+            lastSendTime = currentTime
+
+            sendQueue.forEach { (_, block) ->
+                block()
+            }
+            sendQueue.clear()
+        }
     }
 
     private suspend fun Mutex.sendInfo(path: String, pairs: List<Pair<String, Any>>): DataItem {
