@@ -118,9 +118,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             val cellInfos = betweenUtils.retrieveCellInfos(item)
 
             withContext(Dispatchers.Main) {
-                cellInfos.forEach { (t, u) ->
-                    CellModelWear.cellInfos[t] = u
-                }
+                CellModelWear.cellInfos.putAll(cellInfos)
             }
         }
     }
@@ -131,9 +129,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
             withContext(Dispatchers.Main) {
-                signalStrengths.forEach { (t, u) ->
-                    CellModelWear.strengthInfos[t] = u
-                }
+                CellModelWear.strengthInfos.putAll(signalStrengths)
             }
         }
     }
@@ -144,9 +140,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             val serviceState = betweenUtils.retrieveServiceState(item)
 
             withContext(Dispatchers.Main) {
-                serviceState.forEach { (t, u) ->
-                    CellModelWear.serviceStates[t] = u
-                }
+                CellModelWear.serviceStates.putAll(serviceState)
             }
         }
     }
@@ -157,9 +151,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
 
             withContext(Dispatchers.Main) {
-                subInfo.forEach { (t, u) ->
-                    CellModelWear.subInfos[t] = u
-                }
+                CellModelWear.subInfos.putAll(subInfo)
             }
         }
     }
