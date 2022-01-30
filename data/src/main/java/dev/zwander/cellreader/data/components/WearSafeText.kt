@@ -1,12 +1,11 @@
-package dev.zwander.cellreader.data.util
+package dev.zwander.cellreader.data.components
 
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -16,12 +15,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import dev.zwander.cellreader.data.components.WearSafeText
+import dev.zwander.cellreader.data.util.isWear
 
 @Composable
-fun FormatText(
-    textId: Int,
-    vararg textFormat: Any,
+fun WearSafeText(
+    text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -38,17 +36,20 @@ fun FormatText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
-    val string = if (textFormat.isEmpty()) {
-        stringResource(id = textId)
-    } else {
-        stringResource(id = textId, *textFormat)
+    val context = LocalContext.current
+    val isWear = remember {
+        context.isWear
     }
 
-    WearSafeText(
-        string,
-        modifier, color, fontSize, fontStyle,
-        fontWeight, fontFamily, letterSpacing, textDecoration,
-        textAlign, lineHeight, overflow, softWrap, maxLines,
-        onTextLayout, style
-    )
+    if (isWear) {
+        androidx.wear.compose.material.Text(
+            text, modifier, color, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing, textDecoration, textAlign,
+            lineHeight, overflow, softWrap, maxLines, onTextLayout, style
+        )
+    } else {
+        androidx.compose.material.Text(
+            text, modifier, color, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing, textDecoration, textAlign,
+            lineHeight, overflow, softWrap, maxLines, onTextLayout, style
+        )
+    }
 }

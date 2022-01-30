@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import dev.zwander.cellreader.data.layouts.cellsignalstrength.CellSignalStrength
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.wrappers.*
 
@@ -19,7 +20,7 @@ fun SignalStrength(
     signalStrength: SignalStrength
 ) {
     with (signalStrength) {
-        Text(
+        WearSafeText(
             text = stringResource(id = R.string.signal_strength),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center

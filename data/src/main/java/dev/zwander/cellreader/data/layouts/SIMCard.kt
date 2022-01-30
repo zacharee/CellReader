@@ -98,14 +98,14 @@ fun CellModelBase.SIMCard(
                             Image(bitmap = it, contentDescription = null)
                         }
                     }
-                    Text(text = "${subInfo?.carrierName}")
+                    WearSafeText(text = "${subInfo?.carrierName}")
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onShowingCells(!showingCells) }) {
+                    WearSafeIconButton(onClick = { onShowingCells(!showingCells) }) {
                         val rotation by animateFloatAsState(
                             targetValue = if (showingCells) 180f else 0f,
                             animationSpec = tween(
@@ -116,7 +116,7 @@ fun CellModelBase.SIMCard(
                             )
                         )
 
-                        Icon(
+                        WearSafeIcon(
                             painter = painterResource(id = R.drawable.arrow_down),
                             contentDescription = null,
                             modifier = Modifier
@@ -260,7 +260,8 @@ fun CellModelBase.SIMCard(
         androidx.wear.compose.material.Card(
             onClick = {},
             modifier = modifier,
-            backgroundPainter = ColorPainter(Color.Transparent)
+            backgroundPainter = ColorPainter(Color.Transparent),
+            contentPadding = PaddingValues(0.dp)
         ) {
             contents()
         }

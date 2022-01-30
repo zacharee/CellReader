@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.PaddedDivider
+import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.duplexModeToString
 import dev.zwander.cellreader.data.util.onNegAvail
@@ -22,7 +23,7 @@ fun ServiceState(
     serviceState: ServiceStateWrapper
 ) {
     with (serviceState) {
-        Text(
+        WearSafeText(
             text = stringResource(id = R.string.service_state),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
@@ -116,7 +117,7 @@ fun ServiceState(
                 .padding(start = 16.dp, end = 16.dp)
         )
 
-        Text(
+        WearSafeText(
             text = stringResource(id = R.string.network_registrations),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center

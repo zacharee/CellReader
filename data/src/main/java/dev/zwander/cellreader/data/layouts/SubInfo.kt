@@ -14,6 +14,7 @@ import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.PaddedDivider
+import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 
@@ -28,7 +29,7 @@ fun SubInfo(
                 .padding(start = 16.dp, end = 16.dp)
         )
 
-        Text(
+        WearSafeText(
             text = stringResource(id = R.string.subscription_info),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center

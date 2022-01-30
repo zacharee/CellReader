@@ -14,6 +14,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.wrappers.UiccAccessRuleWrapper
 
@@ -21,7 +22,7 @@ import dev.zwander.cellreader.data.wrappers.UiccAccessRuleWrapper
 fun AccessRules(
     accessRules: List<UiccAccessRuleWrapper>
 ) {
-    Text(
+    WearSafeText(
         text = stringResource(id = R.string.access_rules),
         modifier = Modifier.fillMaxWidth()
     )

@@ -21,7 +21,7 @@ fun LevelIndicator(level: Int, dBm: Int, type: String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box {
-            Text(
+            WearSafeText(
                 text = type.first().toString(),
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
@@ -47,7 +47,7 @@ fun LevelIndicator(level: Int, dBm: Int, type: String) {
             )
         }
 
-        Text(
+        WearSafeText(
             text = "$dBm dBm",
             modifier = Modifier.width(64.dp),
             maxLines = 1,

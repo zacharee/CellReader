@@ -143,6 +143,7 @@ fun ExpanderSignalCard(
                 androidx.wear.compose.material.Card(
                     onClick = {},
                     backgroundPainter = ColorPainter(Color.Transparent),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     contents()
                 }

@@ -1,6 +1,5 @@
 package dev.zwander.cellreader.data.components
 
-import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,11 +16,11 @@ fun LinkIcon(
 ) {
     val context = LocalContext.current
 
-    IconButton(
+    WearSafeIconButton(
         onClick = { context.launchUrl(link) },
         modifier = modifier
     ) {
-        Icon(
+        WearSafeIcon(
             painter = icon,
             contentDescription = desc
         )

@@ -23,8 +23,7 @@ import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import dev.zwander.cellreader.BuildConfig
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.components.Expander
-import dev.zwander.cellreader.data.components.LinkIcon
+import dev.zwander.cellreader.data.components.*
 import tk.zwander.patreonsupportersretrieval.data.SupporterInfo
 import tk.zwander.patreonsupportersretrieval.util.DataParser
 import tk.zwander.patreonsupportersretrieval.util.launchUrl
@@ -149,27 +148,27 @@ private fun BoxScope.BottomBar(
 
                 Spacer(Modifier.size(16.dp))
 
-                IconButton(
+                WearIconButton(
                     onClick = {
                         onDialogChange(
                             if (whichDialog == BottomDialogPage.SUPPORTERS) null else BottomDialogPage.SUPPORTERS
                         )
                     },
                 ) {
-                    Icon(
+                    WearSafeIcon(
                         painter = painterResource(id = R.drawable.heart),
                         contentDescription = stringResource(id = R.string.supporters)
                     )
                 }
 
-                IconButton(
+                WearSafeIconButton(
                     onClick = {
                         onDialogChange(
                             if (whichDialog == BottomDialogPage.ABOUT) null else BottomDialogPage.ABOUT
                         )
                     }
                 ) {
-                    Icon(
+                    WearSafeIcon(
                         painter = painterResource(id = R.drawable.about),
                         contentDescription = stringResource(id = R.string.about)
                     )
@@ -217,7 +216,7 @@ private fun BoxScope.BottomBar(
                                     .padding(8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = item.name)
+                                WearSafeText(text = item.name)
                             }
                         }
                     }
@@ -235,7 +234,7 @@ private fun BoxScope.BottomBar(
                         .padding(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
+                    WearSafeText(
                         text = stringResource(id = R.string.app_name),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -243,7 +242,7 @@ private fun BoxScope.BottomBar(
 
                     Spacer(Modifier.size(4.dp))
 
-                    Text(
+                    WearSafeText(
                         text = "v${BuildConfig.VERSION_NAME}"
                     )
                 }

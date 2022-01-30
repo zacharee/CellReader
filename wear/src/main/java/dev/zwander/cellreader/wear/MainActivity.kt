@@ -6,20 +6,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.ScalingLazyColumn
-import androidx.wear.compose.material.itemsIndexed
-import androidx.wear.compose.material.rememberScalingLazyListState
+import androidx.wear.compose.material.*
 import com.google.android.gms.wearable.*
 import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.data.CellModel
@@ -79,84 +79,92 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         dataClient.addListener(listener)
 
         setContent {
-            val state = rememberScalingLazyListState()
+            CellReaderTheme {
+                androidx.compose.material.LocalTextStyle.provides(LocalTextStyle.current)
+                androidx.compose.material.LocalContentColor.provides(LocalContentColor.current)
+                androidx.compose.material.LocalContentAlpha.provides(LocalContentAlpha.current)
 
-            val showingCells = remember {
-                mutableStateMapOf<Int, Boolean>()
-            }
-            val expanded = remember {
-                mutableStateMapOf<String, Boolean>()
-            }
+                val state = rememberScalingLazyListState()
 
-            with (CellModelWear) {
-                ScalingLazyColumn(
-                    state = state,
-                    modifier = Modifier.fillMaxHeight()
-                ) {
-                    sortedSubIds.forEachIndexed { subIndex, t ->
-                        item(t) {
-                            SIMCard(
-                                subInfo = subInfos[t],
-                                expanded = expanded[t.toString()] ?: false,
-                                onExpand = { expanded[t.toString()] = it },
-                                showingCells = showingCells[t] ?: true,
-                                onShowingCells = { showingCells[t] = it },
-                                modifier = Modifier
-                                    .padding(bottom = 8.dp),
-                                wear = true,
-                            )
-                        }
+                val showingCells = remember {
+                    mutableStateMapOf<Int, Boolean>()
+                }
+                val expanded = remember {
+                    mutableStateMapOf<String, Boolean>()
+                }
 
-                        val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
-                        val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
-                        val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
-
-                        cellInfos[t]?.let { cellInfo ->
-                            itemsIndexed(cellInfo, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                                val isFinal = index == lastCellIndex && strengthsEmpty
-
-                                AnimatedVisibility(
-                                    visible = showingCells[t] != false,
-                                    modifier = Modifier
-                                        .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                    enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
-                                    exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
-                                ) {
-                                    val key = remember(item.cellIdentity) {
-                                        "$t:${item.cellIdentity}"
-                                    }
-
-                                    SignalCard(
-                                        cellInfo = item,
-                                        expanded = expanded[key] ?: false,
-                                        isFinal = isFinal,
-                                        onExpand = { expanded[key] = it },
+                Box {
+                    with (CellModelWear) {
+                        ScalingLazyColumn(
+                            state = state,
+                            modifier = Modifier.fillMaxHeight()
+                        ) {
+                            sortedSubIds.forEachIndexed { subIndex, t ->
+                                item(t) {
+                                    SIMCard(
+                                        subInfo = subInfos[t],
+                                        expanded = expanded[t.toString()] ?: false,
+                                        onExpand = { expanded[t.toString()] = it },
+                                        showingCells = showingCells[t] ?: true,
+                                        onShowingCells = { showingCells[t] = it },
                                         modifier = Modifier
-                                            .fillMaxWidth(),
-                                        wear = true
+                                            .padding(bottom = 8.dp),
+                                        wear = true,
                                     )
                                 }
-                            }
-                        }
 
-                        strengthInfos[t]?.let { strengthInfo ->
-                            itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
-                                val isFinal = index == lastStrengthIndex
+                                val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
+                                val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
+                                val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
 
-                                AnimatedVisibility(
-                                    visible = showingCells[t] != false,
-                                    modifier = Modifier
-                                        .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                    enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
-                                    exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
-                                ) {
-                                    CellSignalStrengthCard(
-                                        cellSignalStrength = item,
-                                        isFinal = isFinal,
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        wear = true
-                                    )
+                                cellInfos[t]?.let { cellInfo ->
+                                    itemsIndexed(cellInfo, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                                        val isFinal = index == lastCellIndex && strengthsEmpty
+
+                                        AnimatedVisibility(
+                                            visible = showingCells[t] != false,
+                                            modifier = Modifier
+                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                            enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                            exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                                        ) {
+                                            val key = remember(item.cellIdentity) {
+                                                "$t:${item.cellIdentity}"
+                                            }
+
+                                            SignalCard(
+                                                cellInfo = item,
+                                                expanded = expanded[key] ?: false,
+                                                isFinal = isFinal,
+                                                onExpand = { expanded[key] = it },
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                wear = true
+                                            )
+                                        }
+                                    }
+                                }
+
+                                strengthInfos[t]?.let { strengthInfo ->
+                                    itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
+                                        val isFinal = index == lastStrengthIndex
+
+                                        AnimatedVisibility(
+                                            visible = showingCells[t] != false,
+                                            modifier = Modifier
+                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                            enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                            exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                                        ) {
+                                            CellSignalStrengthCard(
+                                                cellSignalStrength = item,
+                                                isFinal = isFinal,
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                wear = true
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -235,7 +243,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private fun updateServiceState(item: DataItem) {
         loadServiceStateJobs.add(
             launch(Dispatchers.IO) {
-                val serviceState = betweenUtils.retrieveServiceState(item) ?: return@launch
+                val serviceState = betweenUtils.retrieveServiceState(item)
 
                 withContext(Dispatchers.Main) {
                     serviceState.forEach { (t, u) ->

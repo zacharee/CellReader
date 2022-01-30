@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -45,7 +46,7 @@ fun Expander(
                 )
             )
 
-            Icon(
+            WearSafeIcon(
                 painter = painterResource(id = R.drawable.arrow_down),
                 contentDescription = null,
                 modifier = Modifier.rotate(rotation)
@@ -66,6 +67,7 @@ fun Expander(
             onClick = {},
             modifier = modifier,
             backgroundPainter = ColorPainter(Color.Transparent),
+            contentPadding = PaddingValues(0.dp)
         ) {
             contents()
         }

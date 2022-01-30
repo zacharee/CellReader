@@ -11,9 +11,9 @@ import dev.zwander.cellreader.data.R
 @Composable
 fun CellReaderTheme(content: @Composable () -> Unit) {
     val colors = darkColors(
-        primary = colorResource(id = dev.zwander.cellreader.R.color.purple_500),
-        primaryVariant = colorResource(id = dev.zwander.cellreader.R.color.purple_200),
-        secondary = colorResource(id = dev.zwander.cellreader.R.color.teal_200),
+        primary = colorResource(id = R.color.purple_500),
+        primaryVariant = colorResource(id = R.color.purple_200),
+        secondary = colorResource(id = R.color.teal_200),
         surface = colorResource(id = R.color.surface),
         background = colorResource(id = R.color.background)
     )
