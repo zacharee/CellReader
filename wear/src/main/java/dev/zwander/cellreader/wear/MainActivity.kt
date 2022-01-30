@@ -201,9 +201,6 @@ fun MainContent() {
         vignette = {
             Vignette(vignettePosition = VignettePosition.TopAndBottom)
         },
-        positionIndicator = {
-            PositionIndicator(scalingLazyListState = state)
-        }
     ) {
         with(CellModelWear) {
             Crossfade(targetState = sortedSubIds.isEmpty()) {
