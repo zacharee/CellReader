@@ -218,7 +218,8 @@ fun MainContent() {
                     } else {
                         ScalingLazyColumn(
                             state = state,
-                            modifier = Modifier.fillMaxHeight()
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.spacedBy(0.dp)
                         ) {
                             sortedSubIds.forEachIndexed { subIndex, t ->
                                 item(t) {
