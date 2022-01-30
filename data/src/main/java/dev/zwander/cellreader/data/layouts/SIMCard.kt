@@ -37,6 +37,7 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.data.CellModelBase
 import dev.zwander.cellreader.data.util.*
+import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 import kotlinx.coroutines.delay
 
@@ -132,17 +133,11 @@ fun CellModelBase.SIMCard(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         FormatText(R.string.rplmn_format, rplmn)
-                        FormatText(R.string.network_type_format, context.resources.getString(
-                            when (serviceStates[subInfo?.id]?.dataNetworkType) {
-                                CellInfo.TYPE_GSM -> R.string.gsm
-                                CellInfo.TYPE_WCDMA -> R.string.wcdma
-                                CellInfo.TYPE_CDMA -> R.string.cdma
-                                CellInfo.TYPE_TDSCDMA -> R.string.tdscdma
-                                CellInfo.TYPE_LTE -> R.string.lte
-                                CellInfo.TYPE_NR -> R.string.nr
-                                else -> R.string.unknown
-                            }
-                        ))
+                        FormatText(R.string.network_type_format,
+                            ServiceStateWrapper.rilRadioTechnologyToString(
+                                ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subInfo?.id]?.dataNetworkType ?: 0)
+                            )
+                        )
                         FormatText(R.string.carrier_aggregation_format, "${serviceStates[subInfo?.id]?.isUsingCarrierAggregation}")
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

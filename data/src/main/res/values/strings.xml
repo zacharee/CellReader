@@ -24,13 +24,13 @@
 
     <string name="level_format">Level: %s</string>
     <string name="timestamp_format">Timestamp: %s</string>
-    <string name="operator_format">Operator: %s</string>
+    <string name="operator_format">Carrier: %s</string>
     <string name="roaming_format">Roaming: %s</string>
     <string name="roaming_type_format">Roaming Type: %s</string>
     <string name="data_roaming_from_reg_format">Data Roaming from Reg: %s</string>
     <string name="state_format">State: %s</string>
     <string name="emergency_only_format">Emergency Only: %s</string>
-    <string name="network_type_format">Network Type: %s</string>
+    <string name="network_type_format">Type: %s</string>
     <string name="bandwidths_format">Bandwidths: %s</string>
     <string name="duplex_format">Duplex: %s</string>
     <string name="channel_format">Channel: %s</string>
@@ -65,7 +65,6 @@
     <string name="carrier_aggregation_format">CA: %s</string>
     <string name="nr_state_format">NR: %s</string>
     <string name="gci_format">GCI: %s</string>
-    <string name="mcc_mnc_format">MCC-MNC: %s</string>
     <string name="plmn_format">PLMN: %s</string>
     <string name="type_format">Type: %s</string>
     <string name="lac_format">LAC: %s</string>

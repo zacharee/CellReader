@@ -42,10 +42,6 @@ fun CellIdentity(
                 globalCellId?.apply {
                     FormatText(R.string.gci_format, this)
                 }
-
-                plmn?.apply {
-                    FormatText(R.string.plmn_format, asMccMnc)
-                }
             }
         }
 
@@ -87,7 +83,7 @@ fun CellIdentity(
             }
 
             mcc?.apply {
-                FormatText(R.string.mcc_mnc_format, "${mcc}-${mnc}")
+                FormatText(R.string.plmn_format, "${mcc}-${mnc}")
             }
         }
     }

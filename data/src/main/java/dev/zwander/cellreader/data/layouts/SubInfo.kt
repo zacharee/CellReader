@@ -90,7 +90,7 @@ fun SubInfo(
             }
             FormatText(R.string.card_id_format, cardId ?: "")
             FormatText(R.string.data_roaming_format, "$dataRoaming")
-            FormatText(R.string.mcc_mnc_format, "$mcc-$mnc")
+            FormatText(R.string.plmn_format, "$mcc-$mnc")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 FormatText(R.string.uicc_apps_format, "$uiccApplicationsEnabled")

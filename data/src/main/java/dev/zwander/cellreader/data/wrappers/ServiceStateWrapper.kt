@@ -7,7 +7,6 @@ import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
 import android.telephony.ServiceState.RoamingType
 import android.telephony.TelephonyManager
-import com.android.telephony.Rlog
 import dev.zwander.cellreader.data.util.AccessNetworkUtils
 
 data class ServiceStateWrapper(
@@ -145,10 +144,22 @@ data class ServiceStateWrapper(
         )?.accessNetworkTechnology ?: TelephonyManager.NETWORK_TYPE_UNKNOWN
 
     val dataNetworkType: Int
-        get() = getNetworkRegistrationInfo(
-            NetworkRegistrationInfo.DOMAIN_PS,
-            AccessNetworkConstants.TRANSPORT_TYPE_WWAN
-        )?.accessNetworkTechnology ?: TelephonyManager.NETWORK_TYPE_UNKNOWN
+        get() {
+            val iwlanRegInfo = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN
+            )
+            val wwanRegInfo = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+            )
+
+            if (iwlanRegInfo == null || !iwlanRegInfo.isInService) {
+                return wwanRegInfo?.accessNetworkTechnology ?: TelephonyManager.NETWORK_TYPE_UNKNOWN
+            }
+
+            return if (!wwanRegInfo!!.isInService || iWlanPreferred) {
+                iwlanRegInfo.accessNetworkTechnology
+            } else wwanRegInfo.accessNetworkTechnology
+        }
 
     val roaming: Boolean
         get() = voiceRoamingType != ServiceState.ROAMING_TYPE_NOT_ROAMING
@@ -193,7 +204,7 @@ data class ServiceStateWrapper(
 
     val isUsingCarrierAggregation: Boolean
         get() {
-            if (cellBandwidths.isNotEmpty()) return true
+            if (cellBandwidths.size > 1) return true
 
             return networkRegistrationInfos?.any {
                 it.isUsingCarrierAggregation
