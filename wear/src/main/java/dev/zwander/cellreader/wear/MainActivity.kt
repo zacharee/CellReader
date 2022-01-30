@@ -222,9 +222,7 @@ fun MainContent() {
             Vignette(vignettePosition = VignettePosition.TopAndBottom)
         },
         positionIndicator = {
-            if (state.isScrollInProgress) {
-                PositionIndicator(scalingLazyListState = state)
-            }
+            PositionIndicator(scalingLazyListState = state)
         }
     ) {
         Box {
