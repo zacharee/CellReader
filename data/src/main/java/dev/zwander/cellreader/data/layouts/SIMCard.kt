@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.telephony.*
 import android.telephony.AccessNetworkConstants
-import android.util.Log
 import android.view.animation.AnticipateOvershootInterpolator
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
@@ -13,9 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +23,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
@@ -89,17 +87,28 @@ fun CellModelBase.SIMCard(
                         ?.rplmn.asMccMnc
                 }
 
-                FlowRow(
-                    mainAxisSpacing = 16.dp,
-                    mainAxisAlignment = FlowMainAxisAlignment.Center,
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
+                    Spacer(Modifier.weight(1f))
+
                     subInfo?.iconBitmap?.let { bitmap ->
                         BitmapFactory.decodeByteArray(bitmap, 0, bitmap.size)?.asImageBitmap()?.let {
-                            Image(bitmap = it, contentDescription = null)
+                            Image(
+                                bitmap = it, contentDescription = null,
+                                modifier = Modifier.size((16 * LocalDensity.current.fontScale).dp)
+                                    .align(Alignment.CenterVertically)
+                            )
+
+                            Spacer(Modifier.size(8.dp))
                         }
                     }
-                    WearSafeText(text = "${subInfo?.carrierName}")
+                    WearSafeText(
+                        text = "${subInfo?.carrierName}",
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+
+                    Spacer(Modifier.weight(1f))
                 }
 
                 Row(

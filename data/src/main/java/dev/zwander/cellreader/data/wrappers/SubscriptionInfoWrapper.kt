@@ -2,9 +2,7 @@ package dev.zwander.cellreader.data.wrappers
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
-import android.os.ParcelUuid
 import android.telephony.CellInfo
 import android.telephony.SubscriptionInfo
 import dev.zwander.cellreader.data.cardIdCompat
