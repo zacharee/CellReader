@@ -5,7 +5,6 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.wearable.*
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
@@ -352,12 +351,12 @@ class BetweenUtils private constructor(private val context: Context) {
     private suspend fun Mutex.sendInfo(gson: Gson, path: String, pairs: List<Pair<String, Any>>): DataItem {
         withLock {
             val mapped = pairs.map {
-                it.first to Asset.createFromBytes(gson.toJson(it.second).toByteArray())
+                it.first to gson.toJson(it.second).toByteArray()
             }
 
             val request = PutDataMapRequest.create(path).apply {
                 mapped.forEach { (key, item) ->
-                    dataMap.putAsset(key, item)
+                    dataMap.putByteArray(key, item)
                 }
             }.asPutDataRequest()
                 .setUrgent()
@@ -366,17 +365,17 @@ class BetweenUtils private constructor(private val context: Context) {
         }
     }
 
-    private suspend inline fun <reified T : Any?> retrieveInfo(
+    private inline fun <reified T : Any?> retrieveInfo(
         gson: Gson,
         dataItem: DataItem,
         key: String,
         empty: T,
         typeToken: TypeToken<T>
     ): T {
-        val asset = try {
+        val bytes = try {
             DataMapItem.fromDataItem(dataItem)
                 .dataMap
-                .getAsset(key)
+                .getByteArray(key)
         } catch (e: IllegalArgumentException) {
             Log.e("CellReader", "error", e)
             null
@@ -385,10 +384,7 @@ class BetweenUtils private constructor(private val context: Context) {
             null
         } ?: return empty
 
-        val response = dataClient.getFdForAsset(asset).await()
-        val json = response.inputStream.bufferedReader().use { input -> input.readText() }
-
-        response.release()
+        val json = bytes.decodeToString()
 
         return try {
             gson.fromJson<T>(
