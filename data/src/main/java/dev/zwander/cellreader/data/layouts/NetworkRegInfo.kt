@@ -37,6 +37,21 @@ fun NetworkRegInfo(
                 modifier = Modifier.padding(8.dp)
             ) {
                 with(networkRegistrationInfo) {
+                    FormatText(
+                        R.string.transport_format,
+                        AccessNetworkConstants.transportTypeToString(
+                            transportType
+                        )
+                    )
+                    FormatText(
+                        R.string.access_format,
+                        ServiceStateWrapper.rilRadioTechnologyToString(
+                            ServiceStateWrapper.networkTypeToRilRadioTechnology(
+                                accessNetworkTechnology
+                            )
+                        )
+                    )
+
                     this.dataSpecificInfo?.apply {
                         FormatText(R.string.endc_available_format, "$isEnDcAvailable")
                         FormatText(R.string.nr_available_format, "$isNrAvailable")
@@ -72,21 +87,6 @@ fun NetworkRegInfo(
 
                         FormatText(R.string.css_format, "$cssSupported")
                     }
-
-                    FormatText(
-                        R.string.transport_format,
-                        AccessNetworkConstants.transportTypeToString(
-                            transportType
-                        )
-                    )
-                    FormatText(
-                        R.string.access_format,
-                        ServiceStateWrapper.rilRadioTechnologyToString(
-                            ServiceStateWrapper.networkTypeToRilRadioTechnology(
-                                accessNetworkTechnology
-                            )
-                        )
-                    )
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         FormatText(R.string.registered_format, "$isRegistered")
