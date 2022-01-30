@@ -83,7 +83,7 @@ fun CellModelBase.SIMCard(
                     rplmn = serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                     )
-                        ?.first { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                        ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
                         ?.rplmn.asMccMnc
                 }
 
