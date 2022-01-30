@@ -22,7 +22,6 @@ import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
 import kotlinx.coroutines.*
-import java.util.*
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private var loadCellInfosJob: Job? = null
