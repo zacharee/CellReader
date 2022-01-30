@@ -35,10 +35,18 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private val dataClient by lazy { Wearable.getDataClient(this) }
 
     private val listener = DataClient.OnDataChangedListener {
-        it.forEach { event ->
-            val frozen = event.dataItem.freeze()
+        it.firstOrNull { event ->
+            event.dataItem.uri.path == BetweenUtils.CLEAR_PATH
+        }?.let { event ->
+            handleDataItem(event.dataItem.freeze())
+        }
 
-            handleDataItem(frozen)
+        it.forEach { event ->
+            if (event.dataItem.uri.path != BetweenUtils.CLEAR_PATH) {
+                val frozen = event.dataItem.freeze()
+
+                handleDataItem(frozen)
+            }
         }
     }
 
@@ -56,8 +64,16 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         dataClient.dataItems.addOnCompleteListener { item ->
             launch(Dispatchers.IO) {
-                item.result.forEach {
+                item.result.firstOrNull {
+                    it.uri.path == BetweenUtils.CLEAR_PATH
+                }?.let {
                     handleDataItem(it.freeze())
+                }
+
+                item.result.forEach {
+                    if (it.uri.path != BetweenUtils.CLEAR_PATH) {
+                        handleDataItem(it.freeze())
+                    }
                 }
 
                 item.result.release()
