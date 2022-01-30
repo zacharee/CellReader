@@ -77,32 +77,34 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         }
 
         dataClient.dataItems.addOnCompleteListener { item ->
-            item.result.forEach {
-                with(it.uri.toString()) {
-                    when {
-                        contains(BetweenUtils.CELL_INFOS_PATH) -> {
-                            updateCellInfos(it.freeze())
-                        }
-                        contains(BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH) -> {
-                            updateSignalStrengths(it.freeze())
-                        }
-                        contains(BetweenUtils.SERVICE_STATE_PATH) -> {
-                            updateServiceState(it.freeze())
-                        }
-                        contains(BetweenUtils.SUB_INFO_PATH) -> {
-                            updateSubInfo(it.freeze())
-                        }
-                        contains(BetweenUtils.SUB_ID_PATH) -> {
-                            addSubId(it.freeze())
-                        }
-                        contains(BetweenUtils.PRIMARY_CELL_PATH) -> {
-                            updatePrimaryCell(it.freeze())
+            launch(Dispatchers.IO) {
+                item.result.forEach {
+                    with(it.uri.toString()) {
+                        when {
+                            contains(BetweenUtils.CELL_INFOS_PATH) -> {
+                                updateCellInfos(it.freeze())
+                            }
+                            contains(BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH) -> {
+                                updateSignalStrengths(it.freeze())
+                            }
+                            contains(BetweenUtils.SERVICE_STATE_PATH) -> {
+                                updateServiceState(it.freeze())
+                            }
+                            contains(BetweenUtils.SUB_INFO_PATH) -> {
+                                updateSubInfo(it.freeze())
+                            }
+                            contains(BetweenUtils.SUB_ID_PATH) -> {
+                                addSubId(it.freeze())
+                            }
+                            contains(BetweenUtils.PRIMARY_CELL_PATH) -> {
+                                updatePrimaryCell(it.freeze())
+                            }
                         }
                     }
                 }
-            }
 
-            item.result.release()
+                item.result.release()
+            }
         }
     }
 
