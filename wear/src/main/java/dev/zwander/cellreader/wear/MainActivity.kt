@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import com.google.android.gms.wearable.*
 import dev.zwander.cellreader.data.BetweenUtils
+import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
@@ -23,11 +25,11 @@ import kotlinx.coroutines.*
 import java.util.*
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
-    private val loadCellInfosJobs = Collections.synchronizedList(arrayListOf<Job>())
-    private val loadCellSignalStrengthsJobs = Collections.synchronizedList(arrayListOf<Job>())
-    private val loadServiceStateJobs = Collections.synchronizedList(arrayListOf<Job>())
-    private val loadSubInfoJobs = Collections.synchronizedList(arrayListOf<Job>())
-    private val addSubIdJobs = Collections.synchronizedList(arrayListOf<Job>())
+    private var loadCellInfosJob: Job? = null
+    private var loadCellSignalStrengthsJob: Job? = null
+    private var loadServiceStateJob: Job? = null
+    private var loadSubInfoJob: Job? = null
+    private var addSubIdJob: Job? = null
     private var updatePrimaryCellJob: Job? = null
 
     private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
@@ -111,82 +113,67 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     }
 
     private fun updateCellInfos(item: DataItem) {
-        loadCellInfosJobs.add(
-            launch(Dispatchers.IO) {
-                val cellInfos = betweenUtils.retrieveCellInfos(item)
+        loadCellInfosJob?.cancel()
+        loadCellInfosJob = launch(Dispatchers.IO) {
+            val cellInfos = betweenUtils.retrieveCellInfos(item)
 
-                withContext(Dispatchers.Main) {
-                    cellInfos.forEach { (t, u) ->
-                        CellModelWear.cellInfos[t] = u
-                    }
+            withContext(Dispatchers.Main) {
+                cellInfos.forEach { (t, u) ->
+                    CellModelWear.cellInfos[t] = u
                 }
-
-                coroutineContext[Job]?.let { loadCellInfosJobs.remove(it) }
             }
-        )
+        }
     }
 
     private fun updateSignalStrengths(item: DataItem) {
-        loadCellSignalStrengthsJobs.add(
-            launch(Dispatchers.IO) {
-                val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
+        loadCellSignalStrengthsJob?.cancel()
+        loadCellSignalStrengthsJob = launch(Dispatchers.IO) {
+            val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
-                withContext(Dispatchers.Main) {
-                    signalStrengths.forEach { (t, u) ->
-                        CellModelWear.strengthInfos[t] = u
-                    }
+            withContext(Dispatchers.Main) {
+                signalStrengths.forEach { (t, u) ->
+                    CellModelWear.strengthInfos[t] = u
                 }
-
-                coroutineContext[Job]?.let { loadCellSignalStrengthsJobs.remove(it) }
             }
-        )
+        }
     }
 
     private fun updateServiceState(item: DataItem) {
-        loadServiceStateJobs.add(
-            launch(Dispatchers.IO) {
-                val serviceState = betweenUtils.retrieveServiceState(item)
+        loadServiceStateJob?.cancel()
+        loadServiceStateJob = launch(Dispatchers.IO) {
+            val serviceState = betweenUtils.retrieveServiceState(item)
 
-                withContext(Dispatchers.Main) {
-                    serviceState.forEach { (t, u) ->
-                        CellModelWear.serviceStates[t] = u
-                    }
+            withContext(Dispatchers.Main) {
+                serviceState.forEach { (t, u) ->
+                    CellModelWear.serviceStates[t] = u
                 }
-
-                coroutineContext[Job]?.let { loadServiceStateJobs.remove(it) }
             }
-        )
+        }
     }
 
     private fun updateSubInfo(item: DataItem) {
-        loadSubInfoJobs.add(
-            launch(Dispatchers.IO) {
-                val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
+        loadSubInfoJob?.cancel()
+        loadSubInfoJob = launch(Dispatchers.IO) {
+            val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
 
-                withContext(Dispatchers.Main) {
-                    subInfo.forEach { (t, u) ->
-                        CellModelWear.subInfos[t] = u
-                    }
+            withContext(Dispatchers.Main) {
+                subInfo.forEach { (t, u) ->
+                    CellModelWear.subInfos[t] = u
                 }
-
-                coroutineContext[Job]?.let { loadSubInfoJobs.remove(it) }
             }
-        )
+        }
     }
 
     private fun addSubId(item: DataItem) {
-        addSubIdJobs.add(
-            launch(Dispatchers.IO) {
-                val subId = betweenUtils.retrieveNewSubId(item)
+        addSubIdJob?.cancel()
+        addSubIdJob = launch(Dispatchers.IO) {
+            val subId = betweenUtils.retrieveNewSubId(item)
 
-                withContext(Dispatchers.Main) {
-                    CellModelWear.subIds.clear()
-                    CellModelWear.subIds.addAll(subId)
-                }
-
-                coroutineContext[Job]?.let { addSubIdJobs.remove(it) }
+            withContext(Dispatchers.Main) {
+                CellModelWear.subIds.clear()
+                CellModelWear.subIds.addAll(subId)
             }
-        )
+        }
     }
 
     private fun updatePrimaryCell(item: DataItem) {
@@ -225,90 +212,100 @@ fun MainContent() {
             PositionIndicator(scalingLazyListState = state)
         }
     ) {
-        Box {
-            with(CellModelWear) {
-                ScalingLazyColumn(
-                    state = state,
-                    modifier = Modifier.fillMaxHeight()
+        with(CellModelWear) {
+            Crossfade(targetState = sortedSubIds.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    sortedSubIds.forEachIndexed { subIndex, t ->
-                        item(t) {
-                            SIMCard(
-                                subInfo = subInfos[t],
-                                expanded = expanded[t.toString()] ?: false,
-                                onExpand = { expanded[t.toString()] = it },
-                                showingCells = showingCells[t] ?: true,
-                                onShowingCells = { showingCells[t] = it },
-                                modifier = Modifier
-                                    .padding(bottom = 8.dp),
-                                wear = true,
-                            )
-                        }
-
-                        val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
-                        val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
-                        val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
-
-                        cellInfos[t]?.let { cellInfo ->
-                            itemsIndexed(
-                                cellInfo,
-                                { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                                val isFinal = index == lastCellIndex && strengthsEmpty
-
-                                AnimatedVisibility(
-                                    visible = showingCells[t] != false,
-                                    modifier = Modifier
-                                        .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                    enter = fadeIn() + expandIn(
-                                        clip = false,
-                                        expandFrom = Alignment.TopEnd
-                                    ),
-                                    exit = shrinkOut(
-                                        clip = false,
-                                        shrinkTowards = Alignment.TopEnd
-                                    ) + fadeOut()
-                                ) {
-                                    val key = remember(item.cellIdentity) {
-                                        "$t:${item.cellIdentity}"
-                                    }
-
-                                    SignalCard(
-                                        cellInfo = item,
-                                        expanded = expanded[key] ?: false,
-                                        isFinal = isFinal,
-                                        onExpand = { expanded[key] = it },
+                    if (it) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    } else {
+                        ScalingLazyColumn(
+                            state = state,
+                            modifier = Modifier.fillMaxHeight()
+                        ) {
+                            sortedSubIds.forEachIndexed { subIndex, t ->
+                                item(t) {
+                                    SIMCard(
+                                        subInfo = subInfos[t],
+                                        expanded = expanded[t.toString()] ?: false,
+                                        onExpand = { expanded[t.toString()] = it },
+                                        showingCells = showingCells[t] ?: true,
+                                        onShowingCells = { showingCells[t] = it },
                                         modifier = Modifier
-                                            .fillMaxWidth(),
-                                        wear = true
+                                            .padding(bottom = 8.dp),
+                                        wear = true,
                                     )
                                 }
-                            }
-                        }
 
-                        strengthInfos[t]?.let { strengthInfo ->
-                            itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
-                                val isFinal = index == lastStrengthIndex
+                                val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
+                                val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
+                                val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
 
-                                AnimatedVisibility(
-                                    visible = showingCells[t] != false,
-                                    modifier = Modifier
-                                        .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                    enter = fadeIn() + expandIn(
-                                        clip = false,
-                                        expandFrom = Alignment.TopEnd
-                                    ),
-                                    exit = shrinkOut(
-                                        clip = false,
-                                        shrinkTowards = Alignment.TopEnd
-                                    ) + fadeOut()
-                                ) {
-                                    CellSignalStrengthCard(
-                                        cellSignalStrength = item,
-                                        isFinal = isFinal,
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        wear = true
-                                    )
+                                cellInfos[t]?.let { cellInfo ->
+                                    itemsIndexed(
+                                        cellInfo,
+                                        { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                                        val isFinal = index == lastCellIndex && strengthsEmpty
+
+                                        AnimatedVisibility(
+                                            visible = showingCells[t] != false,
+                                            modifier = Modifier
+                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                            enter = fadeIn() + expandIn(
+                                                clip = false,
+                                                expandFrom = Alignment.TopEnd
+                                            ),
+                                            exit = shrinkOut(
+                                                clip = false,
+                                                shrinkTowards = Alignment.TopEnd
+                                            ) + fadeOut()
+                                        ) {
+                                            val key = remember(item.cellIdentity) {
+                                                "$t:${item.cellIdentity}"
+                                            }
+
+                                            SignalCard(
+                                                cellInfo = item,
+                                                expanded = expanded[key] ?: false,
+                                                isFinal = isFinal,
+                                                onExpand = { expanded[key] = it },
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                wear = true
+                                            )
+                                        }
+                                    }
+                                }
+
+                                strengthInfos[t]?.let { strengthInfo ->
+                                    itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
+                                        val isFinal = index == lastStrengthIndex
+
+                                        AnimatedVisibility(
+                                            visible = showingCells[t] != false,
+                                            modifier = Modifier
+                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                            enter = fadeIn() + expandIn(
+                                                clip = false,
+                                                expandFrom = Alignment.TopEnd
+                                            ),
+                                            exit = shrinkOut(
+                                                clip = false,
+                                                shrinkTowards = Alignment.TopEnd
+                                            ) + fadeOut()
+                                        ) {
+                                            CellSignalStrengthCard(
+                                                cellSignalStrength = item,
+                                                isFinal = isFinal,
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                wear = true
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
