@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.*
@@ -18,17 +19,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
+import androidx.compose.ui.unit.*
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.data.R
@@ -98,6 +98,11 @@ fun CellModelBase.SIMCard(
                                 bitmap = it, contentDescription = null,
                                 modifier = Modifier.size((16 * LocalDensity.current.fontScale).dp)
                                     .align(Alignment.CenterVertically)
+                                    .shadow(
+                                        elevation = 8.dp,
+                                        shape = CircleShape,
+                                        clip = false
+                                    )
                             )
 
                             Spacer(Modifier.size(8.dp))
