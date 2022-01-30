@@ -38,29 +38,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         it.forEach { event ->
             val frozen = event.dataItem.freeze()
 
-            when (event.dataItem.uri.path) {
-                BetweenUtils.CELL_INFOS_PATH -> {
-                    updateCellInfos(frozen)
-                }
-                BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH -> {
-                    updateSignalStrengths(frozen)
-                }
-                BetweenUtils.SERVICE_STATE_PATH -> {
-                    updateServiceState(frozen)
-                }
-                BetweenUtils.SUB_INFO_PATH -> {
-                    updateSubInfo(frozen)
-                }
-                BetweenUtils.SUB_ID_PATH -> {
-                    addSubId(frozen)
-                }
-                BetweenUtils.CLEAR_PATH -> {
-                    clear()
-                }
-                BetweenUtils.PRIMARY_CELL_PATH -> {
-                    updatePrimaryCell(frozen)
-                }
-            }
+            handleDataItem(frozen)
         }
     }
 
@@ -79,28 +57,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         dataClient.dataItems.addOnCompleteListener { item ->
             launch(Dispatchers.IO) {
                 item.result.forEach {
-                    with(it.uri.toString()) {
-                        when {
-                            contains(BetweenUtils.CELL_INFOS_PATH) -> {
-                                updateCellInfos(it.freeze())
-                            }
-                            contains(BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH) -> {
-                                updateSignalStrengths(it.freeze())
-                            }
-                            contains(BetweenUtils.SERVICE_STATE_PATH) -> {
-                                updateServiceState(it.freeze())
-                            }
-                            contains(BetweenUtils.SUB_INFO_PATH) -> {
-                                updateSubInfo(it.freeze())
-                            }
-                            contains(BetweenUtils.SUB_ID_PATH) -> {
-                                addSubId(it.freeze())
-                            }
-                            contains(BetweenUtils.PRIMARY_CELL_PATH) -> {
-                                updatePrimaryCell(it.freeze())
-                            }
-                        }
-                    }
+                    handleDataItem(it.freeze())
                 }
 
                 item.result.release()
@@ -113,6 +70,32 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         cancel()
         dataClient.removeListener(listener)
+    }
+
+    private fun handleDataItem(frozen: DataItem) {
+        when (frozen.uri.path) {
+            BetweenUtils.CELL_INFOS_PATH -> {
+                updateCellInfos(frozen)
+            }
+            BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH -> {
+                updateSignalStrengths(frozen)
+            }
+            BetweenUtils.SERVICE_STATE_PATH -> {
+                updateServiceState(frozen)
+            }
+            BetweenUtils.SUB_INFO_PATH -> {
+                updateSubInfo(frozen)
+            }
+            BetweenUtils.SUB_ID_PATH -> {
+                addSubId(frozen)
+            }
+            BetweenUtils.CLEAR_PATH -> {
+                clear()
+            }
+            BetweenUtils.PRIMARY_CELL_PATH -> {
+                updatePrimaryCell(frozen)
+            }
+        }
     }
 
     private fun updateCellInfos(item: DataItem) {
