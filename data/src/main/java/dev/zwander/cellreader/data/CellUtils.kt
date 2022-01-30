@@ -3,6 +3,7 @@ package dev.zwander.cellreader.data
 import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
+import dev.zwander.cellreader.data.wrappers.*
 import java.lang.Exception
 
 val CellConfigLte.endcAvailable: Boolean
@@ -15,18 +16,18 @@ val CellConfigLte.endcAvailable: Boolean
 val CellInfo.timeStampMillisCompat: Long
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) timestampMillis else (timeStamp / 1000000)
 
-fun CellIdentity.getBands(infos: List<ARFCNInfo>): List<String> {
+fun CellIdentityWrapper.getBands(infos: List<ARFCNInfo>): List<String> {
     return when {
-        this is CellIdentityGsm -> infos.map { it.band }
-        this is CellIdentityWcdma -> infos.map { it.band }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdma -> infos.map { it.band }
-        this is CellIdentityLte -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            bands.map { it.toString() }
+        this is CellIdentityGsmWrapper -> infos.map { it.band }
+        this is CellIdentityWcdmaWrapper -> infos.map { it.band }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdmaWrapper -> infos.map { it.band }
+        this is CellIdentityLteWrapper -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            bands?.map { it.toString() } ?: listOf()
         } else {
             infos.map { it.band }
         }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNr -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            bands.map { it.toString() }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            bands?.map { it.toString() } ?: listOf()
         } else {
             infos.map { it.band }
         }

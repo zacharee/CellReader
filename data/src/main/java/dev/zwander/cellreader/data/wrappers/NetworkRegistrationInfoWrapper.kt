@@ -19,6 +19,20 @@ data class NetworkRegistrationInfoWrapper(
     val rplmn: String?,
     val isUsingCarrierAggregation: Boolean,
 ) {
+    val isRegistered: Boolean
+        get() = registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
+                || registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING
+
+    val isInService: Boolean
+        get() = registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
+                || registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING
+
+    val isEmergencyEnabled: Boolean
+        get() = emergencyOnly
+
+    val isSearching: Boolean
+        get() = registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING
+
     constructor(info: NetworkRegistrationInfo) : this(
         info.domain,
         info.transportType,

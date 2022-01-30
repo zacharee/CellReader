@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sim_card">#2266AB</color>
+    <color name="sim_card_1">#421A58</color>
+    <color name="cell_info">#30A26A</color>
+    <color name="cell_info_1">#2A8084</color>
+    <color name="signal_strength">#A44008</color>
+    <color name="signal_strength_1">#A42B12</color>
+    <color name="surface">#343434</color>
+    <color name="background">#121212</color>
+</resources>

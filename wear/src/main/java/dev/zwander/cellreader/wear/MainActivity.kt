@@ -1,19 +1,36 @@
 package dev.zwander.cellreader.wear
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.ScalingLazyColumn
+import androidx.wear.compose.material.itemsIndexed
+import androidx.wear.compose.material.rememberScalingLazyListState
 import com.google.android.gms.wearable.*
 import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.CellModelWear
-import dev.zwander.cellreader.wear.databinding.ActivityMainBinding
+import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
+import dev.zwander.cellreader.data.layouts.SIMCard
+import dev.zwander.cellreader.data.layouts.SignalCard
 import kotlinx.coroutines.*
-import kotlinx.coroutines.tasks.await
 import java.util.*
 
-class MainActivity : Activity(), CoroutineScope by MainScope() {
+class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private val loadCellInfosJobs = Collections.synchronizedList(arrayListOf<Job>())
     private val loadCellSignalStrengthsJobs = Collections.synchronizedList(arrayListOf<Job>())
     private val loadServiceStateJobs = Collections.synchronizedList(arrayListOf<Job>())
@@ -21,7 +38,6 @@ class MainActivity : Activity(), CoroutineScope by MainScope() {
     private val addSubIdJobs = Collections.synchronizedList(arrayListOf<Job>())
     private var updatePrimaryCellJob: Job? = null
 
-    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
     private val dataClient by lazy { Wearable.getDataClient(this) }
 
@@ -55,11 +71,98 @@ class MainActivity : Activity(), CoroutineScope by MainScope() {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(binding.root)
         dataClient.addListener(listener)
+
+        setContent {
+            val state = rememberScalingLazyListState()
+
+            val showingCells = remember {
+                mutableStateMapOf<Int, Boolean>()
+            }
+            val expanded = remember {
+                mutableStateMapOf<String, Boolean>()
+            }
+
+            with (CellModelWear) {
+                ScalingLazyColumn(
+                    state = state,
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    sortedSubIds.forEachIndexed { subIndex, t ->
+                        item(t) {
+                            SIMCard(
+                                subInfo = subInfos[t],
+                                expanded = expanded[t.toString()] ?: false,
+                                onExpand = { expanded[t.toString()] = it },
+                                showingCells = showingCells[t] ?: true,
+                                onShowingCells = { showingCells[t] = it },
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp),
+                                wear = true,
+                            )
+                        }
+
+                        val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
+                        val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
+                        val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
+
+                        cellInfos[t]?.let { cellInfo ->
+                            itemsIndexed(cellInfo, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                                val isFinal = index == lastCellIndex && strengthsEmpty
+
+                                AnimatedVisibility(
+                                    visible = showingCells[t] != false,
+                                    modifier = Modifier
+                                        .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                    enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                    exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                                ) {
+                                    val key = remember(item.cellIdentity) {
+                                        "$t:${item.cellIdentity}"
+                                    }
+
+                                    SignalCard(
+                                        cellInfo = item,
+                                        expanded = expanded[key] ?: false,
+                                        isFinal = isFinal,
+                                        onExpand = { expanded[key] = it },
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        wear = true
+                                    )
+                                }
+                            }
+                        }
+
+                        strengthInfos[t]?.let { strengthInfo ->
+                            itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
+                                val isFinal = index == lastStrengthIndex
+
+                                AnimatedVisibility(
+                                    visible = showingCells[t] != false,
+                                    modifier = Modifier
+                                        .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                    enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                                    exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                                ) {
+                                    CellSignalStrengthCard(
+                                        cellSignalStrength = item,
+                                        isFinal = isFinal,
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        wear = true
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         dataClient.dataItems.addOnCompleteListener { item ->
             item.result.forEach {
@@ -158,7 +261,8 @@ class MainActivity : Activity(), CoroutineScope by MainScope() {
                 val subId = betweenUtils.retrieveNewSubId(item)
 
                 withContext(Dispatchers.Main) {
-                    CellModelWear.subIds.add(subId)
+                    CellModelWear.subIds.clear()
+                    CellModelWear.subIds.addAll(subId)
                 }
 
                 coroutineContext[Job]?.let { addSubIdJobs.remove(it) }

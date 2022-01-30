@@ -5,7 +5,6 @@ import android.telephony.*
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.bitErrorRateCompat
 import java.util.*
-import kotlin.collections.ArrayList
 
 sealed class CellSignalStrengthWrapper {
     companion object {
@@ -25,6 +24,7 @@ sealed class CellSignalStrengthWrapper {
     abstract val level: Int
     abstract val dbm: Int
     abstract val valid: Boolean
+    abstract val asuLevel: Int
 
     abstract override fun hashCode(): Int
     abstract override fun equals(other: Any?): Boolean
@@ -36,7 +36,8 @@ class CellSignalStrengthGsmWrapper(
     val timingAdvance: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean
+    override val valid: Boolean,
+    override val asuLevel: Int,
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthGsm) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
@@ -44,7 +45,8 @@ class CellSignalStrengthGsmWrapper(
         strength.timingAdvance,
         strength.level,
         strength.dbm,
-        strength.isValid
+        strength.isValid,
+        strength.asuLevel,
     )
 
     override fun hashCode(): Int {
@@ -72,8 +74,23 @@ class CellSignalStrengthCdmaWrapper(
     val evdoSnr: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean
+    override val valid: Boolean,
+    override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
+    val evdoAsuLevel: Int
+        get() {
+            val evdoDbm: Int = evdoDbm
+            val evdoSnr: Int = evdoSnr
+
+            val levelEvdoDbm =
+                if (evdoDbm >= -65) 16 else if (evdoDbm >= -75) 8 else if (evdoDbm >= -85) 4 else if (evdoDbm >= -95) 2 else if (evdoDbm >= -105) 1 else 99
+
+            val levelEvdoSnr =
+                if (evdoSnr >= 7) 16 else if (evdoSnr >= 6) 8 else if (evdoSnr >= 5) 4 else if (evdoSnr >= 3) 2 else if (evdoSnr >= 1) 1 else 99
+
+            return if (levelEvdoDbm < levelEvdoSnr) levelEvdoDbm else levelEvdoSnr
+        }
+
     constructor(strength: CellSignalStrengthCdma) : this(
         strength.cdmaDbm,
         strength.cdmaEcio,
@@ -82,7 +99,8 @@ class CellSignalStrengthCdmaWrapper(
         strength.evdoSnr,
         strength.level,
         strength.dbm,
-        strength.isValid
+        strength.isValid,
+        strength.asuLevel
     )
 
     override fun hashCode(): Int {
@@ -113,7 +131,8 @@ class CellSignalStrengthTdscdmaWrapper(
     val rscp: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean
+    override val valid: Boolean,
+    override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(strength: CellSignalStrengthTdscdma) : this(
@@ -122,7 +141,8 @@ class CellSignalStrengthTdscdmaWrapper(
         strength.rscp,
         strength.level,
         strength.dbm,
-        strength.isValid
+        strength.isValid,
+        strength.asuLevel
     )
 
     override fun hashCode(): Int {
@@ -150,7 +170,8 @@ class CellSignalStrengthWcdmaWrapper(
     val ecNo: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean
+    override val valid: Boolean,
+    override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthWcdma) : this(
         strength.rssi,
@@ -159,7 +180,8 @@ class CellSignalStrengthWcdmaWrapper(
         strength.ecNo,
         strength.level,
         strength.dbm,
-        strength.isValid
+        strength.isValid,
+        strength.asuLevel
     )
 
     override fun hashCode(): Int {
@@ -191,7 +213,8 @@ class CellSignalStrengthLteWrapper(
     val timingAdvance: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean
+    override val valid: Boolean,
+    override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthLte) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
@@ -203,7 +226,8 @@ class CellSignalStrengthLteWrapper(
         strength.timingAdvance,
         strength.level,
         strength.dbm,
-        strength.isValid
+        strength.isValid,
+        strength.asuLevel
     )
 
     override fun hashCode(): Int {
@@ -243,7 +267,8 @@ class CellSignalStrengthNrWrapper(
     val ssSinr: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean
+    override val valid: Boolean,
+    override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(strength: CellSignalStrengthNr) : this(
@@ -257,7 +282,8 @@ class CellSignalStrengthNrWrapper(
         strength.ssSinr,
         strength.level,
         strength.dbm,
-        strength.isValid
+        strength.isValid,
+        strength.asuLevel
     )
 
     override fun hashCode(): Int {

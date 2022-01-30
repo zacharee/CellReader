@@ -22,11 +22,11 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.data.CellModel
-import dev.zwander.cellreader.data.data.CellModelWear
-import dev.zwander.cellreader.data.data.ProvideCellModel
-import dev.zwander.cellreader.utils.cellIdentityCompat
-import dev.zwander.cellreader.utils.cellSignalStrengthCompat
-import dev.zwander.cellreader.utils.onAvail
+import dev.zwander.cellreader.data.util.cellIdentityCompat
+import dev.zwander.cellreader.data.util.cellSignalStrengthCompat
+import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.util.onAvail
+import dev.zwander.cellreader.data.wrappers.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -57,7 +57,7 @@ class SignalWidget : GlanceAppWidget() {
                             }
                         }
 
-                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}".hashCode().toLong() }) { _, item ->
+                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { _, item ->
                             SignalCard(cellInfo = item)
                         }
                     }
@@ -67,7 +67,7 @@ class SignalWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun SignalCard(cellInfo: CellInfo) {
+    private fun SignalCard(cellInfo: CellInfoWrapper) {
         val context = LocalContext.current
 
         Row(
@@ -87,7 +87,7 @@ class SignalWidget : GlanceAppWidget() {
                     ) {
                         Image(
                             provider = ImageProvider(
-                                when (cellInfo.cellSignalStrengthCompat.level) {
+                                when (cellInfo.cellSignalStrength.level) {
                                     CellSignalStrength.SIGNAL_STRENGTH_POOR -> R.drawable.cell_1
                                     CellSignalStrength.SIGNAL_STRENGTH_MODERATE -> R.drawable.cell_2
                                     CellSignalStrength.SIGNAL_STRENGTH_GOOD -> R.drawable.cell_3
@@ -102,7 +102,7 @@ class SignalWidget : GlanceAppWidget() {
 
                         Spacer(GlanceModifier.size(8.dp))
 
-                        Text(text = cellInfo.cellSignalStrengthCompat.dbm.toString())
+                        Text(text = cellInfo.cellSignalStrength.dbm.toString())
                     }
 
                     Spacer(GlanceModifier.size(8.dp))
@@ -114,14 +114,14 @@ class SignalWidget : GlanceAppWidget() {
                             text = context.resources.getString(
                                 R.string.type_format,
                                 context.resources.getString(
-                                    cellInfo.cellSignalStrengthCompat.run {
+                                    cellInfo.cellSignalStrength.run {
                                         when {
-                                            this is CellSignalStrengthGsm -> R.string.gsm
-                                            this is CellSignalStrengthWcdma -> R.string.wcdma
-                                            this is CellSignalStrengthCdma -> R.string.cdma
-                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdma -> R.string.tdscdma
-                                            this is CellSignalStrengthLte -> R.string.lte
-                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> R.string.nr
+                                            this is CellSignalStrengthGsmWrapper -> R.string.gsm
+                                            this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
+                                            this is CellSignalStrengthCdmaWrapper -> R.string.cdma
+                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
+                                            this is CellSignalStrengthLteWrapper -> R.string.lte
+                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
                                             else -> R.string.unknown
                                         }
                                     }
@@ -129,16 +129,16 @@ class SignalWidget : GlanceAppWidget() {
                             )
                         )
 
-                        with(cellInfo.cellSignalStrengthCompat) {
+                        with(cellInfo.cellSignalStrength) {
                             when {
-                                this is CellSignalStrengthLte -> {
+                                this is CellSignalStrengthLteWrapper -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     Text(
                                         text = context.resources.getString(R.string.rsrq_format, rsrq.toString())
                                     )
                                 }
-                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNr -> {
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     csiRsrq.onAvail {
@@ -152,9 +152,9 @@ class SignalWidget : GlanceAppWidget() {
                             }
                         }
 
-                        with (cellInfo.cellIdentityCompat) {
+                        with (cellInfo.cellIdentity) {
                             when {
-                                this is CellIdentityGsm -> {
+                                this is CellIdentityGsmWrapper -> {
                                     val arfcnInfo = remember(arfcn) {
                                         ARFCNTools.gsmArfcnToInfo(arfcn)
                                     }
@@ -168,7 +168,7 @@ class SignalWidget : GlanceAppWidget() {
                                         Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
                                     }
                                 }
-                                this is CellIdentityWcdma -> {
+                                this is CellIdentityWcdmaWrapper -> {
                                     val arfcnInfo = remember(uarfcn) {
                                         ARFCNTools.uarfcnToInfo(uarfcn)
                                     }
@@ -182,7 +182,7 @@ class SignalWidget : GlanceAppWidget() {
                                         Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
                                     }
                                 }
-                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdma -> {
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdmaWrapper -> {
                                     val arfcnInfo = remember(uarfcn) {
                                         ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
                                     }
@@ -196,11 +196,11 @@ class SignalWidget : GlanceAppWidget() {
                                         Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
                                     }
                                 }
-                                this is CellIdentityLte -> {
+                                this is CellIdentityLteWrapper -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                        Text(text = context.resources.getString(R.string.bands_format, bands?.joinToString(", ")))
                                     } else {
                                         val arfcnInfo = remember(earfcn) {
                                             ARFCNTools.earfcnToInfo(earfcn)
@@ -216,16 +216,16 @@ class SignalWidget : GlanceAppWidget() {
                                         }
                                     }
                                 }
-                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNr -> {
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> {
                                     Spacer(GlanceModifier.size(8.dp))
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                        Text(text = context.resources.getString(R.string.bands_format, bands.joinToString(", ")))
+                                        Text(text = context.resources.getString(R.string.bands_format, bands?.joinToString(", ")))
                                     } else {
-                                        val arfcnInfo = remember(nrarfcn) {
-                                            ARFCNTools.nrArfcnToInfo(nrarfcn)
+                                        val arfcnInfo = remember(nrArfcn) {
+                                            ARFCNTools.nrArfcnToInfo(nrArfcn)
                                         }
-                                        val bands = remember(nrarfcn) {
+                                        val bands = remember(nrArfcn) {
                                             arfcnInfo.map { it.band }
                                         }
 

@@ -16,12 +16,10 @@ import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.StateListener
 import dev.zwander.cellreader.data.data.TelephonyListener
 import dev.zwander.cellreader.data.data.TelephonyListenerCallback
-import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
-import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
-import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
-import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
-import dev.zwander.cellreader.utils.CellUtils
-import dev.zwander.cellreader.utils.cellIdentityCompat
+import dev.zwander.cellreader.data.util.CellUtils
+import dev.zwander.cellreader.data.util.cellIdentityCompat
+import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.wrappers.*
 import kotlinx.coroutines.*
 
 class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
@@ -120,12 +118,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 subscriptions.map {
                     cellInfos[it] = listOf()
                     strengthInfos[it] = listOf()
-                    subInfos[it] = subs.getActiveSubscriptionInfo(it)
+                    subInfos[it] = SubscriptionInfoWrapper(subs.getActiveSubscriptionInfo(it), this@UpdaterService)
                     subIds.add(it)
 
                     launch(Dispatchers.IO) {
-                        betweenUtils.queueSubscriptionInfo(it, SubscriptionInfoWrapper(subInfos[it]!!, this@UpdaterService))
-                        betweenUtils.queueNewSubId(it)
+                        betweenUtils.queueSubscriptionInfo(it, subInfos[it]!!)
+                        betweenUtils.queueNewSubId(subIds)
                     }
 
                     it to telephony.createForSubscriptionId(it).also { telephony ->
@@ -156,28 +154,19 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 }
             )
         }
-
-        CellModel.create(
-            telephony,
-            subs,
-            subscriptions,
-            this
-        )
     }
 
     @SuppressLint("MissingPermission")
-    override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
+    override fun updateCellInfo(subId: Int, origInfos: MutableList<CellInfo>) {
         with (CellModel) {
-            if (infos.isEmpty()) {
-                infos.addAll(telephonies[subId]!!.allCellInfo)
+            if (origInfos.isEmpty()) {
+                origInfos.addAll(telephonies[subId]!!.allCellInfo)
             }
 
-            infos.sortWith(CellUtils.CellInfoComparator)
+            val infos = origInfos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
             val foundIDs = mutableListOf<String>()
-            val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentityCompat.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentityCompat.toString()) } }
-
-            val wrapped = newInfo.map { CellInfoWrapper.newInstance(it) }
+            val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
             launch(Dispatchers.Main) {
                 cellInfos[subId] = newInfo
@@ -186,7 +175,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
 
             launch(Dispatchers.IO) {
-                betweenUtils.queueCellInfos(subId, wrapped)
+                betweenUtils.queueCellInfos(subId, newInfo)
             }
         }
     }
@@ -194,28 +183,26 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun updateSignal(subId: Int, strength: SignalStrength?) {
         @Suppress("DEPRECATION")
         val newInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            (strength?.cellSignalStrengths?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
+            (strength?.cellSignalStrengths?.map { CellSignalStrengthWrapper.newInstance(it) }?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
         } else {
-            mutableListOf<CellSignalStrength>().apply {
+            mutableListOf<CellSignalStrengthWrapper>().apply {
                 strength?.let { strength ->
                     if (strength.gsmSignalStrength != Int.MAX_VALUE) {
-                        add(CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE))
+                        add(CellSignalStrengthGsmWrapper(CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE)))
                     }
                     if (strength.cdmaDbm != Int.MAX_VALUE) {
-                        add(CellSignalStrengthCdma(-strength.cdmaDbm, -strength.cdmaEcio, -strength.evdoDbm, -strength.evdoEcio, -strength.evdoSnr))
+                        add(CellSignalStrengthCdmaWrapper(CellSignalStrengthCdma(-strength.cdmaDbm, -strength.cdmaEcio, -strength.evdoDbm, -strength.evdoEcio, -strength.evdoSnr)))
                     }
                     if (strength.wcdmaAsuLevel != 255) {
-                        add(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE))
+                        add(CellSignalStrengthWcdmaWrapper(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE)))
                     }
                     if (strength.lteSignalStrength != Int.MAX_VALUE) {
-                        add(CellSignalStrengthLte::class.java.getConstructor(Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java)
-                            .newInstance(strength.lteSignalStrength, strength.lteRsrp, strength.lteRsrq, strength.lteRssnr, strength.lteCqi, Int.MAX_VALUE))
+                        add(CellSignalStrengthLteWrapper(CellSignalStrengthLte::class.java.getConstructor(Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java)
+                            .newInstance(strength.lteSignalStrength, strength.lteRsrp, strength.lteRsrq, strength.lteRssnr, strength.lteCqi, Int.MAX_VALUE)))
                     }
                 }
             }
         }
-
-        val wrapped = newInfo.map { CellSignalStrengthWrapper.newInstance(it) }
 
         launch(Dispatchers.Main) {
             with (CellModel) {
@@ -227,7 +214,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
 
         launch(Dispatchers.IO) {
-            betweenUtils.queueSignalStrengths(subId, wrapped)
+            betweenUtils.queueSignalStrengths(subId, newInfo)
         }
     }
 
@@ -236,7 +223,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val wrapped = serviceState?.run { ServiceStateWrapper(this) }
 
             launch(Dispatchers.Main) {
-                serviceStates[subId] = serviceState
+                serviceStates[subId] = wrapped
             }
 
             launch(Dispatchers.IO) {
@@ -273,7 +260,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             } else {
                 newList.forEach { subInfo ->
                     launch(Dispatchers.Main) {
-                        CellModel.subInfos[subInfo.subscriptionId] = subInfo
+                        CellModel.subInfos[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
                     }
 
                     launch(Dispatchers.IO) {

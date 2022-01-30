@@ -15,6 +15,9 @@ sealed class CellIdentityWrapper(
     val globalCellId: String?,
     val channelNumber: Int,
 ) {
+    val plmn: String?
+        get() = if (mcc.isNullOrBlank()) null else (mcc + mnc)
+
     companion object {
         fun newInstance(identity: CellIdentity?): CellIdentityWrapper? {
             if (identity == null) return null

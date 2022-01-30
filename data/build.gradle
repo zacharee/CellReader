@@ -27,15 +27,33 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
+    }
 }
 
 dependencies {
-
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
     implementation "com.google.android.gms:play-services-wearable:17.1.0"
-    api "androidx.compose.runtime:runtime:1.2.0-alpha01"
+
+    api "androidx.compose.runtime:runtime:$compose_version"
+    api "androidx.compose.foundation:foundation:$compose_version"
+    api "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    api "androidx.activity:activity-compose:1.4.0"
+    api 'com.google.accompanist:accompanist-flowlayout:0.22.0-rc'
+
+    api "androidx.compose.material:material:$compose_version"
+    api 'androidx.wear.compose:compose-material:1.0.0-alpha15'
+    api 'androidx.wear.compose:compose-foundation:1.0.0-alpha15'
+
+    api 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 
     api 'io.gsonfire:gson-fire:1.8.5'
 

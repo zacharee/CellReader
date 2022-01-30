@@ -6,35 +6,18 @@ import android.telephony.*
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.*
 import dev.zwander.cellreader.data.SubsComparator
+import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
+import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
+import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 
-object CellModel {
-    var primaryCell by mutableStateOf(0)
-
-    val subIds = mutableStateListOf<Int>()
-    val cellInfos = mutableStateMapOf<Int, List<CellInfo>>()
-    val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrength>>()
+object CellModel : CellModelBase() {
     val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
-    val subInfos = mutableStateMapOf<Int, SubscriptionInfo?>()
-    val serviceStates = mutableStateMapOf<Int, ServiceState?>()
     val telephonies = mutableStateMapOf<Int, TelephonyManager>()
-
-    val sortedSubIds by derivedStateOf {
-        subIds.sortedWith(SubsComparator(primaryCell))
-    }
 
     val telephonyCallbacks = HashMap<Int, TelephonyCallback>()
     @Suppress("DEPRECATION")
     val telephonyListeners = HashMap<Int, PhoneStateListener>()
-
-    @SuppressLint("MissingPermission")
-    fun create(
-        telephony: TelephonyManager,
-        subs: SubscriptionManager,
-        subscriptions: List<Int>,
-        listenerCallback: TelephonyListenerCallback
-    ) {
-
-    }
 
     fun destroy() {
         telephonies.forEach { (subId, telephony) ->
@@ -49,15 +32,9 @@ object CellModel {
         clear()
     }
 
-    private fun clear() {
-        primaryCell = 0
-
-        subIds.clear()
-        cellInfos.clear()
-        strengthInfos.clear()
+    override fun clear() {
+        super.clear()
         signalStrengths.clear()
-        subInfos.clear()
-        serviceStates.clear()
         telephonies.clear()
     }
 }

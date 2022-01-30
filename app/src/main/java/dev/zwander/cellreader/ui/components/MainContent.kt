@@ -18,11 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import dev.zwander.cellreader.data.data.CellModel
-import dev.zwander.cellreader.data.data.ProvideCellModel
-import dev.zwander.cellreader.ui.layouts.CellSignalStrengthCard
-import dev.zwander.cellreader.ui.layouts.SIMCard
-import dev.zwander.cellreader.ui.layouts.SignalCard
-import dev.zwander.cellreader.utils.cellIdentityCompat
+import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
+import dev.zwander.cellreader.data.layouts.SIMCard
+import dev.zwander.cellreader.data.layouts.SignalCard
+import dev.zwander.cellreader.data.util.cellIdentityCompat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -54,7 +53,6 @@ fun MainContent() {
                 sortedSubIds.forEachIndexed { subIndex, t ->
                     item(t) {
                         SIMCard(
-                            telephony = telephonies[t]!!,
                             subInfo = subInfos[t],
                             expanded = expanded[t.toString()] ?: false,
                             onExpand = { expanded[t.toString()] = it },
@@ -62,7 +60,9 @@ fun MainContent() {
                             onShowingCells = { showingCells[t] = it },
                             modifier = Modifier
                                 .animateItemPlacement()
-                                .padding(bottom = 8.dp)
+                                .padding(bottom = 8.dp),
+                            wear = false,
+                            signalStrength = signalStrengths[t]!!
                         )
                     }
 
@@ -70,7 +70,7 @@ fun MainContent() {
                     val lastStrengthIndex = strengthInfos[t]!!.lastIndex
                     val strengthsEmpty = strengthInfos[t]!!.isEmpty()
 
-                    itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentityCompat}" }) { index, item ->
+                    itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
                         val isFinal = index == lastCellIndex && strengthsEmpty
 
                         AnimatedVisibility(
@@ -81,8 +81,8 @@ fun MainContent() {
                             enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                             exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                         ) {
-                            val key = remember(item.cellIdentityCompat) {
-                                "$t:${item.cellIdentityCompat}"
+                            val key = remember(item.cellIdentity) {
+                                "$t:${item.cellIdentity}"
                             }
 
                             SignalCard(
@@ -91,7 +91,8 @@ fun MainContent() {
                                 isFinal = isFinal,
                                 onExpand = { expanded[key] = it },
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth(),
+                                wear = false
                             )
                         }
                     }
@@ -111,7 +112,8 @@ fun MainContent() {
                                 cellSignalStrength = item,
                                 isFinal = isFinal,
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth(),
+                                wear = false
                             )
                         }
                     }

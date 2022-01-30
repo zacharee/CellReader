@@ -15,12 +15,25 @@ sealed class VopsSupportInfoWrapper {
             }
         }
     }
+
+    abstract val vopsSupported: Boolean
+    abstract val emergencyServiceSupported: Boolean
+    abstract val emergencyFallbackServiceSupported: Boolean
 }
 
 data class LteVopsSupportInfoWrapper(
     val vopsSupport: Int,
     val emcBearerSupport: Int
 ) : VopsSupportInfoWrapper() {
+    override val vopsSupported: Boolean
+        get() = vopsSupport != LteVopsSupportInfo.LTE_STATUS_NOT_SUPPORTED
+
+    override val emergencyServiceSupported: Boolean
+        get() = emcBearerSupport == LteVopsSupportInfo.LTE_STATUS_SUPPORTED
+
+    override val emergencyFallbackServiceSupported: Boolean
+        get() = false
+
     constructor(info: LteVopsSupportInfo) : this(
         info.vopsSupport,
         info.emcBearerSupport
@@ -28,10 +41,19 @@ data class LteVopsSupportInfoWrapper(
 }
 
 data class NrVopsSupportInfoWrapper(
-    val vopsSUpport: Int,
+    val vopsSupport: Int,
     val emcSupport: Int,
     val emfSupport: Int
 ) : VopsSupportInfoWrapper() {
+    override val vopsSupported: Boolean
+        get() = vopsSupport != NrVopsSupportInfo.NR_STATUS_VOPS_NOT_SUPPORTED
+
+    override val emergencyServiceSupported: Boolean
+        get() = emcSupport != NrVopsSupportInfo.NR_STATUS_EMC_NOT_SUPPORTED
+
+    override val emergencyFallbackServiceSupported: Boolean
+        get() = emfSupport != NrVopsSupportInfo.NR_STATUS_EMF_NOT_SUPPORTED
+
     constructor(info: NrVopsSupportInfo) : this(
         info.vopsSupport,
         info.emcSupport,

@@ -17,6 +17,18 @@
         <entry key="app/src/main/res/drawable/test.xml" value="0.1555" />
         <entry key="app/src/main/res/drawable/website.xml" value="0.15" />
         <entry key="app/src/main/res/xml/widget.xml" value="0.1" />
+        <entry key="data/src/main/res/drawable/about.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/cell_0.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/cell_1.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/cell_2.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/cell_3.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/cell_4.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/github.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/heart.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/patreon.xml" value="0.15" />
+        <entry key="data/src/main/res/drawable/website.xml" value="0.15" />
+        <entry key="data/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.15" />
+        <entry key="data/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.15" />
         <entry key="wear/src/main/res/layout/activity_main.xml" value="0.854602510460251" />
       </map>
     </option>

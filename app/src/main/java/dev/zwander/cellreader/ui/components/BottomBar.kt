@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import dev.zwander.cellreader.BuildConfig
-import dev.zwander.cellreader.R
+import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.components.Expander
+import dev.zwander.cellreader.data.components.LinkIcon
 import tk.zwander.patreonsupportersretrieval.data.SupporterInfo
 import tk.zwander.patreonsupportersretrieval.util.DataParser
 import tk.zwander.patreonsupportersretrieval.util.launchUrl
