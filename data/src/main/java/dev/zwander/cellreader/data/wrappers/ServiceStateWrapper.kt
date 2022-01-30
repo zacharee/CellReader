@@ -218,7 +218,7 @@ data class ServiceStateWrapper(
         )?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE
 
     fun getNetworkRegistrationInfo(domain: Int, transportType: Int): NetworkRegistrationInfoWrapper? {
-        return networkRegistrationInfos?.first {
+        return networkRegistrationInfos?.firstOrNull {
             it.transportType == transportType
                     && (it.domain and domain) != 0
         }
