@@ -102,6 +102,8 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                     }
                 }
             }
+
+            item.result.release()
         }
     }
 

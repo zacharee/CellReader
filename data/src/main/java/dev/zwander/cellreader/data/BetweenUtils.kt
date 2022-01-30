@@ -388,6 +388,8 @@ class BetweenUtils private constructor(private val context: Context) {
         val response = dataClient.getFdForAsset(asset).await()
         val json = response.inputStream.bufferedReader().use { input -> input.readText() }
 
+        response.release()
+
         return try {
             gson.fromJson<T>(
                 json,
