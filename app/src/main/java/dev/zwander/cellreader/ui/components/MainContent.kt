@@ -21,7 +21,6 @@ import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
-import dev.zwander.cellreader.data.util.cellIdentityCompat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -61,7 +60,6 @@ fun MainContent() {
                             modifier = Modifier
                                 .animateItemPlacement()
                                 .padding(bottom = 8.dp),
-                            wear = false,
                             signalStrength = signalStrengths[t]
                         )
                     }

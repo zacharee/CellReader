@@ -27,9 +27,8 @@ fun ExpanderSignalCard(
     type: String,
     colors: List<Pair<Float, Color>>,
     modifier: Modifier = Modifier,
-    basicInfo: (@Composable() () -> Unit)? = null,
-    expandedInfo: (@Composable() () -> Unit)? = null,
-    wear: Boolean = false
+    basicInfo: @Composable() (() -> Unit)? = null,
+    expandedInfo: @Composable() (() -> Unit)? = null
 ) {
     var size by remember {
         mutableStateOf(IntSize.Zero)
@@ -134,21 +133,11 @@ fun ExpanderSignalCard(
                 }
             }
 
-            if (!wear) {
-                Card(
-                    backgroundColor = Color.Transparent,
-                    elevation = 8.dp
-                ) {
-                    contents()
-                }
-            } else {
-                androidx.wear.compose.material.Card(
-                    onClick = {},
-                    backgroundPainter = ColorPainter(Color.Transparent),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    contents()
-                }
+            Card(
+                backgroundColor = Color.Transparent,
+                elevation = 8.dp
+            ) {
+                contents()
             }
         }
     }

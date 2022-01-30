@@ -13,14 +13,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
-import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.onSizeChanged
@@ -48,7 +46,6 @@ fun CellModelBase.SIMCard(
     showingCells: Boolean,
     onShowingCells: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    wear: Boolean = false,
     signalStrength: SignalStrength? = null
 ) {
     val context = LocalContext.current
@@ -258,21 +255,10 @@ fun CellModelBase.SIMCard(
         }
     }
 
-    if (!wear) {
-        Card(
-            modifier = modifier,
-            backgroundColor = Color.Transparent
-        ) {
-            contents()
-        }
-    } else {
-        androidx.wear.compose.material.Card(
-            onClick = {},
-            modifier = modifier,
-            backgroundPainter = ColorPainter(Color.Transparent),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            contents()
-        }
+    Card(
+        modifier = modifier,
+        backgroundColor = Color.Transparent
+    ) {
+        contents()
     }
 }

@@ -25,8 +25,7 @@ import dev.zwander.cellreader.data.R
 fun Expander(
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-    wear: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     @Composable
     fun contents() {
@@ -54,22 +53,11 @@ fun Expander(
         }
     }
 
-    if (!wear) {
-        Card(
-            modifier = modifier,
-            backgroundColor = Color.Transparent,
-            elevation = 0.dp,
-        ) {
-            contents()
-        }
-    } else {
-        androidx.wear.compose.material.Card(
-            onClick = {},
-            modifier = modifier,
-            backgroundPainter = ColorPainter(Color.Transparent),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            contents()
-        }
+    Card(
+        modifier = modifier,
+        backgroundColor = Color.Transparent,
+        elevation = 0.dp,
+    ) {
+        contents()
     }
 }

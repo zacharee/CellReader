@@ -3,7 +3,6 @@ package dev.zwander.cellreader.data.layouts
 import android.os.Build
 import android.telephony.*
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -73,7 +72,6 @@ fun CellSignalStrengthCard(
                     advanced = true
                 )
             }
-        },
-        wear = wear
+        }
     )
 }
