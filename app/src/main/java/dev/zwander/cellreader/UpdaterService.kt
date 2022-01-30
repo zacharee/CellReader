@@ -122,7 +122,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     subIds.add(it)
 
                     launch(Dispatchers.IO) {
-                        betweenUtils.queueSubscriptionInfo(it, subInfos[it]!!)
+                        betweenUtils.queueSubscriptionInfo(subInfos)
                         betweenUtils.queueNewSubId(subIds)
                     }
 
@@ -171,11 +171,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             launch(Dispatchers.Main) {
                 cellInfos[subId] = newInfo
 
-                SignalWidget().updateAll(this@UpdaterService)
-            }
+                launch(Dispatchers.IO) {
+                    betweenUtils.queueCellInfos(cellInfos)
+                }
 
-            launch(Dispatchers.IO) {
-                betweenUtils.queueCellInfos(subId, newInfo)
+                SignalWidget().updateAll(this@UpdaterService)
             }
         }
     }
@@ -209,12 +209,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 signalStrengths[subId] = strength
                 strengthInfos[subId] = newInfo
 
+                launch(Dispatchers.IO) {
+                    betweenUtils.queueSignalStrengths(strengthInfos)
+                }
+
                 SignalWidget().updateAll(this@UpdaterService)
             }
-        }
-
-        launch(Dispatchers.IO) {
-            betweenUtils.queueSignalStrengths(subId, newInfo)
         }
     }
 
@@ -224,10 +224,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
             launch(Dispatchers.Main) {
                 serviceStates[subId] = wrapped
-            }
 
-            launch(Dispatchers.IO) {
-                betweenUtils.queueServiceState(subId, wrapped)
+                launch(Dispatchers.IO) {
+                    betweenUtils.queueServiceState(serviceStates)
+                }
             }
         }
     }
@@ -261,10 +261,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 newList.forEach { subInfo ->
                     launch(Dispatchers.Main) {
                         CellModel.subInfos[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
-                    }
 
-                    launch(Dispatchers.IO) {
-                        betweenUtils.queueSubscriptionInfo(subInfo.subscriptionId, SubscriptionInfoWrapper(subInfo, this@UpdaterService))
+                        launch(Dispatchers.IO) {
+                            betweenUtils.queueSubscriptionInfo(CellModel.subInfos)
+                        }
                     }
                 }
             }

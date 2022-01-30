@@ -29,6 +29,7 @@ import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.math.sign
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private val loadCellInfosJobs = Collections.synchronizedList(arrayListOf<Job>())
@@ -205,7 +206,9 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 val cellInfos = betweenUtils.retrieveCellInfos(item)
 
                 withContext(Dispatchers.Main) {
-                    CellModelWear.cellInfos[cellInfos.first] = cellInfos.second
+                    cellInfos.forEach { (t, u) ->
+                        CellModelWear.cellInfos[t] = u
+                    }
                 }
 
                 coroutineContext[Job]?.let { loadCellInfosJobs.remove(it) }
@@ -219,7 +222,9 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
                 withContext(Dispatchers.Main) {
-                    CellModelWear.strengthInfos[signalStrengths.first] = signalStrengths.second
+                    signalStrengths.forEach { (t, u) ->
+                        CellModelWear.strengthInfos[t] = u
+                    }
                 }
 
                 coroutineContext[Job]?.let { loadCellSignalStrengthsJobs.remove(it) }
@@ -233,7 +238,9 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 val serviceState = betweenUtils.retrieveServiceState(item) ?: return@launch
 
                 withContext(Dispatchers.Main) {
-                    CellModelWear.serviceStates[serviceState.first] = serviceState.second
+                    serviceState.forEach { (t, u) ->
+                        CellModelWear.serviceStates[t] = u
+                    }
                 }
 
                 coroutineContext[Job]?.let { loadServiceStateJobs.remove(it) }
@@ -247,7 +254,9 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
 
                 withContext(Dispatchers.Main) {
-                    CellModelWear.subInfos[subInfo.first] = subInfo.second
+                    subInfo.forEach { (t, u) ->
+                        CellModelWear.subInfos[t] = u
+                    }
                 }
 
                 coroutineContext[Job]?.let { loadSubInfoJobs.remove(it) }

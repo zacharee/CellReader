@@ -62,13 +62,13 @@ fun MainContent() {
                                 .animateItemPlacement()
                                 .padding(bottom = 8.dp),
                             wear = false,
-                            signalStrength = signalStrengths[t]!!
+                            signalStrength = signalStrengths[t]
                         )
                     }
 
-                    val lastCellIndex = cellInfos[t]!!.lastIndex
-                    val lastStrengthIndex = strengthInfos[t]!!.lastIndex
-                    val strengthsEmpty = strengthInfos[t]!!.isEmpty()
+                    val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
+                    val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
+                    val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
 
                     itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
                         val isFinal = index == lastCellIndex && strengthsEmpty

@@ -156,103 +156,107 @@ class BetweenUtils private constructor(private val context: Context) {
     private val sendQueue = ConcurrentHashMap<Mutex, suspend () -> Unit>()
     private var lastSendTime = 0L
 
-    suspend fun queueCellInfos(subId: Int, wrapped: List<CellInfoWrapper>) {
+    suspend fun queueCellInfos(infos: Map<Int, List<CellInfoWrapper>>) {
         enqueue(cellMutex) {
-            sendCellInfos(subId, wrapped)
+            sendCellInfos(infos)
         }
     }
 
-    private suspend fun sendCellInfos(subId: Int, wrapped: List<CellInfoWrapper>) {
+    private suspend fun sendCellInfos(infos: Map<Int, List<CellInfoWrapper>>) {
         cellMutex.sendInfo(
             cellInfoGson,
             CELL_INFOS_PATH,
             listOf(
-                CELL_INFOS_KEY to (subId to wrapped)
+                CELL_INFOS_KEY to infos
             )
         )
     }
 
-    suspend fun retrieveCellInfos(dataItem: DataItem): Pair<Int, ArrayList<CellInfoWrapper>> {
+    suspend fun retrieveCellInfos(dataItem: DataItem): HashMap<Int, ArrayList<CellInfoWrapper>> {
         return retrieveInfo(
             cellInfoGson,
             dataItem,
             CELL_INFOS_KEY,
-            Pair(0, arrayListOf())
+            hashMapOf(),
+            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>() {}
         )
     }
 
-    suspend fun queueSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>) {
-        enqueue(subInfoMutex) {
-            sendSignalStrengths(subId, wrapped)
+    suspend fun queueSignalStrengths(strengths: Map<Int, List<CellSignalStrengthWrapper>>) {
+        enqueue(signalMutex) {
+            sendSignalStrengths(strengths)
         }
     }
 
-    private suspend fun sendSignalStrengths(subId: Int, wrapped: List<CellSignalStrengthWrapper>) {
+    private suspend fun sendSignalStrengths(strengths: Map<Int, List<CellSignalStrengthWrapper>>) {
         signalMutex.sendInfo(
             cellSignalStrengthGson,
             CELL_SIGNAL_STRENGTHS_PATH,
             listOf(
-                CELL_SIGNAL_STRENGTHS_KEY to (subId to wrapped)
+                CELL_SIGNAL_STRENGTHS_KEY to strengths
             )
         )
     }
 
-    suspend fun retrieveSignalStrengths(dataItem: DataItem): Pair<Int, ArrayList<CellSignalStrengthWrapper>> {
+    suspend fun retrieveSignalStrengths(dataItem: DataItem): HashMap<Int, ArrayList<CellSignalStrengthWrapper>> {
         return retrieveInfo(
             cellSignalStrengthGson,
             dataItem,
             CELL_SIGNAL_STRENGTHS_KEY,
-            Pair(0, arrayListOf())
+            hashMapOf(),
+            object : TypeToken<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>() {}
         )
     }
 
-    suspend fun queueServiceState(subId: Int, wrapped: ServiceStateWrapper?) {
+    suspend fun queueServiceState(states: Map<Int, ServiceStateWrapper?>) {
         enqueue(stateMutex) {
-            sendServiceState(subId, wrapped)
+            sendServiceState(states)
         }
     }
 
-    private suspend fun sendServiceState(subId: Int, wrapped: ServiceStateWrapper?) {
+    private suspend fun sendServiceState(states: Map<Int, ServiceStateWrapper?>) {
         stateMutex.sendInfo(
             serviceStateGson,
             SERVICE_STATE_PATH,
             listOf(
-                SERVICE_STATE_KEY to (subId to wrapped)
+                SERVICE_STATE_KEY to states
             )
         )
     }
 
-    suspend fun retrieveServiceState(dataItem: DataItem): Pair<Int, ServiceStateWrapper?>? {
+    suspend fun retrieveServiceState(dataItem: DataItem): HashMap<Int, ServiceStateWrapper?> {
         return retrieveInfo(
             serviceStateGson,
             dataItem,
             SERVICE_STATE_KEY,
-            null
+            hashMapOf(),
+            object : TypeToken<HashMap<Int, ServiceStateWrapper?>>() {}
         )
     }
 
-    suspend fun queueSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper) {
+    suspend fun queueSubscriptionInfo(infos: Map<Int, SubscriptionInfoWrapper?>) {
         enqueue(subInfoMutex) {
-            sendSubscriptionInfo(subId, wrapped)
+            sendSubscriptionInfo(infos)
         }
     }
 
-    private suspend fun sendSubscriptionInfo(subId: Int, wrapped: SubscriptionInfoWrapper) {
+    private suspend fun sendSubscriptionInfo(infos: Map<Int, SubscriptionInfoWrapper?>) {
         subInfoMutex.sendInfo(
             otherGson,
             SUB_INFO_PATH,
             listOf(
-                SUB_INFO_KEY to (subId to wrapped)
+                SUB_INFO_KEY to infos
             )
         )
     }
 
-    suspend fun retrieveSubscriptionInfo(dataItem: DataItem): Pair<Int, SubscriptionInfoWrapper?> {
+    suspend fun retrieveSubscriptionInfo(dataItem: DataItem): HashMap<Int, SubscriptionInfoWrapper?> {
         return retrieveInfo(
             otherGson,
             dataItem,
             SUB_INFO_KEY,
-            Pair(0, null)
+            hashMapOf(),
+            object : TypeToken<HashMap<Int, SubscriptionInfoWrapper?>>() {}
         )
     }
 
@@ -272,12 +276,13 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun retrieveNewSubId(dataItem: DataItem): List<Int> {
+    suspend fun retrieveNewSubId(dataItem: DataItem): ArrayList<Int> {
         return retrieveInfo(
             otherGson,
             dataItem,
             SUB_ID_KEY,
-            listOf()
+            arrayListOf(),
+            object : TypeToken<ArrayList<Int>>() {}
         )
     }
 
@@ -318,7 +323,8 @@ class BetweenUtils private constructor(private val context: Context) {
             otherGson,
             dataItem,
             PRIMARY_CELL_KEY,
-            0
+            0,
+            object : TypeToken<Int>() {}
         )
     }
 
@@ -360,7 +366,13 @@ class BetweenUtils private constructor(private val context: Context) {
         }
     }
 
-    private suspend inline fun <reified T : Any?> retrieveInfo(gson: Gson, dataItem: DataItem, key: String, empty: T): T {
+    private suspend inline fun <reified T : Any?> retrieveInfo(
+        gson: Gson,
+        dataItem: DataItem,
+        key: String,
+        empty: T,
+        typeToken: TypeToken<T>
+    ): T {
         val asset = try {
             DataMapItem.fromDataItem(dataItem)
                 .dataMap
@@ -376,13 +388,11 @@ class BetweenUtils private constructor(private val context: Context) {
         val response = dataClient.getFdForAsset(asset).await()
         val json = response.inputStream.bufferedReader().use { input -> input.readText() }
 
-        Log.e("CellReader", "json $json")
-
         return try {
             gson.fromJson<T>(
                 json,
-                object : TypeToken<T>() {}.type
-            )?.also { Log.e("CellReader", "Class ${it::class.java} $it") } ?: empty
+                typeToken.type
+            ) ?: empty
         } catch (e: Exception) {
             Log.e("CellReader", "error", e)
             empty

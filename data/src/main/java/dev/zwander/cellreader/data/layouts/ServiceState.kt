@@ -46,7 +46,7 @@ fun ServiceState(
             FormatText(
                 R.string.roaming_type_format,
                 HashSet(networkRegistrationInfos?.map { it.roamingType } ?: listOf())
-                    .joinToString("/") { ServiceState.roamingTypeToString(it) }
+                    .joinToString("/") { ServiceStateWrapper.roamingTypeToString(it) }
             )
         } else {
             FormatText(
@@ -58,15 +58,15 @@ fun ServiceState(
 
         FormatText(
             R.string.state_format,
-            setOf(dataRegState, voiceRegState).joinToString("/") { ServiceState.rilServiceStateToString(it) }
+            setOf(dataRegState, voiceRegState).joinToString("/") { ServiceStateWrapper.rilServiceStateToString(it) }
         )
         FormatText(R.string.emergency_only_format, "$emergencyOnly")
 
         FormatText(
             R.string.network_type_format,
             setOf(dataNetworkType, voiceNetworkType).joinToString("/") {
-                ServiceState.rilRadioTechnologyToString(
-                    ServiceState.networkTypeToRilRadioTechnology(
+                ServiceStateWrapper.rilRadioTechnologyToString(
+                    ServiceStateWrapper.networkTypeToRilRadioTechnology(
                         it
                     )
                 )

@@ -2,6 +2,7 @@ package dev.zwander.cellreader.data.wrappers
 
 import android.os.Build
 import android.telephony.NetworkRegistrationInfo
+import android.telephony.NetworkRegistrationInfo.RegistrationState
 
 data class NetworkRegistrationInfoWrapper(
     val domain: Int,
@@ -19,6 +20,31 @@ data class NetworkRegistrationInfoWrapper(
     val rplmn: String?,
     val isUsingCarrierAggregation: Boolean,
 ) {
+    companion object {
+        fun registrationStateToString(@RegistrationState registrationState: Int): String {
+            when (registrationState) {
+                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING -> return "NOT_REG_OR_SEARCHING"
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME -> return "HOME"
+                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING -> return "NOT_REG_SEARCHING"
+                NetworkRegistrationInfo.REGISTRATION_STATE_DENIED -> return "DENIED"
+                NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN -> return "UNKNOWN"
+                NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING -> return "ROAMING"
+            }
+            return "Unknown reg state $registrationState"
+        }
+
+        fun serviceTypeToString(@NetworkRegistrationInfo.ServiceType serviceType: Int): String {
+            when (serviceType) {
+                NetworkRegistrationInfo.SERVICE_TYPE_VOICE -> return "VOICE"
+                NetworkRegistrationInfo.SERVICE_TYPE_DATA -> return "DATA"
+                NetworkRegistrationInfo.SERVICE_TYPE_SMS -> return "SMS"
+                NetworkRegistrationInfo.SERVICE_TYPE_VIDEO -> return "VIDEO"
+                NetworkRegistrationInfo.SERVICE_TYPE_EMERGENCY -> return "EMERGENCY"
+            }
+            return "Unknown service type $serviceType"
+        }
+    }
+
     val isRegistered: Boolean
         get() = registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
                 || registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING

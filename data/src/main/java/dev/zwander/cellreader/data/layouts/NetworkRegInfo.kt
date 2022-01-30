@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.os.Build
-import android.telephony.AccessNetworkConstants
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
 import androidx.compose.foundation.BorderStroke
@@ -18,6 +17,7 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.layouts.cellIdentity.CellIdentity
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.NetworkRegistrationInfoWrapper
+import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 
 @Composable
 fun NetworkRegInfo(
@@ -81,8 +81,8 @@ fun NetworkRegInfo(
                     )
                     FormatText(
                         R.string.access_format,
-                        ServiceState.rilRadioTechnologyToString(
-                            ServiceState.networkTypeToRilRadioTechnology(
+                        ServiceStateWrapper.rilRadioTechnologyToString(
+                            ServiceStateWrapper.networkTypeToRilRadioTechnology(
                                 accessNetworkTechnology
                             )
                         )
@@ -98,14 +98,14 @@ fun NetworkRegInfo(
                     }
                     FormatText(
                         R.string.roaming_format,
-                        ServiceState.roamingTypeToString(
+                        ServiceStateWrapper.roamingTypeToString(
                             roamingType
                         )
                     )
 
                     FormatText(
                         R.string.registration_state_format,
-                        NetworkRegistrationInfo.registrationStateToString(
+                        NetworkRegistrationInfoWrapper.registrationStateToString(
                             registrationState
                         )
                     )
@@ -118,7 +118,7 @@ fun NetworkRegInfo(
                     FormatText(
                         R.string.services_format,
                         availableServices.joinToString(", ") {
-                            NetworkRegistrationInfo.serviceTypeToString(
+                            NetworkRegistrationInfoWrapper.serviceTypeToString(
                                 it
                             )
                         })

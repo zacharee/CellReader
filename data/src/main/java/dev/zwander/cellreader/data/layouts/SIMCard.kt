@@ -80,8 +80,6 @@ fun CellModelBase.SIMCard(
                     mutableStateOf("000-000")
                 }
 
-                Log.e("CellReader", "${serviceStates[subInfo?.id]}")
-
                 LaunchedEffect(key1 = serviceStates[subInfo?.id]) {
                     rplmn = serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
