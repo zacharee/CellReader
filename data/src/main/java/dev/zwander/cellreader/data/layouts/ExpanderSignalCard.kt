@@ -68,12 +68,14 @@ fun ExpanderSignalCard(
                                 bottom = if (expandedInfo != null) 0.dp else 8.dp
                             )
                         ) {
-                            Row(
+                            HybridFlowRow(
                                 verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                mainAxisSpacing = 8.dp,
+                                mainAxisAlignment = FlowMainAxisAlignment.Center,
+                                crossAxisAlignment = FlowCrossAxisAlignment.Center
                             ) {
                                 LevelIndicator(level, dBm, type)
-
-                                Spacer(Modifier.size(8.dp))
 
                                 FlowRow(
                                     mainAxisSpacing = 16.dp,
