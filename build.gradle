@@ -1,6 +1,8 @@
 buildscript {
     ext {
         compose_version = '1.2.0-alpha02'
+        version_code = 3
+        version_name = "0.3"
     }
 }
 plugins {

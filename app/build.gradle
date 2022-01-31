@@ -10,8 +10,8 @@ android {
         applicationId "dev.zwander.cellreader"
         minSdk 28
         targetSdk 31
-        versionCode 2
-        versionName "0.2"
+        versionCode version_code
+        versionName version_name
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

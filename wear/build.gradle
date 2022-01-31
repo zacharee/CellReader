@@ -10,8 +10,8 @@ android {
         applicationId "dev.zwander.cellreader"
         minSdk 28
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        versionCode version_code
+        versionName version_name
 
     }
 
