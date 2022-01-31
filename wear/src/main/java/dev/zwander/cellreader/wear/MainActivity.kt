@@ -13,11 +13,11 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import com.google.android.gms.wearable.*
 import dev.zwander.cellreader.data.BetweenUtils
+import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
@@ -59,13 +59,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         setContent {
             CellReaderTheme {
-                CompositionLocalProvider(
-                    androidx.compose.material.LocalTextStyle provides LocalTextStyle.current,
-                    androidx.compose.material.LocalContentAlpha provides LocalContentAlpha.current,
-                    androidx.compose.material.LocalContentColor provides LocalContentColor.current
-                ) {
-                    MainContent()
-                }
+                MainContent()
             }
         }
 

@@ -16,9 +16,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
-import dev.zwander.cellreader.ui.theme.CellReaderTheme
 import dev.zwander.cellreader.utils.PermissionUtils
 
 

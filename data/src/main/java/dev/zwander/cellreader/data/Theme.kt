@@ -1,6 +1,7 @@
-package dev.zwander.cellreader.wear
+package dev.zwander.cellreader.data
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
@@ -11,27 +12,13 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Colors
 import androidx.wear.compose.material.Shapes
 import androidx.wear.compose.material.Typography
-import dev.zwander.cellreader.data.R
 
-// Set of Material typography styles to start with
 val Typography = Typography(
     body1 = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     )
-    /* Other default text styles to override
-    button = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W500,
-        fontSize = 14.sp
-    ),
-    caption = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
-    )
-    */
 )
 
 @Composable
@@ -44,14 +31,32 @@ fun CellReaderTheme(content: @Composable() () -> Unit) {
         background = colorResource(id = R.color.background)
     )
 
-    androidx.wear.compose.material.MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes(
+    androidx.compose.material.MaterialTheme(
+        colors = darkColors(
+            primary = colors.primary,
+            primaryVariant = colors.primaryVariant,
+            secondary = colors.secondary,
+            surface = colors.surface,
+            background = colors.background
+        ),
+        typography = androidx.compose.material.Typography(
+            body1 = Typography.body1
+        ),
+        shapes = androidx.compose.material.Shapes(
             small = RoundedCornerShape(12.dp),
             medium = RoundedCornerShape(12.dp),
             large = RoundedCornerShape(12.dp)
-        ),
-        content = content
-    )
+        )
+    ) {
+        androidx.wear.compose.material.MaterialTheme(
+            colors = colors,
+            typography = Typography,
+            shapes = Shapes(
+                small = RoundedCornerShape(12.dp),
+                medium = RoundedCornerShape(12.dp),
+                large = RoundedCornerShape(12.dp)
+            ),
+            content = content
+        )
+    }
 }
