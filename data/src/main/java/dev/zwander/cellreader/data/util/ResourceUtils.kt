@@ -1,54 +1,51 @@
 package dev.zwander.cellreader.data.util
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.Text
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.unit.sp
 import dev.zwander.cellreader.data.components.WearSafeText
 
 @Composable
 fun FormatText(
     textId: Int,
-    vararg textFormat: Any,
+    textFormat: Any?,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    fontSize: TextUnit = TextUnit.Unspecified,
-    fontStyle: FontStyle? = null,
-    fontWeight: FontWeight? = null,
-    fontFamily: FontFamily? = null,
-    letterSpacing: TextUnit = TextUnit.Unspecified,
-    textDecoration: TextDecoration? = null,
-    textAlign: TextAlign? = null,
-    lineHeight: TextUnit = TextUnit.Unspecified,
-    overflow: TextOverflow = TextOverflow.Clip,
-    softWrap: Boolean = true,
-    maxLines: Int = Int.MAX_VALUE,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
-    style: TextStyle = LocalTextStyle.current,
+    vertical: Boolean = true
 ) {
-    val string = if (textFormat.isEmpty()) {
-        stringResource(id = textId)
-    } else {
-        stringResource(id = textId, *textFormat)
-    }
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (vertical) {
+            WearSafeText(
+                text = textFormat.toString(),
+            )
 
-    WearSafeText(
-        string,
-        modifier, color, fontSize, fontStyle,
-        fontWeight, fontFamily, letterSpacing, textDecoration,
-        textAlign, lineHeight, overflow, softWrap, maxLines,
-        onTextLayout, style
-    )
+            ProvideTextStyle(
+                value = TextStyle(
+                    baselineShift = BaselineShift.Superscript
+                )
+            ) {
+                WearSafeText(
+                    text = stringResource(id = textId),
+                    fontSize = 12.sp,
+                )
+            }
+        } else {
+            val string = if (textFormat == null) {
+                stringResource(id = textId)
+            } else {
+                stringResource(id = textId, textFormat)
+            }
+
+            WearSafeText(text = string)
+        }
+    }
 }
