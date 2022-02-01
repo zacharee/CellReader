@@ -154,20 +154,17 @@ fun Int.avail() = this != CellInfo.UNAVAILABLE
 fun Long.avail() = this != CellInfo.UNAVAILABLE_LONG
 
 @SuppressLint("ComposableNaming")
-@Composable
-fun Int.onAvail(block: @Composable()(Int) -> Unit) {
+inline fun Int.onAvail(block: (Int) -> Unit) {
     if (avail()) block(this)
 }
 
 @SuppressLint("ComposableNaming")
-@Composable
-fun Long.onAvail(block: @Composable()(Long) -> Unit) {
+inline fun Long.onAvail(block: (Long) -> Unit) {
     if (avail()) block(this)
 }
 
 @SuppressLint("ComposableNaming")
-@Composable
-fun Int.onNegAvail(block: @Composable()(Int) -> Unit) {
+inline fun Int.onNegAvail(block: (Int) -> Unit) {
     if (this != -1) block(this)
 }
 

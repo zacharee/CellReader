@@ -17,9 +17,9 @@ import dev.zwander.cellreader.data.data.StateListener
 import dev.zwander.cellreader.data.data.TelephonyListener
 import dev.zwander.cellreader.data.data.TelephonyListenerCallback
 import dev.zwander.cellreader.data.util.CellUtils
-import dev.zwander.cellreader.data.util.cellIdentityCompat
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.wrappers.*
+import dev.zwander.cellreader.widget.SignalWidget
 import kotlinx.coroutines.*
 
 class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
