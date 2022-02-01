@@ -281,7 +281,7 @@ class SignalWidget : GlanceAppWidget() {
                     }
                 }
 
-                if (size.width >= 250.dp) {
+                if (size.width >= 190.dp) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
