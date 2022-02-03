@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.CellReader" parent="android:Theme.Material.NoActionBar">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.CellReader" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:navigationBarColor">@color/background</item>
         <item name="android:colorBackground">@color/background</item>
+    </style>
 
+    <style name="Glance.AppWidget.Theme" parent="Theme.CellReader" tools:override="true">
         <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:listSelector">@android:color/transparent</item>
     </style>
 </resources>

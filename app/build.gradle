@@ -51,6 +51,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     implementation 'androidx.glance:glance:1.0.0-alpha02'
     implementation 'androidx.glance:glance-appwidget:1.0.0-alpha02'
+    implementation 'com.google.android.material:material:1.6.0-alpha02'
 
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.22.0-rc"
     implementation "com.google.accompanist:accompanist-insets:0.22.0-rc"
