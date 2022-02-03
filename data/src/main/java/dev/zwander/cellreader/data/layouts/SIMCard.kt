@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -107,7 +108,9 @@ fun CellModelBase.SIMCard(
                     }
                     WearSafeText(
                         text = "${subInfo?.carrierName}",
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
 
                     Spacer(Modifier.weight(1f))

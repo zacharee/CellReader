@@ -24,9 +24,9 @@ fun LevelIndicator(level: Int, dBm: Int, type: String) {
             WearSafeText(
                 text = type.first().toString(),
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 modifier = Modifier.align(Alignment.TopCenter)
-                    .padding(end = 16.dp)
+                    .padding(end = 14.dp)
             )
 
             Image(
@@ -41,8 +41,8 @@ fun LevelIndicator(level: Int, dBm: Int, type: String) {
                 ),
                 contentDescription = null,
                 modifier = Modifier
-                    .width(32.dp)
-                    .height(32.dp),
+                    .width(28.dp)
+                    .height(28.dp),
                 contentScale = ContentScale.Fit
             )
         }
@@ -52,7 +52,7 @@ fun LevelIndicator(level: Int, dBm: Int, type: String) {
             modifier = Modifier.width(64.dp),
             maxLines = 1,
             textAlign = TextAlign.Center,
-            fontSize = 14.sp,
+            fontSize = 13.sp,
             overflow = TextOverflow.Ellipsis
         )
     }
