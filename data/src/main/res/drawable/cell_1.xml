@@ -18,11 +18,12 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportHeight="24"
+    android:tint="?android:textColorSecondary">
     <path
-        android:fillColor="?android:textColorSecondary"
+        android:fillColor="@android:color/white"
         android:pathData="M20,7v13H7L20,7 M22,2L2,22h20V2L22,2z" />
     <path
-        android:fillColor="?android:textColorSecondary"
+        android:fillColor="@android:color/white"
         android:pathData="M 11 13 L 2 22 L 11 22 Z" />
 </vector>

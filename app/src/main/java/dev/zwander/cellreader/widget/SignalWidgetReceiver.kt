@@ -21,12 +21,14 @@ import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import dev.zwander.cellreader.BuildConfig
 import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
 import kotlinx.coroutines.GlobalScope
@@ -75,24 +77,37 @@ class SignalWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun SignalBarGroup(level: Int, dbm: Int) {
+    private fun SignalBarGroup(level: Int, dbm: Int, type: String) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                provider = ImageProvider(
-                    when (level) {
-                        CellSignalStrength.SIGNAL_STRENGTH_POOR -> R.drawable.cell_1
-                        CellSignalStrength.SIGNAL_STRENGTH_MODERATE -> R.drawable.cell_2
-                        CellSignalStrength.SIGNAL_STRENGTH_GOOD -> R.drawable.cell_3
-                        CellSignalStrength.SIGNAL_STRENGTH_GREAT -> R.drawable.cell_4
-                        else -> R.drawable.cell_0
-                    }
-                ),
-                contentDescription = null,
-                modifier = GlanceModifier.size(32.dp),
-                contentScale = ContentScale.Fit,
-            )
+            Box(
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Text(
+                    text = type.first().toString(),
+                    style = TextStyle(
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp,
+                    ),
+                    modifier = GlanceModifier.padding(end = 14.dp)
+                )
+
+                Image(
+                    provider = ImageProvider(
+                        when (level) {
+                            CellSignalStrength.SIGNAL_STRENGTH_POOR -> R.drawable.cell_1
+                            CellSignalStrength.SIGNAL_STRENGTH_MODERATE -> R.drawable.cell_2
+                            CellSignalStrength.SIGNAL_STRENGTH_GOOD -> R.drawable.cell_3
+                            CellSignalStrength.SIGNAL_STRENGTH_GREAT -> R.drawable.cell_4
+                            else -> R.drawable.cell_0
+                        }
+                    ),
+                    contentDescription = null,
+                    modifier = GlanceModifier.size(32.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
 
             Text(
                 text = dbm.toString(),
@@ -105,25 +120,6 @@ class SignalWidget : GlanceAppWidget() {
 
     private fun CellInfoWrapper.createItems(context: Context): Map<String, Any?> {
         return hashMapOf<String, Any?>().apply {
-            put(
-                context.resources.getString(
-                    R.string.type_format
-                ),
-                context.resources.getString(
-                    cellSignalStrength.run {
-                        when {
-                            this is CellSignalStrengthGsmWrapper -> R.string.gsm
-                            this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
-                            this is CellSignalStrengthCdmaWrapper -> R.string.cdma
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
-                            this is CellSignalStrengthLteWrapper -> R.string.lte
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
-                            else -> R.string.unknown
-                        }
-                    }
-                )
-            )
-
             with (cellSignalStrength) {
                 when {
                     this is CellSignalStrengthLteWrapper -> {
@@ -223,6 +219,13 @@ class SignalWidget : GlanceAppWidget() {
                         }
                     }
                 }
+
+                if (!plmn.isNullOrBlank()) {
+                    put(
+                        context.resources.getString(R.string.plmn_format),
+                        plmn.asMccMnc
+                    )
+                }
             }
         }
     }
@@ -240,6 +243,22 @@ class SignalWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.padding(8.dp)
                     .fillMaxWidth(),
             ) {
+               val type = remember(cellInfo.cellSignalStrength) {
+                   context.resources.getString(
+                       cellInfo.cellSignalStrength.run {
+                           when {
+                               this is CellSignalStrengthGsmWrapper -> R.string.gsm
+                               this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
+                               this is CellSignalStrengthCdmaWrapper -> R.string.cdma
+                               Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
+                               this is CellSignalStrengthLteWrapper -> R.string.lte
+                               Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
+                               else -> R.string.unknown
+                           }
+                       }
+                   )
+               }
+
                 val items = remember(cellInfo) {
                     cellInfo.createItems(context)
                 }
@@ -283,7 +302,7 @@ class SignalWidget : GlanceAppWidget() {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm)
+                        SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
 
                         Spacer(GlanceModifier.size(16.dp))
 
@@ -297,7 +316,7 @@ class SignalWidget : GlanceAppWidget() {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm)
+                        SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
 
                         Spacer(GlanceModifier.size(8.dp))
 

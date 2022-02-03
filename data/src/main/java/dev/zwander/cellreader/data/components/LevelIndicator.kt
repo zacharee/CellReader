@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -45,7 +46,7 @@ fun LevelIndicator(level: Int, dBm: Int, type: String) {
                     .width(28.dp)
                     .height(28.dp),
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(Color.White)
+                colorFilter = ColorFilter.tint(Color.White, blendMode = BlendMode.DstIn)
             )
         }
 
