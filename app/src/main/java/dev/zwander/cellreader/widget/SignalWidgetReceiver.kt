@@ -23,6 +23,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import dev.zwander.cellreader.BuildConfig
 import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
@@ -47,28 +48,37 @@ class SignalWidget : GlanceAppWidget() {
         with (CellModel) {
             Box(
                 modifier = GlanceModifier.cornerRadius(8.dp)
-                    .background(Color(0xff121212))
+                    .appWidgetBackground()
                     .fillMaxSize()
             ) {
                 LazyColumn(
                     modifier = GlanceModifier.fillMaxSize()
                 ) {
-                    sortedSubIds.forEach { t ->
+                    sortedSubIds.forEachIndexed { index, t ->
                         item(t.toLong()) {
                             Box(
-                                modifier = GlanceModifier.height(48.dp)
-                                    .fillMaxWidth(),
-                                contentAlignment = Alignment.Center
+                                modifier = GlanceModifier.padding(bottom = 4.dp, top = if (index > 0) 4.dp else 0.dp)
                             ) {
-                                FormatWidgetText(
-                                    name = context.resources.getString(R.string.sim_slot_format),
-                                    value = t
-                                )
+                                Box(
+                                    modifier = GlanceModifier.height(40.dp)
+                                        .fillMaxWidth()
+                                        .background(ImageProvider(R.drawable.sim_card_widget_background))
+                                        .cornerRadius(12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    FormatWidgetText(
+                                        name = context.resources.getString(R.string.sim_slot_format),
+                                        value = t
+                                    )
+                                }
                             }
                         }
 
-                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { _, item ->
-                            SignalCard(cellInfo = item, size = size)
+                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { index, item ->
+                            SignalCard(
+                                cellInfo = item, size = size,
+                                modifier = if (index < cellInfos[t]!!.lastIndex) GlanceModifier.padding(bottom = 4.dp) else GlanceModifier
+                            )
                         }
                     }
                 }
@@ -89,6 +99,7 @@ class SignalWidget : GlanceAppWidget() {
                     style = TextStyle(
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
+                        color = ColorProvider(Color.White)
                     ),
                     modifier = GlanceModifier.padding(end = 14.dp)
                 )
@@ -112,7 +123,8 @@ class SignalWidget : GlanceAppWidget() {
             Text(
                 text = dbm.toString(),
                 style = TextStyle(
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    color = ColorProvider(Color.White)
                 )
             )
         }
@@ -231,96 +243,104 @@ class SignalWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun SignalCard(cellInfo: CellInfoWrapper, size: DpSize) {
+    private fun SignalCard(cellInfo: CellInfoWrapper, size: DpSize, modifier: GlanceModifier) {
         val context = LocalContext.current
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = GlanceModifier.fillMaxWidth()
+        Box(
+            modifier = modifier
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = GlanceModifier.padding(8.dp)
-                    .fillMaxWidth(),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = GlanceModifier.fillMaxWidth()
+                    .background(imageProvider = ImageProvider(R.drawable.signal_card_widget_background))
+                    .cornerRadius(12.dp)
             ) {
-               val type = remember(cellInfo.cellSignalStrength) {
-                   context.resources.getString(
-                       cellInfo.cellSignalStrength.run {
-                           when {
-                               this is CellSignalStrengthGsmWrapper -> R.string.gsm
-                               this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
-                               this is CellSignalStrengthCdmaWrapper -> R.string.cdma
-                               Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
-                               this is CellSignalStrengthLteWrapper -> R.string.lte
-                               Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
-                               else -> R.string.unknown
-                           }
-                       }
-                   )
-               }
-
-                val items = remember(cellInfo) {
-                    cellInfo.createItems(context)
-                }
-                val itemGridArray by derivedStateOf {
-                    val grid = hashMapOf<Int, MutableList<Pair<String, Any?>>>()
-                    val rowSize = 3
-
-                    items.entries.forEachIndexed { index, entry ->
-                        val gridRowIndex = index / rowSize
-                        val gridColumnIndex = index % rowSize
-
-                        if (!grid.containsKey(gridRowIndex)) {
-                            grid[gridRowIndex] = mutableListOf()
-                        }
-
-                        grid[gridRowIndex]?.add(gridColumnIndex, entry.toPair())
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = GlanceModifier.padding(start = 8.dp, end = 8.dp)
+                        .fillMaxWidth(),
+                ) {
+                    val type = remember(cellInfo.cellSignalStrength) {
+                        context.resources.getString(
+                            cellInfo.cellSignalStrength.run {
+                                when {
+                                    this is CellSignalStrengthGsmWrapper -> R.string.gsm
+                                    this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
+                                    this is CellSignalStrengthCdmaWrapper -> R.string.cdma
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
+                                    this is CellSignalStrengthLteWrapper -> R.string.lte
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
+                                    else -> R.string.unknown
+                                }
+                            }
+                        )
                     }
 
-                    grid
-                }
+                    val items = remember(cellInfo) {
+                        cellInfo.createItems(context)
+                    }
+                    val itemGridArray by derivedStateOf {
+                        val grid = hashMapOf<Int, MutableList<Pair<String, Any?>>>()
+                        val rowSize = 3
 
-                @Composable
-                fun itemGrid() {
-                    itemGridArray.forEach { (_, columns) ->
-                        Row(
-                            modifier = GlanceModifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            columns.forEachIndexed { index, column ->
-                                FormatWidgetText(name = column.first, value = column.second)
+                        items.entries.forEachIndexed { index, entry ->
+                            val gridRowIndex = index / rowSize
+                            val gridColumnIndex = index % rowSize
 
-                                if (index < columns.lastIndex) {
-                                    Spacer(GlanceModifier.defaultWeight())
+                            if (!grid.containsKey(gridRowIndex)) {
+                                grid[gridRowIndex] = mutableListOf()
+                            }
+
+                            grid[gridRowIndex]?.add(gridColumnIndex, entry.toPair())
+                        }
+
+                        grid
+                    }
+
+                    @Composable
+                    fun itemGrid() {
+                        itemGridArray.forEach { (_, columns) ->
+                            Row(
+                                modifier = GlanceModifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Spacer(GlanceModifier.defaultWeight())
+                                columns.forEachIndexed { index, column ->
+                                    FormatWidgetText(name = column.first, value = column.second)
+
+                                    if (index < columns.lastIndex) {
+                                        Spacer(GlanceModifier.defaultWeight())
+                                    }
                                 }
+                                Spacer(GlanceModifier.defaultWeight())
                             }
                         }
                     }
-                }
 
-                if (size.width >= 190.dp) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
-
-                        Spacer(GlanceModifier.size(16.dp))
-
-                        Column(
-                            modifier = GlanceModifier.fillMaxWidth()
+                    if (size.width >= 190.dp) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
+
+                            Spacer(GlanceModifier.size(8.dp))
+
+                            Column(
+                                modifier = GlanceModifier.fillMaxWidth()
+                            ) {
+                                itemGrid()
+                            }
+                        }
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
+
+                            Spacer(GlanceModifier.size(8.dp))
+
                             itemGrid()
                         }
-                    }
-                } else {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
-
-                        Spacer(GlanceModifier.size(8.dp))
-
-                        itemGrid()
                     }
                 }
             }
