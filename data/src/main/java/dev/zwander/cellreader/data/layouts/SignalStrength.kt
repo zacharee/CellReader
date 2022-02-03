@@ -37,8 +37,7 @@ fun SignalStrength(
 fun CellSignalStrengthCard(
     cellSignalStrength: CellSignalStrengthWrapper,
     isFinal: Boolean,
-    modifier: Modifier = Modifier,
-    wear: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     ExpanderSignalCard(
         isFinal = isFinal,

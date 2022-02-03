@@ -235,13 +235,40 @@ fun MainContent() {
 
                                 val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
                                 val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
-                                val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
+                                val cellInfosEmpty = cellInfos[t]?.isEmpty() ?: true
+
+                                strengthInfos[t]?.let { strengthInfo ->
+                                    itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
+                                        val isFinal = index == lastStrengthIndex && cellInfosEmpty
+
+                                        AnimatedVisibility(
+                                            visible = showingCells[t] != false,
+                                            modifier = Modifier
+                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                                            enter = fadeIn() + expandIn(
+                                                clip = false,
+                                                expandFrom = Alignment.TopEnd
+                                            ),
+                                            exit = shrinkOut(
+                                                clip = false,
+                                                shrinkTowards = Alignment.TopEnd
+                                            ) + fadeOut()
+                                        ) {
+                                            CellSignalStrengthCard(
+                                                cellSignalStrength = item,
+                                                isFinal = isFinal,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            )
+                                        }
+                                    }
+                                }
 
                                 cellInfos[t]?.let { cellInfo ->
                                     itemsIndexed(
                                         cellInfo,
                                         { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                                        val isFinal = index == lastCellIndex && strengthsEmpty
+                                        val isFinal = index == lastCellIndex
 
                                         AnimatedVisibility(
                                             visible = showingCells[t] != false,
@@ -265,34 +292,6 @@ fun MainContent() {
                                                 expanded = expanded[key] ?: false,
                                                 isFinal = isFinal,
                                                 onExpand = { expanded[key] = it },
-                                                modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                wear = true
-                                            )
-                                        }
-                                    }
-                                }
-
-                                strengthInfos[t]?.let { strengthInfo ->
-                                    itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
-                                        val isFinal = index == lastStrengthIndex
-
-                                        AnimatedVisibility(
-                                            visible = showingCells[t] != false,
-                                            modifier = Modifier
-                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                            enter = fadeIn() + expandIn(
-                                                clip = false,
-                                                expandFrom = Alignment.TopEnd
-                                            ),
-                                            exit = shrinkOut(
-                                                clip = false,
-                                                shrinkTowards = Alignment.TopEnd
-                                            ) + fadeOut()
-                                        ) {
-                                            CellSignalStrengthCard(
-                                                cellSignalStrength = item,
-                                                isFinal = isFinal,
                                                 modifier = Modifier
                                                     .fillMaxWidth(),
                                                 wear = true

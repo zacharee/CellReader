@@ -66,10 +66,30 @@ fun MainContent() {
 
                     val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
                     val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
-                    val strengthsEmpty = strengthInfos[t]?.isEmpty() ?: true
+                    val cellInfosEmpty = cellInfos[t]?.isEmpty() ?: true
+
+                    itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
+                        val isFinal = index == lastStrengthIndex && cellInfosEmpty
+
+                        AnimatedVisibility(
+                            visible = showingCells[t] != false,
+                            modifier = Modifier
+                                .animateItemPlacement()
+                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
+                            enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
+                            exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
+                        ) {
+                            CellSignalStrengthCard(
+                                cellSignalStrength = item,
+                                isFinal = isFinal,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
 
                     itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                        val isFinal = index == lastCellIndex && strengthsEmpty
+                        val isFinal = index == lastCellIndex
 
                         AnimatedVisibility(
                             visible = showingCells[t] != false,
@@ -88,27 +108,6 @@ fun MainContent() {
                                 expanded = expanded[key] ?: false,
                                 isFinal = isFinal,
                                 onExpand = { expanded[key] = it },
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                wear = false
-                            )
-                        }
-                    }
-
-                    itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
-                        val isFinal = index == lastStrengthIndex
-
-                        AnimatedVisibility(
-                            visible = showingCells[t] != false,
-                            modifier = Modifier
-                                .animateItemPlacement()
-                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                            enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
-                            exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
-                        ) {
-                            CellSignalStrengthCard(
-                                cellSignalStrength = item,
-                                isFinal = isFinal,
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 wear = false
