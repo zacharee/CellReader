@@ -1,6 +1,5 @@
 package dev.zwander.cellreader.data.components
 
-import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter

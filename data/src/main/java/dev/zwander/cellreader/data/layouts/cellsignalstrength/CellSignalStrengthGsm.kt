@@ -3,7 +3,6 @@ package dev.zwander.cellreader.data.layouts.cellsignalstrength
 import android.os.Build
 import androidx.compose.runtime.Composable
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.bitErrorRateCompat
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthGsmWrapper

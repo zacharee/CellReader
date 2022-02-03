@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.data.wrappers
 
 import android.telephony.UiccAccessRule
-import com.android.internal.telephony.uicc.IccUtils
 
 data class UiccAccessRuleWrapper(
     val certificateHash: ByteArray,

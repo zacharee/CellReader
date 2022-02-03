@@ -5,14 +5,12 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.telephony.*
-import android.util.Log
+import android.telephony.CellSignalStrength
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,8 +25,8 @@ import androidx.glance.text.TextStyle
 import dev.zwander.cellreader.BuildConfig
 import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
-import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
 import kotlinx.coroutines.GlobalScope

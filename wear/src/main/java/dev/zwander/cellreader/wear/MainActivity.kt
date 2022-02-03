@@ -8,14 +8,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
-import com.google.android.gms.wearable.*
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.DataItem
+import com.google.android.gms.wearable.Wearable
 import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModelWear

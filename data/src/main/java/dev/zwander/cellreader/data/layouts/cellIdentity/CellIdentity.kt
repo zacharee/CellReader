@@ -1,13 +1,14 @@
 package dev.zwander.cellreader.data.layouts.cellIdentity
 
 import android.os.Build
-import android.telephony.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.getBands
-import dev.zwander.cellreader.data.util.*
+import dev.zwander.cellreader.data.util.FormatText
+import dev.zwander.cellreader.data.util.onAvail
+import dev.zwander.cellreader.data.util.onCast
 import dev.zwander.cellreader.data.wrappers.*
 
 @Composable

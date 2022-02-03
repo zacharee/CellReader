@@ -1,6 +1,5 @@
 package dev.zwander.cellreader.data.layouts.cellIdentity
 
-import android.telephony.CellIdentityCdma
 import androidx.compose.runtime.Composable
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.util.FormatText

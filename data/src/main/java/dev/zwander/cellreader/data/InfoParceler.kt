@@ -1,11 +1,8 @@
 package dev.zwander.cellreader.data
 
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
-import android.telephony.*
 import com.google.android.gms.wearable.DataMap
-import io.gsonfire.GsonFireBuilder
 
 object InfoParceler {
 

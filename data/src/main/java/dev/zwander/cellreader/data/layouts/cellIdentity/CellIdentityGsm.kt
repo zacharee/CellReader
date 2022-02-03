@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.data.layouts.cellIdentity
 
 import android.os.Build
-import android.telephony.CellIdentityGsm
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.data.ARFCNInfo

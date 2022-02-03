@@ -4,12 +4,8 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.*
-import dev.zwander.cellreader.data.SubsComparator
-import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
-import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
-import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
-import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 
 object CellModel : CellModelBase() {
     val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()

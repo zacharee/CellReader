@@ -1,8 +1,6 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.os.Build
-import android.telephony.NetworkRegistrationInfo
-import android.telephony.ServiceState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card

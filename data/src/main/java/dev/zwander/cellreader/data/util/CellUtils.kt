@@ -2,8 +2,10 @@ package dev.zwander.cellreader.data.util
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.telephony.*
-import androidx.compose.runtime.Composable
+import android.telephony.CellInfo
+import android.telephony.NetworkRegistrationInfo
+import android.telephony.ServiceState
+import android.telephony.SubscriptionManager
 import dev.zwander.cellreader.data.wrappers.*
 import kotlin.math.absoluteValue
 

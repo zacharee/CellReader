@@ -3,7 +3,6 @@ package dev.zwander.cellreader.data.components
 import android.telephony.CellSignalStrength
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
