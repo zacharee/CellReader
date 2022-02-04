@@ -4,14 +4,16 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Icon
 import android.os.Build
+import android.telephony.AccessNetworkConstants
 import android.telephony.CellSignalStrength
 import android.telephony.CellSignalStrengthWcdma
+import android.telephony.TelephonyManager
 import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -31,6 +33,7 @@ import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.util.asBitmap
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
@@ -61,17 +64,67 @@ class SignalWidget : GlanceAppWidget() {
                             Box(
                                 modifier = GlanceModifier.padding(bottom = 4.dp, top = if (index > 0) 4.dp else 0.dp)
                             ) {
-                                Box(
-                                    modifier = GlanceModifier.height(40.dp)
+                                Column(
+                                    modifier = GlanceModifier.wrapContentHeight()
                                         .fillMaxWidth()
                                         .background(ImageProvider(R.drawable.sim_card_widget_background))
-                                        .cornerRadius(12.dp),
-                                    contentAlignment = Alignment.Center
+                                        .cornerRadius(12.dp)
+                                        .padding(bottom = 4.dp, top = 4.dp),
+                                    horizontalAlignment = Alignment.Horizontal.CenterHorizontally
                                 ) {
-                                    FormatWidgetText(
-                                        name = context.resources.getString(R.string.sim_slot_format),
-                                        value = t
-                                    )
+                                    val subInfo = subInfos[t]
+
+                                    Row(
+                                        verticalAlignment = Alignment.Vertical.CenterVertically
+                                    ) {
+                                        subInfo?.iconBitmap?.let { bmp ->
+                                            Image(
+                                                provider = ImageProvider(Icon.createWithData(bmp, 0, bmp.size)),
+                                                contentDescription = null,
+                                                modifier = GlanceModifier.size(16.dp)
+                                            )
+                                        }
+
+                                        Spacer(GlanceModifier.size(8.dp))
+
+                                        Text(
+                                            text = (subInfo?.carrierName ?: t.toString()),
+                                            style = TextStyle(
+                                                color = ColorProvider(Color.White)
+                                            )
+                                        )
+                                    }
+
+                                    Spacer(GlanceModifier.size(4.dp))
+
+                                    val rplmn = remember(serviceStates[subInfo?.id]) {
+                                        serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
+                                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                                        )
+                                            ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                                            ?.rplmn.asMccMnc
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.Vertical.CenterVertically,
+                                        modifier = GlanceModifier.fillMaxWidth()
+                                    ) {
+                                        Spacer(GlanceModifier.defaultWeight())
+
+                                        FormatWidgetText(
+                                            name = context.resources.getString(R.string.rplmn_format),
+                                            value = rplmn
+                                        )
+
+                                        Spacer(GlanceModifier.defaultWeight())
+
+                                        FormatWidgetText(
+                                            name = context.resources.getString(R.string.carrier_aggregation_format),
+                                            value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
+                                        )
+
+                                        Spacer(GlanceModifier.defaultWeight())
+                                    }
                                 }
                             }
                         }

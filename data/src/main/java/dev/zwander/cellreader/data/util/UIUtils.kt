@@ -1,6 +1,8 @@
 package dev.zwander.cellreader.data.util
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.TypedValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -55,3 +57,7 @@ fun Context.dpAsPx(number: Number) = TypedValue.applyDimension(
     number.toFloat(),
     resources.displayMetrics
 )
+
+fun ByteArray.asBitmap(): Bitmap? {
+    return BitmapFactory.decodeByteArray(this, 0, size)
+}
