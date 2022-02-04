@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.telephony.CellSignalStrength
+import android.telephony.CellSignalStrengthWcdma
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -74,6 +76,14 @@ class SignalWidget : GlanceAppWidget() {
                             }
                         }
 
+                        itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index".hashCode().toLong() }) { index, item ->
+                            StrengthCard(
+                                strength = item,
+                                size = size,
+                                modifier = if (index < strengthInfos[t]!!.lastIndex || !cellInfos[t].isNullOrEmpty()) GlanceModifier.padding(bottom = 4.dp) else GlanceModifier
+                            )
+                        }
+
                         itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { index, item ->
                             SignalCard(
                                 cellInfo = item, size = size,
@@ -130,33 +140,46 @@ class SignalWidget : GlanceAppWidget() {
         }
     }
 
+    private fun CellSignalStrengthWrapper.createItems(context: Context, full: Boolean = true): Map<String, Any?> {
+        return hashMapOf<String, Any?>().apply {
+            when {
+                this@createItems is CellSignalStrengthLteWrapper -> {
+                    put(
+                        context.resources.getString(R.string.rsrq_format),
+                        rsrq
+                    )
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this@createItems is CellSignalStrengthNrWrapper -> {
+                    csiRsrq.onAvail {
+                        put(
+                            context.resources.getString(R.string.rsrq_format),
+                            it
+                        )
+                    }
+
+                    ssRsrq.onAvail {
+                        put(
+                            context.resources.getString(R.string.rsrq_format),
+                            it
+                        )
+                    }
+                }
+                else -> {}
+            }
+
+            if (full) {
+                put(
+                    context.resources.getString(R.string.asu_format),
+                    asuLevel
+                )
+            }
+        }
+    }
+
     private fun CellInfoWrapper.createItems(context: Context): Map<String, Any?> {
         return hashMapOf<String, Any?>().apply {
             with (cellSignalStrength) {
-                when {
-                    this is CellSignalStrengthLteWrapper -> {
-                        put(
-                            context.resources.getString(R.string.rsrq_format),
-                            rsrq
-                        )
-                    }
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> {
-                        csiRsrq.onAvail {
-                            put(
-                                context.resources.getString(R.string.rsrq_format),
-                                it
-                            )
-                        }
-
-                        ssRsrq.onAvail {
-                            put(
-                                context.resources.getString(R.string.rsrq_format),
-                                it
-                            )
-                        }
-                    }
-                    else -> {}
-                }
+                putAll(this.createItems(context, false))
             }
 
             with (cellIdentity) {
@@ -243,7 +266,7 @@ class SignalWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun SignalCard(cellInfo: CellInfoWrapper, size: DpSize, modifier: GlanceModifier) {
+    private fun BaseCard(strength: CellSignalStrengthWrapper, size: DpSize, modifier: GlanceModifier, backgroundResource: Int, items: Map<String, Any?>) {
         val context = LocalContext.current
 
         Box(
@@ -252,7 +275,7 @@ class SignalWidget : GlanceAppWidget() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = GlanceModifier.fillMaxWidth()
-                    .background(imageProvider = ImageProvider(R.drawable.signal_card_widget_background))
+                    .background(imageProvider = ImageProvider(backgroundResource))
                     .cornerRadius(12.dp)
             ) {
                 Box(
@@ -260,9 +283,9 @@ class SignalWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.padding(start = 8.dp, end = 8.dp)
                         .fillMaxWidth(),
                 ) {
-                    val type = remember(cellInfo.cellSignalStrength) {
+                    val type = remember(strength) {
                         context.resources.getString(
-                            cellInfo.cellSignalStrength.run {
+                            strength.run {
                                 when {
                                     this is CellSignalStrengthGsmWrapper -> R.string.gsm
                                     this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
@@ -276,9 +299,6 @@ class SignalWidget : GlanceAppWidget() {
                         )
                     }
 
-                    val items = remember(cellInfo) {
-                        cellInfo.createItems(context)
-                    }
                     val itemGridArray by derivedStateOf {
                         val grid = hashMapOf<Int, MutableList<Pair<String, Any?>>>()
                         val rowSize = 3
@@ -321,7 +341,7 @@ class SignalWidget : GlanceAppWidget() {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
+                            SignalBarGroup(level = strength.level, dbm = strength.dbm, type = type)
 
                             Spacer(GlanceModifier.size(8.dp))
 
@@ -333,9 +353,10 @@ class SignalWidget : GlanceAppWidget() {
                         }
                     } else {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = GlanceModifier.padding(top = 4.dp, bottom = 4.dp)
                         ) {
-                            SignalBarGroup(level = cellInfo.cellSignalStrength.level, dbm = cellInfo.cellSignalStrength.dbm, type = type)
+                            SignalBarGroup(level = strength.level, dbm = strength.dbm, type = type)
 
                             Spacer(GlanceModifier.size(8.dp))
 
@@ -345,6 +366,35 @@ class SignalWidget : GlanceAppWidget() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun SignalCard(cellInfo: CellInfoWrapper, size: DpSize, modifier: GlanceModifier) {
+        val context = LocalContext.current
+
+        val items = remember(cellInfo) {
+            cellInfo.createItems(context)
+        }
+
+        BaseCard(strength = cellInfo.cellSignalStrength, size = size, modifier = modifier,
+            backgroundResource = R.drawable.signal_card_widget_background, items = items)
+    }
+
+    @Composable
+    private fun StrengthCard(strength: CellSignalStrengthWrapper, size: DpSize, modifier: GlanceModifier) {
+        val context = LocalContext.current
+
+        val items = remember(strength) {
+            strength.createItems(context)
+        }
+
+        BaseCard(
+            strength = strength,
+            size = size,
+            modifier = modifier,
+            backgroundResource = R.drawable.signal_strength_widget_background,
+            items = items
+        )
     }
 }
 
