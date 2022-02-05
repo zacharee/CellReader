@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.*
+import androidx.glance.action.*
 import androidx.glance.appwidget.*
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
@@ -29,6 +30,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import dev.zwander.cellreader.BuildConfig
+import dev.zwander.cellreader.MainActivity
 import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
@@ -127,18 +129,36 @@ class SignalWidget : GlanceAppWidget() {
                             }
                         }
 
-                        itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index".hashCode().toLong() }) { index, item ->
+                        itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
                             StrengthCard(
                                 strength = item,
                                 size = size,
-                                modifier = if (index < strengthInfos[t]!!.lastIndex || !cellInfos[t].isNullOrEmpty()) GlanceModifier.padding(bottom = 4.dp) else GlanceModifier
+                                modifier = GlanceModifier.padding(bottom = 4.dp)
                             )
                         }
 
-                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { index, item ->
+                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { _, item ->
                             SignalCard(
                                 cellInfo = item, size = size,
-                                modifier = if (index < cellInfos[t]!!.lastIndex) GlanceModifier.padding(bottom = 4.dp) else GlanceModifier
+                                modifier = GlanceModifier.padding(bottom = 4.dp)
+                            )
+                        }
+                    }
+
+                    item {
+                        Box(
+                            modifier = GlanceModifier.fillMaxWidth()
+                                .background(ImageProvider(R.drawable.open_app_widget_background))
+                                .cornerRadius(12.dp)
+                                .padding(bottom = 4.dp, top = 4.dp)
+                                .clickable(onClick = actionStartActivity<MainActivity>()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = context.resources.getString(R.string.open_app),
+                                style = TextStyle(
+                                    color = ColorProvider(Color.White)
+                                )
                             )
                         }
                     }

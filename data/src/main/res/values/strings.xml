@@ -21,6 +21,7 @@
     <string name="github">GitHub</string>
     <string name="website">Website</string>
     <string name="about">About</string>
+    <string name="open_app">Open App</string>
 
     <string name="level_format">Level</string>
     <string name="timestamp_format">Timestamp</string>
