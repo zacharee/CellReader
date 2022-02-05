@@ -4,15 +4,11 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.telephony.AccessNetworkConstants
 import android.telephony.CellSignalStrength
-import android.telephony.CellSignalStrengthWcdma
 import android.telephony.TelephonyManager
-import android.util.Log
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
@@ -35,7 +31,6 @@ import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
-import dev.zwander.cellreader.data.util.asBitmap
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
@@ -150,7 +145,7 @@ class SignalWidget : GlanceAppWidget() {
                             modifier = GlanceModifier.fillMaxWidth()
                                 .background(ImageProvider(R.drawable.open_app_widget_background))
                                 .cornerRadius(12.dp)
-                                .padding(bottom = 4.dp, top = 4.dp)
+                                .padding(bottom = 8.dp, top = 8.dp)
                                 .clickable(onClick = actionStartActivity<MainActivity>()),
                             contentAlignment = Alignment.Center
                         ) {
