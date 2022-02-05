@@ -234,38 +234,40 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) : SubscriptionManager.OnSubscriptionsChangedListener() {
         override fun onSubscriptionsChanged() {
-            val newList = subs.allSubscriptionInfoList
-            val newIds = newList.map { it.subscriptionId }
-            val currentIds = currentList.map { it.subscriptionId }
+            launch {
+                val newList = subs.allSubscriptionInfoList
+                val newIds = newList.map { it.subscriptionId }
+                val currentIds = currentList.map { it.subscriptionId }
 
-            val defaultId = SubscriptionManager.getDefaultSubscriptionId()
+                val defaultId = SubscriptionManager.getDefaultSubscriptionId()
 
-            launch(Dispatchers.Main) {
-                CellModel.primaryCell = defaultId
-            }
+                if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
+                    currentList.clear()
+                    currentList.addAll(newList)
 
-            launch(Dispatchers.IO) {
-                betweenUtils.queuePrimaryCell(defaultId)
-            }
+                    withContext(Dispatchers.Main) {
+                        betweenUtils.queueClear()
+                        CellModel.destroy()
+                        init(newIds)
+                    }
+                } else {
+                    newList.forEach { subInfo ->
+                        withContext(Dispatchers.Main) {
+                            CellModel.subInfos[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
 
-            if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
-                currentList.clear()
-                currentList.addAll(newList)
-
-                launch(Dispatchers.Main) {
-                    betweenUtils.queueClear()
-                    CellModel.destroy()
-                    init(newIds)
-                }
-            } else {
-                newList.forEach { subInfo ->
-                    launch(Dispatchers.Main) {
-                        CellModel.subInfos[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
-
-                        launch(Dispatchers.IO) {
-                            betweenUtils.queueSubscriptionInfo(CellModel.subInfos)
+                            withContext(Dispatchers.IO) {
+                                betweenUtils.queueSubscriptionInfo(CellModel.subInfos)
+                            }
                         }
                     }
+                }
+
+                withContext(Dispatchers.Main) {
+                    CellModel.primaryCell = defaultId
+                }
+
+                withContext(Dispatchers.IO) {
+                    betweenUtils.queuePrimaryCell(defaultId)
                 }
             }
         }

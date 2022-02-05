@@ -175,7 +175,7 @@ class CellSignalStrengthWcdmaWrapper(
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthWcdma) : this(
         strength.rssi,
-        strength.bitErrorRate,
+        strength.bitErrorRateCompat,
         strength.rscp,
         strength.ecNo,
         strength.level,

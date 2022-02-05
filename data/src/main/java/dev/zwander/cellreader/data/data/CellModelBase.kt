@@ -17,7 +17,9 @@ abstract class CellModelBase {
     val serviceStates = mutableStateMapOf<Int, ServiceStateWrapper?>()
 
     val sortedSubIds by derivedStateOf {
-        subIds.sortedWith(SubsComparator(primaryCell))
+        primaryCell.let {
+            subIds.sortedWith(SubsComparator(it))
+        }
     }
 
     open fun clear() {

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.telephony.CellInfo
 import android.telephony.SubscriptionInfo
+import dev.zwander.cellreader.data.allAccessRulesCompat
 import dev.zwander.cellreader.data.cardIdCompat
 import java.io.ByteArrayOutputStream
 
@@ -60,7 +61,7 @@ data class SubscriptionInfoWrapper(
         ArrayList(info.hplmns),
         info.countryIso,
         info.isEmbedded,
-        ArrayList(info.allAccessRules.map { UiccAccessRuleWrapper(it) }),
+        ArrayList(info.allAccessRulesCompat.map { UiccAccessRuleWrapper(it) }),
         info.cardString,
         info.cardIdCompat,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isOpportunistic else false,
