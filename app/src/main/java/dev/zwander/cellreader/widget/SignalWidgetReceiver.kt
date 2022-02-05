@@ -95,8 +95,6 @@ class SignalWidget : GlanceAppWidget() {
                                         )
                                     }
 
-                                    Spacer(GlanceModifier.size(4.dp))
-
                                     val rplmn = remember(serviceStates[subInfo?.id]) {
                                         serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
                                             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
