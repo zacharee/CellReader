@@ -56,10 +56,10 @@ class SignalWidget : GlanceAppWidget() {
                 LazyColumn(
                     modifier = GlanceModifier.fillMaxSize()
                 ) {
-                    sortedSubIds.forEachIndexed { index, t ->
+                    sortedSubIds.forEachIndexed { _, t ->
                         item(t.toLong()) {
                             Box(
-                                modifier = GlanceModifier.padding(bottom = 4.dp, top = if (index > 0) 4.dp else 0.dp)
+                                modifier = GlanceModifier.padding(bottom = 4.dp)
                             ) {
                                 Column(
                                     modifier = GlanceModifier.wrapContentHeight()
