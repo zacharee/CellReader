@@ -3,6 +3,13 @@ package dev.zwander.cellreader.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.GoogleApiAvailabilityLight
+import com.google.android.gms.common.GooglePlayServicesUtil
+import com.google.android.gms.common.api.Api
+import com.google.android.gms.common.api.AvailabilityException
+import com.google.android.gms.common.api.GoogleApi
+import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -10,6 +17,7 @@ import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import io.gsonfire.GsonFireBuilder
 import io.gsonfire.TypeSelector
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
@@ -140,8 +148,6 @@ class BetweenUtils private constructor(private val context: Context) {
         .createGsonBuilder()
         .create()
 
-    private val dataClient = Wearable.getDataClient(context)
-
     private val queueMutex = Mutex()
 
     private val cellMutex = Mutex()
@@ -154,6 +160,29 @@ class BetweenUtils private constructor(private val context: Context) {
 
     private val sendQueue = ConcurrentHashMap<Mutex, suspend () -> Unit>()
     private var lastSendTime = 0L
+
+    private suspend fun getDataClient(): DataClient? {
+        val avail = try {
+            GoogleApiAvailability.getInstance().checkApiAvailability(
+                GoogleApi(
+                    context,
+                    Wearable.API,
+                    Wearable.WearableOptions.Builder().build(),
+                    GoogleApi.Settings.DEFAULT_SETTINGS
+                )
+            ).await()
+
+            true
+        } catch (e: AvailabilityException) {
+            false
+        }
+
+        return if (avail) {
+            Wearable.getDataClient(context)
+        } else {
+            null
+        }
+    }
 
     suspend fun queueCellInfos(infos: Map<Int, List<CellInfoWrapper>>) {
         enqueue(cellMutex) {
@@ -348,7 +377,7 @@ class BetweenUtils private constructor(private val context: Context) {
         }
     }
 
-    private suspend fun Mutex.sendInfo(gson: Gson, path: String, pairs: List<Pair<String, Any>>): DataItem {
+    private suspend fun Mutex.sendInfo(gson: Gson, path: String, pairs: List<Pair<String, Any>>): DataItem? {
         withLock {
             val mapped = pairs.map {
                 it.first to gson.toJson(it.second).toByteArray()
@@ -361,7 +390,7 @@ class BetweenUtils private constructor(private val context: Context) {
             }.asPutDataRequest()
                 .setUrgent()
 
-            return dataClient.putDataItem(request).await()
+            return getDataClient()?.putDataItem(request)?.await()
         }
     }
 

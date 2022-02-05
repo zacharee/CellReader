@@ -118,7 +118,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 subscriptions.map {
                     cellInfos[it] = listOf()
                     strengthInfos[it] = listOf()
-                    subInfos[it] = SubscriptionInfoWrapper(subs.getActiveSubscriptionInfo(it), this@UpdaterService)
+                    subInfos[it] = subs.getActiveSubscriptionInfo(it)?.let { subInfo -> SubscriptionInfoWrapper(subInfo, this@UpdaterService) }
                     subIds.add(it)
 
                     launch(Dispatchers.IO) {
