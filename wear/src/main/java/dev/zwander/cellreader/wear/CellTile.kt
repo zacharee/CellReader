@@ -1,8 +1,6 @@
 package dev.zwander.cellreader.wear
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -26,7 +24,11 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
         val type: String,
     )
 
-    private val items by derivedStateOf {
+    @Composable
+    override fun Content() {
+        val grid = hashMapOf<Int, MutableList<TileItemInfo>>()
+        val rowSize = 2
+
         val items = arrayListOf<TileItemInfo>()
 
         CellModelWear.sortedSubIds.forEach { subId ->
@@ -56,13 +58,6 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
             }
         }
 
-        items
-    }
-
-    private val itemGridArray by derivedStateOf {
-        val grid = hashMapOf<Int, MutableList<TileItemInfo>>()
-        val rowSize = 2
-
         items.forEachIndexed { index, tileItemInfo ->
             val gridRowIndex = index / rowSize
             val gridColumnIndex = index % rowSize
@@ -74,12 +69,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
             grid[gridRowIndex]?.add(gridColumnIndex, tileItemInfo)
         }
 
-        grid
-    }
-
-    @Composable
-    override fun Content() {
-        ItemGrid(itemGridArray = itemGridArray, GlanceModifier.fillMaxSize())
+        ItemGrid(itemGridArray = grid, GlanceModifier.fillMaxSize())
     }
 
     @Composable

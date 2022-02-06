@@ -7,13 +7,11 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.telephony.AccessNetworkConstants
-import android.telephony.CellSignalStrength
 import android.telephony.TelephonyManager
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.*
 import androidx.glance.action.*
 import androidx.glance.appwidget.*
@@ -22,7 +20,6 @@ import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import dev.zwander.cellreader.BuildConfig
@@ -49,7 +46,7 @@ class SignalWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val size = LocalSize.current
 
-        with (CellModel) {
+        with(CellModel) {
             Box(
                 modifier = GlanceModifier.cornerRadius(8.dp)
                     .appWidgetBackground()
@@ -78,7 +75,13 @@ class SignalWidget : GlanceAppWidget() {
                                     ) {
                                         subInfo?.iconBitmap?.let { bmp ->
                                             Image(
-                                                provider = ImageProvider(Icon.createWithData(bmp, 0, bmp.size)),
+                                                provider = ImageProvider(
+                                                    Icon.createWithData(
+                                                        bmp,
+                                                        0,
+                                                        bmp.size
+                                                    )
+                                                ),
                                                 contentDescription = null,
                                                 modifier = GlanceModifier.size(16.dp)
                                             )
@@ -94,13 +97,12 @@ class SignalWidget : GlanceAppWidget() {
                                         )
                                     }
 
-                                    val rplmn = remember(serviceStates[subInfo?.id]) {
+                                    val rplmn =
                                         serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
                                             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                                         )
                                             ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
                                             ?.rplmn.asMccMnc
-                                    }
 
                                     Row(
                                         verticalAlignment = Alignment.Vertical.CenterVertically,
@@ -126,7 +128,9 @@ class SignalWidget : GlanceAppWidget() {
                             }
                         }
 
-                        itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
+                        itemsIndexed(
+                            strengthInfos[t]!!,
+                            { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
                             StrengthCard(
                                 strength = item,
                                 size = size,
@@ -134,7 +138,11 @@ class SignalWidget : GlanceAppWidget() {
                             )
                         }
 
-                        itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}".hashCode().toLong() }) { _, item ->
+                        itemsIndexed(
+                            cellInfos[t]!!,
+                            { _, item ->
+                                "$t:${item.cellIdentity}".hashCode().toLong()
+                            }) { _, item ->
                             SignalCard(
                                 cellInfo = item, size = size,
                                 modifier = GlanceModifier.padding(bottom = 4.dp)
@@ -164,7 +172,10 @@ class SignalWidget : GlanceAppWidget() {
         }
     }
 
-    private fun CellSignalStrengthWrapper.createItems(context: Context, full: Boolean = true): Map<String, Any?> {
+    private fun CellSignalStrengthWrapper.createItems(
+        context: Context,
+        full: Boolean = true
+    ): Map<String, Any?> {
         return hashMapOf<String, Any?>().apply {
             when {
                 this@createItems is CellSignalStrengthLteWrapper -> {
@@ -202,11 +213,11 @@ class SignalWidget : GlanceAppWidget() {
 
     private fun CellInfoWrapper.createItems(context: Context): Map<String, Any?> {
         return hashMapOf<String, Any?>().apply {
-            with (cellSignalStrength) {
+            with(cellSignalStrength) {
                 putAll(this.createItems(context, false))
             }
 
-            with (cellIdentity) {
+            with(cellIdentity) {
                 when {
                     this is CellIdentityGsmWrapper -> {
                         val arfcnInfo = ARFCNTools.gsmArfcnToInfo(arfcn)
@@ -290,7 +301,13 @@ class SignalWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun BaseCard(strength: CellSignalStrengthWrapper, size: DpSize, modifier: GlanceModifier, backgroundResource: Int, items: Map<String, Any?>) {
+    private fun BaseCard(
+        strength: CellSignalStrengthWrapper,
+        size: DpSize,
+        modifier: GlanceModifier,
+        backgroundResource: Int,
+        items: Map<String, Any?>
+    ) {
         val context = LocalContext.current
 
         Box(
@@ -307,11 +324,9 @@ class SignalWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.padding(start = 8.dp, end = 8.dp)
                         .fillMaxWidth(),
                 ) {
-                    val type = remember(strength) {
-                        strength.typeString(context)
-                    }
+                    val type = strength.typeString(context)
 
-                    val itemGridArray by derivedStateOf {
+                    val itemGridArray = run {
                         val grid = hashMapOf<Int, MutableList<Pair<String, Any?>>>()
                         val rowSize = 3
 
@@ -384,21 +399,23 @@ class SignalWidget : GlanceAppWidget() {
     private fun SignalCard(cellInfo: CellInfoWrapper, size: DpSize, modifier: GlanceModifier) {
         val context = LocalContext.current
 
-        val items = remember(cellInfo) {
-            cellInfo.createItems(context)
-        }
+        val items = cellInfo.createItems(context)
 
-        BaseCard(strength = cellInfo.cellSignalStrength, size = size, modifier = modifier,
-            backgroundResource = R.drawable.signal_card_widget_background, items = items)
+        BaseCard(
+            strength = cellInfo.cellSignalStrength, size = size, modifier = modifier,
+            backgroundResource = R.drawable.signal_card_widget_background, items = items
+        )
     }
 
     @Composable
-    private fun StrengthCard(strength: CellSignalStrengthWrapper, size: DpSize, modifier: GlanceModifier) {
+    private fun StrengthCard(
+        strength: CellSignalStrengthWrapper,
+        size: DpSize,
+        modifier: GlanceModifier
+    ) {
         val context = LocalContext.current
 
-        val items = remember(strength) {
-            strength.createItems(context)
-        }
+        val items = strength.createItems(context)
 
         BaseCard(
             strength = strength,

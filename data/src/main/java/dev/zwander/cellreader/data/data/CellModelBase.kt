@@ -29,11 +29,8 @@ open class CellModelBase : ICellModel {
     override val subInfos = mutableStateMapOf<Int, SubscriptionInfoWrapper?>()
     override val serviceStates = mutableStateMapOf<Int, ServiceStateWrapper?>()
 
-    override val sortedSubIds by derivedStateOf {
-        primaryCell.let {
-            subIds.sortedWith(SubsComparator(it))
-        }
-    }
+    override val sortedSubIds: List<Int>
+        get() = subIds.sortedWith(SubsComparator(primaryCell))
 
     override fun clear() {
         primaryCell = 0
