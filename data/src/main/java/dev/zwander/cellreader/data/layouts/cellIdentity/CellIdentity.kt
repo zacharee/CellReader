@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.getBands
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.util.onCast
@@ -21,10 +20,6 @@ fun CellIdentity(
         val arfcnInfo = remember(channelNumber) {
             ARFCNTools.getInfo(channelNumber, type)
         }
-        val bands = remember(channelNumber) {
-            getBands(arfcnInfo)
-        }
-
         if (simple) {
             if (bands.isNotEmpty()) {
                 FormatText(

@@ -31,6 +31,8 @@ import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
+import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
@@ -159,50 +161,6 @@ class SignalWidget : GlanceAppWidget() {
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun SignalBarGroup(level: Int, dbm: Int, type: String) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Text(
-                    text = type.first().toString(),
-                    style = TextStyle(
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        color = ColorProvider(Color.White)
-                    ),
-                    modifier = GlanceModifier.padding(end = 14.dp)
-                )
-
-                Image(
-                    provider = ImageProvider(
-                        when (level) {
-                            CellSignalStrength.SIGNAL_STRENGTH_POOR -> R.drawable.cell_1
-                            CellSignalStrength.SIGNAL_STRENGTH_MODERATE -> R.drawable.cell_2
-                            CellSignalStrength.SIGNAL_STRENGTH_GOOD -> R.drawable.cell_3
-                            CellSignalStrength.SIGNAL_STRENGTH_GREAT -> R.drawable.cell_4
-                            else -> R.drawable.cell_0
-                        }
-                    ),
-                    contentDescription = null,
-                    modifier = GlanceModifier.size(32.dp),
-                    contentScale = ContentScale.Fit,
-                )
-            }
-
-            Text(
-                text = dbm.toString(),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    color = ColorProvider(Color.White)
-                )
-            )
         }
     }
 
@@ -350,19 +308,7 @@ class SignalWidget : GlanceAppWidget() {
                         .fillMaxWidth(),
                 ) {
                     val type = remember(strength) {
-                        context.resources.getString(
-                            strength.run {
-                                when {
-                                    this is CellSignalStrengthGsmWrapper -> R.string.gsm
-                                    this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
-                                    this is CellSignalStrengthCdmaWrapper -> R.string.cdma
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
-                                    this is CellSignalStrengthLteWrapper -> R.string.lte
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
-                                    else -> R.string.unknown
-                                }
-                            }
-                        )
+                        strength.typeString(context)
                     }
 
                     val itemGridArray by derivedStateOf {

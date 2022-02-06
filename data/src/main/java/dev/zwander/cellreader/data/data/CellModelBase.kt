@@ -7,22 +7,35 @@ import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 
-abstract class CellModelBase {
-    var primaryCell by mutableStateOf(0)
+interface ICellModel {
+    var primaryCell: Int
+    val subIds: MutableList<Int>
+    val cellInfos: MutableMap<Int, List<CellInfoWrapper>>
+    val strengthInfos: MutableMap<Int, List<CellSignalStrengthWrapper>>
+    val subInfos: MutableMap<Int, SubscriptionInfoWrapper?>
+    val serviceStates: MutableMap<Int, ServiceStateWrapper?>
 
-    val subIds = mutableStateListOf<Int>()
-    val cellInfos = mutableStateMapOf<Int, List<CellInfoWrapper>>()
-    val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrengthWrapper>>()
-    val subInfos = mutableStateMapOf<Int, SubscriptionInfoWrapper?>()
-    val serviceStates = mutableStateMapOf<Int, ServiceStateWrapper?>()
+    val sortedSubIds: List<Int>
 
-    val sortedSubIds by derivedStateOf {
+    fun clear()
+}
+
+open class CellModelBase : ICellModel {
+    override var primaryCell by mutableStateOf(0)
+
+    override val subIds = mutableStateListOf<Int>()
+    override val cellInfos = mutableStateMapOf<Int, List<CellInfoWrapper>>()
+    override val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrengthWrapper>>()
+    override val subInfos = mutableStateMapOf<Int, SubscriptionInfoWrapper?>()
+    override val serviceStates = mutableStateMapOf<Int, ServiceStateWrapper?>()
+
+    override val sortedSubIds by derivedStateOf {
         primaryCell.let {
             subIds.sortedWith(SubsComparator(it))
         }
     }
 
-    open fun clear() {
+    override fun clear() {
         primaryCell = 0
 
         subIds.clear()

@@ -14,10 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
-import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.DataItem
-import com.google.android.gms.wearable.Wearable
-import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
@@ -26,59 +22,18 @@ import dev.zwander.cellreader.data.layouts.SignalCard
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
-    private var loadCellInfosJob: Job? = null
-    private var loadCellSignalStrengthsJob: Job? = null
-    private var loadServiceStateJob: Job? = null
-    private var loadSubInfoJob: Job? = null
-    private var addSubIdJob: Job? = null
-    private var updatePrimaryCellJob: Job? = null
-
-    private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
-    private val dataClient by lazy { Wearable.getDataClient(this) }
-
-    private val listener = DataClient.OnDataChangedListener {
-        it.firstOrNull { event ->
-            event.dataItem.uri.path == BetweenUtils.CLEAR_PATH
-        }?.let { event ->
-            handleDataItem(event.dataItem.freeze())
-        }
-
-        it.forEach { event ->
-            if (event.dataItem.uri.path != BetweenUtils.CLEAR_PATH) {
-                val frozen = event.dataItem.freeze()
-
-                handleDataItem(frozen)
-            }
-        }
-    }
-
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        dataClient.addListener(listener)
+        launch {
+            DataHandler.getInstance(this@MainActivity)
+                .addHandle(this@MainActivity)
+        }
 
         setContent {
             CellReaderTheme {
                 MainContent()
-            }
-        }
-
-        dataClient.dataItems.addOnCompleteListener { item ->
-            launch(Dispatchers.IO) {
-                item.result.firstOrNull {
-                    it.uri.path == BetweenUtils.CLEAR_PATH
-                }?.let {
-                    handleDataItem(it.freeze())
-                }
-
-                item.result.forEach {
-                    if (it.uri.path != BetweenUtils.CLEAR_PATH) {
-                        handleDataItem(it.freeze())
-                    }
-                }
-
-                item.result.release()
             }
         }
     }
@@ -86,105 +41,12 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     override fun onDestroy() {
         super.onDestroy()
 
-        cancel()
-        dataClient.removeListener(listener)
-    }
+        launch {
+            DataHandler.getInstance(this@MainActivity)
+                .removeHandle(this@MainActivity)
 
-    private fun handleDataItem(frozen: DataItem) {
-        when (frozen.uri.path) {
-            BetweenUtils.CELL_INFOS_PATH -> {
-                updateCellInfos(frozen)
-            }
-            BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH -> {
-                updateSignalStrengths(frozen)
-            }
-            BetweenUtils.SERVICE_STATE_PATH -> {
-                updateServiceState(frozen)
-            }
-            BetweenUtils.SUB_INFO_PATH -> {
-                updateSubInfo(frozen)
-            }
-            BetweenUtils.SUB_ID_PATH -> {
-                addSubId(frozen)
-            }
-            BetweenUtils.CLEAR_PATH -> {
-                clear()
-            }
-            BetweenUtils.PRIMARY_CELL_PATH -> {
-                updatePrimaryCell(frozen)
-            }
+            this@MainActivity.cancel()
         }
-    }
-
-    private fun updateCellInfos(item: DataItem) {
-        loadCellInfosJob?.cancel()
-        loadCellInfosJob = launch(Dispatchers.IO) {
-            val cellInfos = betweenUtils.retrieveCellInfos(item)
-
-            withContext(Dispatchers.Main) {
-                CellModelWear.cellInfos.putAll(cellInfos)
-            }
-        }
-    }
-
-    private fun updateSignalStrengths(item: DataItem) {
-        loadCellSignalStrengthsJob?.cancel()
-        loadCellSignalStrengthsJob = launch(Dispatchers.IO) {
-            val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
-
-            withContext(Dispatchers.Main) {
-                CellModelWear.strengthInfos.putAll(signalStrengths)
-            }
-        }
-    }
-
-    private fun updateServiceState(item: DataItem) {
-        loadServiceStateJob?.cancel()
-        loadServiceStateJob = launch(Dispatchers.IO) {
-            val serviceState = betweenUtils.retrieveServiceState(item)
-
-            withContext(Dispatchers.Main) {
-                CellModelWear.serviceStates.putAll(serviceState)
-            }
-        }
-    }
-
-    private fun updateSubInfo(item: DataItem) {
-        loadSubInfoJob?.cancel()
-        loadSubInfoJob = launch(Dispatchers.IO) {
-            val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
-
-            withContext(Dispatchers.Main) {
-                CellModelWear.subInfos.putAll(subInfo)
-            }
-        }
-    }
-
-    private fun addSubId(item: DataItem) {
-        addSubIdJob?.cancel()
-        addSubIdJob = launch(Dispatchers.IO) {
-            val subId = betweenUtils.retrieveNewSubId(item)
-
-            withContext(Dispatchers.Main) {
-                CellModelWear.subIds.clear()
-                CellModelWear.subIds.addAll(subId)
-            }
-        }
-    }
-
-    private fun updatePrimaryCell(item: DataItem) {
-        updatePrimaryCellJob?.cancel()
-        updatePrimaryCellJob = launch(Dispatchers.IO) {
-            val primaryCell = betweenUtils.retrievePrimaryCell(item)
-
-            withContext(Dispatchers.Main) {
-                CellModelWear.primaryCell = primaryCell
-            }
-        }
-    }
-
-    private fun clear() {
-        CellModelWear.clear()
     }
 }
 
@@ -289,12 +151,11 @@ fun MainContent() {
 
                                             SignalCard(
                                                 cellInfo = item,
-                                                expanded = expanded[key] ?: false,
                                                 isFinal = isFinal,
+                                                expanded = expanded[key] ?: false,
                                                 onExpand = { expanded[key] = it },
                                                 modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                wear = true
+                                                    .fillMaxWidth()
                                             )
                                         }
                                     }

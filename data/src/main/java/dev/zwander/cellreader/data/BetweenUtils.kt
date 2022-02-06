@@ -9,7 +9,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil
 import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.AvailabilityException
 import com.google.android.gms.common.api.GoogleApi
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -17,7 +16,6 @@ import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import io.gsonfire.GsonFireBuilder
 import io.gsonfire.TypeSelector
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await

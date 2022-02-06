@@ -1,6 +1,7 @@
 package dev.zwander.cellreader.data
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.telephony.*
 import dev.zwander.cellreader.data.wrappers.*
@@ -15,25 +16,6 @@ val CellConfigLte.endcAvailable: Boolean
 @Suppress("DEPRECATION")
 val CellInfo.timeStampMillisCompat: Long
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) timestampMillis else (timeStamp / 1000000)
-
-fun CellIdentityWrapper.getBands(infos: List<ARFCNInfo>): List<String> {
-    return when {
-        this is CellIdentityGsmWrapper -> infos.map { it.band }
-        this is CellIdentityWcdmaWrapper -> infos.map { it.band }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdmaWrapper -> infos.map { it.band }
-        this is CellIdentityLteWrapper -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            bands?.map { it.toString() } ?: listOf()
-        } else {
-            infos.map { it.band }
-        }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            bands?.map { it.toString() } ?: listOf()
-        } else {
-            infos.map { it.band }
-        }
-        else -> listOf()
-    }
-}
 
 val CellSignalStrengthGsm.bitErrorRateCompat: Int
     @SuppressLint("DiscouragedPrivateApi")
@@ -76,6 +58,30 @@ val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
             listOf()
         }
     }
+
+fun CellSignalStrengthWrapper.typeString(context: Context): String {
+    return context.resources.getString(when {
+        this is CellSignalStrengthGsmWrapper -> R.string.gsm
+        this is CellSignalStrengthWcdmaWrapper -> R.string.wcdma
+        this is CellSignalStrengthCdmaWrapper -> R.string.cdma
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthTdscdmaWrapper -> R.string.tdscdma
+        this is CellSignalStrengthLteWrapper -> R.string.lte
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellSignalStrengthNrWrapper -> R.string.nr
+        else -> R.string.unknown
+    })
+}
+
+fun CellIdentityWrapper.typeString(context: Context): String {
+    return context.resources.getString(when (type) {
+        CellInfo.TYPE_GSM -> R.string.gsm
+        CellInfo.TYPE_WCDMA -> R.string.wcdma
+        CellInfo.TYPE_CDMA -> R.string.cdma
+        CellInfo.TYPE_TDSCDMA -> R.string.tdscdma
+        CellInfo.TYPE_LTE -> R.string.lte
+        CellInfo.TYPE_NR -> R.string.nr
+        else -> R.string.unknown
+    })
+}
 
 class SubsComparator(private val primarySub: Int) : Comparator<Int> {
     override fun compare(o1: Int, o2: Int): Int {

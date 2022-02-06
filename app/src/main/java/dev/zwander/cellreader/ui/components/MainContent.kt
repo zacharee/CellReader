@@ -105,12 +105,11 @@ fun MainContent() {
 
                             SignalCard(
                                 cellInfo = item,
-                                expanded = expanded[key] ?: false,
                                 isFinal = isFinal,
+                                expanded = expanded[key] ?: false,
                                 onExpand = { expanded[key] = it },
                                 modifier = Modifier
-                                    .fillMaxWidth(),
-                                wear = false
+                                    .fillMaxWidth()
                             )
                         }
                     }
