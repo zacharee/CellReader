@@ -1,19 +1,14 @@
 package dev.zwander.cellreader.wear
 
-import android.telephony.CellSignalStrength
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
-import androidx.glance.Image
-import androidx.glance.ImageProvider
+import androidx.glance.background
 import androidx.glance.layout.*
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import androidx.glance.wear.tiles.GlanceTileService
@@ -31,8 +26,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
         val type: String,
     )
 
-    @Composable
-    override fun Content() {
+    private val items by derivedStateOf {
         val items = arrayListOf<TileItemInfo>()
 
         CellModelWear.sortedSubIds.forEach { subId ->
@@ -62,40 +56,46 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
             }
         }
 
-        val itemGridArray by derivedStateOf {
-            val grid = hashMapOf<Int, MutableList<TileItemInfo>>()
-            val rowSize = 2
+        items
+    }
 
-            items.forEachIndexed { index, tileItemInfo ->
-                val gridRowIndex = index / rowSize
-                val gridColumnIndex = index % rowSize
+    private val itemGridArray by derivedStateOf {
+        val grid = hashMapOf<Int, MutableList<TileItemInfo>>()
+        val rowSize = 2
 
-                if (!grid.containsKey(gridRowIndex)) {
-                    grid[gridRowIndex] = mutableListOf()
-                }
+        items.forEachIndexed { index, tileItemInfo ->
+            val gridRowIndex = index / rowSize
+            val gridColumnIndex = index % rowSize
 
-                grid[gridRowIndex]?.add(gridColumnIndex, tileItemInfo)
+            if (!grid.containsKey(gridRowIndex)) {
+                grid[gridRowIndex] = mutableListOf()
             }
 
-            grid
+            grid[gridRowIndex]?.add(gridColumnIndex, tileItemInfo)
         }
 
-        ItemGrid(itemGridArray = itemGridArray)
+        grid
     }
 
     @Composable
-    private fun ItemGrid(itemGridArray: Map<Int, List<TileItemInfo>>) {
+    override fun Content() {
+        ItemGrid(itemGridArray = itemGridArray, GlanceModifier.fillMaxSize())
+    }
+
+    @Composable
+    private fun ItemGrid(itemGridArray: Map<Int, List<TileItemInfo>>, modifier: GlanceModifier) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = GlanceModifier.fillMaxSize()
+            modifier = modifier.background(Color.DarkGray)
         ) {
             itemGridArray.forEach { (_, columns) ->
                 Row(
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = GlanceModifier.defaultWeight()
                 ) {
                     columns.forEachIndexed { _, column ->
-                        Item(column)
+                        Item(column, GlanceModifier.defaultWeight())
                     }
                 }
             }
@@ -103,19 +103,19 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
     }
 
     @Composable
-    private fun Item(info: TileItemInfo) {
+    private fun Item(info: TileItemInfo, modifier: GlanceModifier) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier
         ) {
             SignalBarGroup(level = info.level, dbm = info.dBm, type = info.type)
-
-            Log.e("CellReader", "$info")
 
             if (info.bands.isNotEmpty()) {
                 Text(
                     text = "${resources.getString(R.string.bands_format)}: ${info.bands.joinToString(", ")}",
                     style = TextStyle(
                         fontSize = 12.sp,
+                        color = ColorProvider(Color.White)
                     )
                 )
             }
