@@ -175,7 +175,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     betweenUtils.queueCellInfos(cellInfos)
                 }
 
-                SignalWidget().updateAll(this@UpdaterService)
+                updateWidgets()
             }
         }
     }
@@ -213,7 +213,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     betweenUtils.queueSignalStrengths(strengthInfos)
                 }
 
-                SignalWidget().updateAll(this@UpdaterService)
+                updateWidgets()
             }
         }
     }
@@ -228,8 +228,14 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 launch(Dispatchers.IO) {
                     betweenUtils.queueServiceState(serviceStates)
                 }
+
+                updateWidgets()
             }
         }
+    }
+
+    private suspend fun updateWidgets() {
+        SignalWidget().updateAll(this@UpdaterService)
     }
 
     private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) : SubscriptionManager.OnSubscriptionsChangedListener() {
@@ -258,12 +264,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                             withContext(Dispatchers.IO) {
                                 betweenUtils.queueSubscriptionInfo(CellModel.subInfos)
                             }
+
+                            updateWidgets()
                         }
                     }
                 }
 
                 withContext(Dispatchers.Main) {
                     CellModel.primaryCell = defaultId
+                    updateWidgets()
                 }
 
                 withContext(Dispatchers.IO) {

@@ -1,10 +1,16 @@
 package dev.zwander.cellreader.wear
 
+import android.graphics.Point
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
-import androidx.glance.background
+import androidx.glance.LocalSize
 import androidx.glance.layout.*
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -22,71 +28,71 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
         val dBm: Int,
         val bands: List<String>,
         val type: String,
+        val subId: Int
     )
+
+    private val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
 
     @Composable
     override fun Content() {
-        val grid = hashMapOf<Int, MutableList<TileItemInfo>>()
-        val rowSize = 2
+        val sizePx = Point().apply { wm.defaultDisplay.getSize(this) }
+        val sizeDp = sizePx.let { px -> DisplayMetrics().run {
+            wm.defaultDisplay.getMetrics(this)
 
-        val items = arrayListOf<TileItemInfo>()
+            DpSize((px.x / this.density).dp, (px.y / this.density).dp)
+        } }
 
-        CellModelWear.sortedSubIds.forEach { subId ->
+        val items = CellModelWear.sortedSubIds.map { subId ->
             val cellInfo = CellModelWear.cellInfos[subId]
             val strength = CellModelWear.strengthInfos[subId]
 
             cellInfo?.get(0)?.let {
-                items.add(
-                    TileItemInfo(
-                        it.cellSignalStrength.level,
-                        it.cellSignalStrength.dbm,
-                        it.cellIdentity.bands,
-                        it.cellIdentity.typeString(this@CellTile)
-                    )
+                TileItemInfo(
+                    it.cellSignalStrength.level,
+                    it.cellSignalStrength.dbm,
+                    it.cellIdentity.bands,
+                    it.cellIdentity.typeString(this@CellTile),
+                    subId
                 )
-            }
-
-            strength?.get(0)?.let {
-                items.add(
-                    TileItemInfo(
-                        it.level,
-                        it.dbm,
-                        listOf(),
-                        it.typeString(this@CellTile)
-                    )
+            } to strength?.get(0)?.let {
+                TileItemInfo(
+                    it.level,
+                    it.dbm,
+                    listOf(),
+                    it.typeString(this@CellTile),
+                    subId
                 )
             }
         }
 
-        items.forEachIndexed { index, tileItemInfo ->
-            val gridRowIndex = index / rowSize
-            val gridColumnIndex = index % rowSize
-
-            if (!grid.containsKey(gridRowIndex)) {
-                grid[gridRowIndex] = mutableListOf()
-            }
-
-            grid[gridRowIndex]?.add(gridColumnIndex, tileItemInfo)
-        }
-
-        ItemGrid(itemGridArray = grid, GlanceModifier.fillMaxSize())
+        ItemGrid(items = items, GlanceModifier.width(sizeDp.width).height(sizeDp.height))
     }
 
     @Composable
-    private fun ItemGrid(itemGridArray: Map<Int, List<TileItemInfo>>, modifier: GlanceModifier) {
-        Column(
+    private fun ItemGrid(items: List<Pair<TileItemInfo?, TileItemInfo?>>, modifier: GlanceModifier) {
+        Row(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.background(Color.DarkGray)
+            modifier = modifier
         ) {
-            itemGridArray.forEach { (_, columns) ->
-                Row(
+            items.forEachIndexed { index, (first, second) ->
+                Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = GlanceModifier.defaultWeight()
+                    modifier = GlanceModifier
                 ) {
-                    columns.forEachIndexed { _, column ->
-                        Item(column, GlanceModifier.defaultWeight())
+                    if (first != null) {
+                        Item(first, GlanceModifier)
                     }
+
+                    Text("${(first ?: second)!!.subId}")
+
+                    if (second != null) {
+                        Item(second, GlanceModifier)
+                    }
+                }
+
+                if (index < items.lastIndex) {
+                    Spacer(GlanceModifier.size(8.dp))
                 }
             }
         }

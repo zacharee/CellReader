@@ -2,6 +2,7 @@ package dev.zwander.cellreader.wear
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.wear.tiles.TileService
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.Wearable
@@ -143,7 +144,6 @@ class DataHandler private constructor(private val context: Context) {
             }
             BetweenUtils.CLEAR_PATH -> {
                 clear()
-                updateHandlers(frozen.uri.path)
             }
             BetweenUtils.PRIMARY_CELL_PATH -> {
                 updatePrimaryCell(frozen)
@@ -193,6 +193,7 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.cellInfos.putAll(cellInfos)
                 updateHandlers(item.uri.path)
+                updateTiles()
             }
         }
     }
@@ -205,6 +206,7 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.strengthInfos.putAll(signalStrengths)
                 updateHandlers(item.uri.path)
+                updateTiles()
             }
         }
     }
@@ -217,6 +219,7 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.serviceStates.putAll(serviceState)
                 updateHandlers(item.uri.path)
+                updateTiles()
             }
         }
     }
@@ -229,6 +232,7 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.subInfos.putAll(subInfo)
                 updateHandlers(item.uri.path)
+                updateTiles()
             }
         }
     }
@@ -242,6 +246,7 @@ class DataHandler private constructor(private val context: Context) {
                 CellModelWear.subIds.clear()
                 CellModelWear.subIds.addAll(subId)
                 updateHandlers(item.uri.path)
+                updateTiles()
             }
         }
     }
@@ -254,11 +259,19 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.primaryCell = primaryCell
                 updateHandlers(item.uri.path)
+                updateTiles()
             }
         }
     }
 
     private fun clear() {
         CellModelWear.clear()
+        updateHandlers(BetweenUtils.CLEAR_PATH)
+        updateTiles()
+    }
+
+    fun updateTiles() {
+        TileService.getUpdater(context)
+            .requestUpdate(CellTile::class.java)
     }
 }
