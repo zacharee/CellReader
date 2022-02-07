@@ -6,8 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.telephony.AccessNetworkConstants
 import android.telephony.TelephonyManager
+import android.widget.RemoteViews
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
@@ -33,8 +35,6 @@ import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class SignalWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -50,7 +50,7 @@ class SignalWidget : GlanceAppWidget() {
             Box(
                 modifier = GlanceModifier.cornerRadius(8.dp)
                     .appWidgetBackground()
-                    .fillMaxSize()
+                    .fillMaxSize(),
             ) {
                 LazyColumn(
                     modifier = GlanceModifier.fillMaxSize()
@@ -176,128 +176,100 @@ class SignalWidget : GlanceAppWidget() {
         context: Context,
         full: Boolean = true
     ): Map<String, Any?> {
-        return hashMapOf<String, Any?>().apply {
-            when {
-                this@createItems is CellSignalStrengthLteWrapper -> {
-                    put(
-                        context.resources.getString(R.string.rsrq_format),
-                        rsrq
-                    )
-                }
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this@createItems is CellSignalStrengthNrWrapper -> {
-                    csiRsrq.onAvail {
-                        put(
-                            context.resources.getString(R.string.rsrq_format),
-                            it
-                        )
-                    }
+        val map = hashMapOf<String, Any?>()
 
-                    ssRsrq.onAvail {
-                        put(
-                            context.resources.getString(R.string.rsrq_format),
-                            it
-                        )
-                    }
-                }
-                else -> {}
-            }
+        when {
+            this@createItems is CellSignalStrengthLteWrapper -> {
+                map[context.resources.getString(R.string.rsrq_format)] = rsrq
 
-            if (full) {
-                put(
-                    context.resources.getString(R.string.asu_format),
-                    asuLevel
-                )
+                if (full) {
+                    map[context.resources.getString(R.string.rssi_format)] = rssi
+                }
             }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this@createItems is CellSignalStrengthNrWrapper -> {
+                csiRsrq.onAvail {
+                    map[context.resources.getString(R.string.rsrq_format)] = it
+                }
+
+                ssRsrq.onAvail {
+                    map[context.resources.getString(R.string.rsrq_format)] = it
+                }
+            }
+            else -> {}
         }
+
+        if (full) {
+            map[context.resources.getString(R.string.asu_format)] = asuLevel
+        }
+
+        return map
     }
 
     private fun CellInfoWrapper.createItems(context: Context): Map<String, Any?> {
-        return hashMapOf<String, Any?>().apply {
-            with(cellSignalStrength) {
-                putAll(this.createItems(context, false))
+        val map = hashMapOf<String, Any?>()
+
+        with(cellSignalStrength) {
+            map.putAll(this.createItems(context, false))
+        }
+
+        with(cellIdentity) {
+            when {
+                this is CellIdentityGsmWrapper -> {
+                    val arfcnInfo = ARFCNTools.gsmArfcnToInfo(arfcn)
+                    val bands = arfcnInfo.map { it.band }
+
+                    if (bands.isNotEmpty()) {
+                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
+                    }
+                }
+                this is CellIdentityWcdmaWrapper -> {
+                    val arfcnInfo = ARFCNTools.gsmArfcnToInfo(uarfcn)
+                    val bands = arfcnInfo.map { it.band }
+
+                    if (bands.isNotEmpty()) {
+                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
+                    }
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdmaWrapper -> {
+                    val arfcnInfo = ARFCNTools.gsmArfcnToInfo(uarfcn)
+                    val bands = arfcnInfo.map { it.band }
+
+                    if (bands.isNotEmpty()) {
+                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
+                    }
+                }
+                this is CellIdentityLteWrapper -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
+                    } else {
+                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(earfcn)
+                        val bands = arfcnInfo.map { it.band }
+
+                        if (bands.isNotEmpty()) {
+                            map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
+                        }
+                    }
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        map[context.resources.getString(R.string.bands_format)] = bands?.joinToString(", ")
+                    } else {
+                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(nrArfcn)
+                        val bands = arfcnInfo.map { it.band }
+
+                        if (bands.isNotEmpty()) {
+                            map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
+                        }
+                    }
+                }
             }
 
-            with(cellIdentity) {
-                when {
-                    this is CellIdentityGsmWrapper -> {
-                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(arfcn)
-                        val bands = arfcnInfo.map { it.band }
-
-                        if (bands.isNotEmpty()) {
-                            put(
-                                context.resources.getString(R.string.bands_format),
-                                bands.joinToString(", ")
-                            )
-                        }
-                    }
-                    this is CellIdentityWcdmaWrapper -> {
-                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(uarfcn)
-                        val bands = arfcnInfo.map { it.band }
-
-                        if (bands.isNotEmpty()) {
-                            put(
-                                context.resources.getString(R.string.bands_format),
-                                bands.joinToString(", ")
-                            )
-                        }
-                    }
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityTdscdmaWrapper -> {
-                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(uarfcn)
-                        val bands = arfcnInfo.map { it.band }
-
-                        if (bands.isNotEmpty()) {
-                            put(
-                                context.resources.getString(R.string.bands_format),
-                                bands.joinToString(", ")
-                            )
-                        }
-                    }
-                    this is CellIdentityLteWrapper -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            put(
-                                context.resources.getString(R.string.bands_format),
-                                bands?.joinToString(", ")
-                            )
-                        } else {
-                            val arfcnInfo = ARFCNTools.gsmArfcnToInfo(earfcn)
-                            val bands = arfcnInfo.map { it.band }
-
-                            if (bands.isNotEmpty()) {
-                                put(
-                                    context.resources.getString(R.string.bands_format),
-                                    bands.joinToString(", ")
-                                )
-                            }
-                        }
-                    }
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            put(
-                                context.resources.getString(R.string.bands_format),
-                                bands?.joinToString(", ")
-                            )
-                        } else {
-                            val arfcnInfo = ARFCNTools.gsmArfcnToInfo(nrArfcn)
-                            val bands = arfcnInfo.map { it.band }
-
-                            if (bands.isNotEmpty()) {
-                                put(
-                                    context.resources.getString(R.string.bands_format),
-                                    bands.joinToString(", ")
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (!plmn.isNullOrBlank()) {
-                    put(
-                        context.resources.getString(R.string.plmn_format),
-                        plmn.asMccMnc
-                    )
-                }
+            if (!plmn.isNullOrBlank()) {
+                map[context.resources.getString(R.string.plmn_format)] = plmn.asMccMnc
             }
         }
+
+        return map
     }
 
     @Composable
@@ -364,7 +336,7 @@ class SignalWidget : GlanceAppWidget() {
                         }
                     }
 
-                    if (size.width >= 190.dp) {
+                    if (size.width >= 180.dp) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -440,19 +412,32 @@ class SignalWidgetReceiver : GlanceAppWidgetReceiver() {
         context.startForegroundService(Intent(context, UpdaterService::class.java))
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        appWidgetManager.updateAppWidget(appWidgetId, RemoteViews(context.packageName, R.layout.blank))
+
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_REFRESH) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName =
                 ComponentName(context.packageName, checkNotNull(javaClass.canonicalName))
+
+            val ids = appWidgetManager.getAppWidgetIds(componentName)
+
+            appWidgetManager.updateAppWidget(ids, RemoteViews(context.packageName, R.layout.blank))
+
             onUpdate(
                 context,
                 appWidgetManager,
-                appWidgetManager.getAppWidgetIds(componentName)
+                ids
             )
-            GlobalScope.launch {
-                glanceAppWidget.updateAll(context)
-            }
             return
         }
 
