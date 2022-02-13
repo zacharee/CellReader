@@ -2,6 +2,8 @@
 
 package dev.zwander.cellreader.ui.components
 
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -51,6 +54,24 @@ fun BoxScope.BottomBarScrimContainer() {
         }
     ) {
         scrimFullSize = it != Color.Transparent
+    }
+
+    val backPressedCallback = remember {
+        object : OnBackPressedCallback(expanded || whichDialog != null) {
+            override fun handleOnBackPressed() {
+                if (whichDialog != null) {
+                    whichDialog = null
+                } else if (expanded) {
+                    expanded = false
+                }
+            }
+        }
+    }
+
+    LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher?.addCallback(LocalLifecycleOwner.current, backPressedCallback)
+
+    LaunchedEffect(key1 = expanded, key2 = whichDialog) {
+        backPressedCallback.isEnabled = expanded || whichDialog != null
     }
 
     Box(
