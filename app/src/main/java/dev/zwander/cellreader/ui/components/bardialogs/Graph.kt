@@ -2,6 +2,7 @@
 
 package dev.zwander.cellreader.ui.components.bardialogs
 
+import android.graphics.Color
 import android.view.MotionEvent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -14,13 +15,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.GraphInfo
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.toColorInt
 
 @Composable
@@ -42,13 +47,22 @@ fun Graph(points: Map<Int, GraphInfo>) {
                     axisLeft.textColor = textColor
                     axisRight.textColor = textColor
                     legend.textColor = textColor
-                    axisLeft.granularity = 1.0f
                     description.isEnabled = false
-                    isHighlightPerTapEnabled = false
                     isHighlightPerDragEnabled = false
 
                     legend.isWordWrapEnabled = true
                     legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
+
+                    setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+                        override fun onNothingSelected() {
+                            data.dataSets.forEach { (it as SelectableLineDataSet).isSelected = false }
+                        }
+                        override fun onValueSelected(e: Entry, h: Highlight) {
+                            val dataset = data.dataSets[h.dataSetIndex] as SelectableLineDataSet
+                            data.dataSets.forEach { (it as SelectableLineDataSet).isSelected = false }
+                            dataset.isSelected = true
+                        }
+                    })
 
                     this.onChartGestureListener = object : OnChartGestureListener {
                         private var prevDist = 0f
@@ -85,13 +99,14 @@ fun Graph(points: Map<Int, GraphInfo>) {
                 it.data = LineData(
                     points.flatMap { (_, graphInfo) ->
                         graphInfo.lines.toSortedMap().map { (_, line) ->
-                            LineDataSet(line.line, line.label).apply {
+                            SelectableLineDataSet(line.line, line.label, line).apply {
                                 this.mode = LineDataSet.Mode.LINEAR
-                                this.fillColor = line.color
+                                this.fillColor = if (isSelected) Color.WHITE else line.color
                                 this.circleColors = listOf(fillColor)
                                 this.colors = listOf(fillColor)
                                 this.setDrawCircles(false)
                                 this.axisDependency = line.axis
+                                this.highLightColor = Color.WHITE
                             }
                         }
                     }
@@ -101,14 +116,18 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                 it.setVisibleXRangeMinimum(10f)
                 it.setVisibleXRangeMaximum(50f)
+                it.isDoubleTapToZoomEnabled = false
+                it.maxHighlightDistance = 20f
+                it.xAxis.granularity = 1f
 
                 if (followData) {
-                    it.moveViewToAnimated(it.data.xMax, 0f, YAxis.AxisDependency.LEFT, 100)
+                    it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(300.dp)
+                .padding(8.dp)
         )
 
         Spacer(Modifier.size(8.dp))

@@ -111,6 +111,26 @@ private fun BoxScope.BottomBar(
         )
     }
 
+    val links = remember {
+        listOf(
+            BottomBarLinkInfo(
+                R.drawable.website,
+                R.string.website,
+                "https://zwander.dev"
+            ),
+            BottomBarLinkInfo(
+                R.drawable.github,
+                R.string.github,
+                "https://github.com/zacharee"
+            ),
+            BottomBarLinkInfo(
+                R.drawable.patreon,
+                R.string.patreon,
+                "https://patreon.com/zacharywander"
+            )
+        )
+    }
+
     LaunchedEffect(Unit) {
         while (true) {
             populatePoints(points = points, context = context)
@@ -154,23 +174,13 @@ private fun BoxScope.BottomBar(
             ) {
                 Spacer(Modifier.weight(1f))
 
-                LinkIcon(
-                    icon = painterResource(id = R.drawable.website),
-                    link = "https://zwander.dev",
-                    desc = stringResource(id = R.string.website)
-                )
-
-                LinkIcon(
-                    icon = painterResource(id = R.drawable.github),
-                    link = "https://github.com/zacharee",
-                    desc = stringResource(id = R.string.github)
-                )
-
-                LinkIcon(
-                    icon = painterResource(id = R.drawable.patreon),
-                    link = "https://patreon.com/zacharywander",
-                    desc = stringResource(id = R.string.patreon)
-                )
+                links.forEach { linkInfo ->
+                    LinkIcon(
+                        icon = painterResource(id = linkInfo.iconRes),
+                        link = linkInfo.link,
+                        desc = stringResource(id = linkInfo.descRes)
+                    )
+                }
 
                 Spacer(Modifier.size(16.dp))
 

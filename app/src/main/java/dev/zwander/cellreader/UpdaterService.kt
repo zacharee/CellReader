@@ -166,10 +166,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 infos.addAll(telephonies[subId]!!.allCellInfo)
             }
 
-            val infos = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
+            val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
             val foundIDs = mutableListOf<String>()
-            val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
+            val newInfo = sorted.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
             launch(Dispatchers.Main) {
                 cellInfos[subId] = newInfo
