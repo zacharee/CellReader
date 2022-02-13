@@ -61,6 +61,9 @@ dependencies {
 
     api 'io.gsonfire:gson-fire:1.8.5'
 
+    api 'com.github.madrapps:plot:0.1.1'
+    api 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0")

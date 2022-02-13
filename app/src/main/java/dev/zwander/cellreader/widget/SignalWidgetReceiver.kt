@@ -252,7 +252,7 @@ class SignalWidget : GlanceAppWidget() {
                 }
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        map[context.resources.getString(R.string.bands_format)] = bands?.joinToString(", ")
+                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
                     } else {
                         val arfcnInfo = ARFCNTools.gsmArfcnToInfo(nrArfcn)
                         val bands = arfcnInfo.map { it.band }

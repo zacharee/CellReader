@@ -22,6 +22,8 @@
     <string name="website">Website</string>
     <string name="about">About</string>
     <string name="open_app">Open App</string>
+    <string name="signal_graph">Signal Graph</string>
+    <string name="maintain_scroll">Maintain Scroll</string>
 
     <string name="level_format">Level</string>
     <string name="timestamp_format">Timestamp</string>
@@ -139,4 +141,15 @@
     <string name="dl_freqs_format">DL Freqs</string>
     <string name="ul_freqs_format">UL Freqs</string>
     <string name="freqs_format">Freqs</string>
+
+    <string name="legend_strength">%d: %s Strength</string>
+    <string name="legend_rssi">%d: %s RSSI</string>
+    <string name="legend_rsrq">%d: %s RSRQ</string>
+    <string name="legend_rssnr">%d: %s RSSnR</string>
+    <string name="legend_ss_rsrp">%d: %s RS RSRP</string>
+    <string name="legend_csi_rsrp">%d: %s CSI RSRP</string>
+    <string name="legend_ss_rsrq">%d: %s SS RSRQ</string>
+    <string name="legend_csi_rsrq">%d: %s CSI RSRQ</string>
+    <string name="legend_ss_sinr">%d: %s SS SinR</string>
+    <string name="legend_csi_sinr">%d: %s CSI SinR</string>
 </resources>

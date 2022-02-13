@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
 import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -12,7 +11,6 @@ import android.telephony.*
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.glance.appwidget.updateAll
 import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.StateListener
@@ -21,7 +19,6 @@ import dev.zwander.cellreader.data.data.TelephonyListenerCallback
 import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.wrappers.*
-import dev.zwander.cellreader.widget.SignalWidget
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicLong
@@ -163,13 +160,13 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     }
 
     @SuppressLint("MissingPermission")
-    override fun updateCellInfo(subId: Int, origInfos: MutableList<CellInfo>) {
+    override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (CellModel) {
-            if (origInfos.isEmpty()) {
-                origInfos.addAll(telephonies[subId]!!.allCellInfo)
+            if (infos.isEmpty()) {
+                infos.addAll(telephonies[subId]!!.allCellInfo)
             }
 
-            val infos = origInfos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
+            val infos = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
             val foundIDs = mutableListOf<String>()
             val newInfo = infos.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
