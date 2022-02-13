@@ -91,6 +91,10 @@ fun MainContent() {
                     itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
                         val isFinal = index == lastCellIndex
 
+                        val key = remember(item.cellIdentity) {
+                            "$t:${item.cellIdentity}"
+                        }
+
                         AnimatedVisibility(
                             visible = showingCells[t] != false,
                             modifier = Modifier
@@ -99,10 +103,6 @@ fun MainContent() {
                             enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                             exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                         ) {
-                            val key = remember(item.cellIdentity) {
-                                "$t:${item.cellIdentity}"
-                            }
-
                             SignalCard(
                                 cellInfo = item,
                                 isFinal = isFinal,

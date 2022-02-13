@@ -1,7 +1,9 @@
 package dev.zwander.cellreader.data
 
 
+import android.os.Parcelable
 import android.telephony.CellInfo
+import kotlinx.parcelize.Parcelize
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -175,11 +177,12 @@ object ARFCNTools {
     }
 }
 
+@Parcelize
 data class ARFCNInfo(
     val band: String,
     val dlFreq: Number,
     val ulFreq: Number
-)
+) : Parcelable
 
 data class ARFCNContainer(
     val dlLow: Number = 0,

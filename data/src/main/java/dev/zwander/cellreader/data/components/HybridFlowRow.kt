@@ -3,7 +3,6 @@ package dev.zwander.cellreader.data.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -13,7 +12,7 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.SizeMode
-import dev.zwander.cellreader.data.util.isWear
+import dev.zwander.cellreader.data.util.rememberIsWear
 
 @Composable
 fun HybridFlowRow(
@@ -29,9 +28,7 @@ fun HybridFlowRow(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val isWear = remember {
-        context.isWear
-    }
+    val isWear = context.rememberIsWear()
 
     if (!isWear) {
         Row(

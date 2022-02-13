@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.util.FormatText
@@ -38,8 +39,12 @@ fun CellIdentityNrWrapper.CellIdentityNr(
             )
         }
 
-        val dlFreqs = remember(nrArfcn) { arfcnInfo.map { it.dlFreq } }
-        val ulFreqs = remember(nrArfcn) { arfcnInfo.map { it.ulFreq } }
+        val dlFreqs = rememberSaveable(inputs = arrayOf(nrArfcn)) {
+            arfcnInfo.map { it.dlFreq }
+        }
+        val ulFreqs = rememberSaveable(inputs = arrayOf(nrArfcn)) {
+            arfcnInfo.map { it.ulFreq }
+        }
 
         if (dlFreqs.isNotEmpty()) {
             FormatText(

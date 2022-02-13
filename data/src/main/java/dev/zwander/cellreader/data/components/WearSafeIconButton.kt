@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ContentAlpha
-import dev.zwander.cellreader.data.util.isWear
+import dev.zwander.cellreader.data.util.rememberIsWear
 
 @Composable
 fun WearSafeIconButton(
@@ -25,9 +25,7 @@ fun WearSafeIconButton(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val isWear = remember {
-        context.isWear
-    }
+    val isWear = context.rememberIsWear()
 
     if (isWear) {
         WearIconButton(

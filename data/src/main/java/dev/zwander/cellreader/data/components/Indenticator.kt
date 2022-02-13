@@ -4,7 +4,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -18,7 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.util.isWear
+import dev.zwander.cellreader.data.util.rememberIsWear
 
 @Composable
 fun IndenticatorLine(
@@ -28,9 +27,7 @@ fun IndenticatorLine(
     val density = LocalDensity.current
     val context = LocalContext.current
 
-    val isWear = remember {
-        context.isWear
-    }
+    val isWear = context.rememberIsWear()
 
     val lineWidth = if (isWear) 2 else 3
     val finalFactor = if (isWear) 5.5f else 7.5f
@@ -57,10 +54,7 @@ fun IndenticatorLine(
 @Composable
 fun IndenticatorArrow() {
     val context = LocalContext.current
-
-    val isWear = remember {
-        context.isWear
-    }
+    val isWear = context.rememberIsWear()
 
     Image(
         painter = painterResource(id = R.drawable.indent_arrow),

@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -170,7 +174,19 @@ fun CellModelBase.SIMCard(
 
                 val scroll = rememberCarouselScrollState()
 
-                var subSize by remember {
+                var subSize by rememberSaveable(inputs = arrayOf(subInfo?.id), saver = object : Saver<MutableState<IntSize>, String> {
+                    override fun restore(value: String): MutableState<IntSize> {
+                        val split = value.split("x")
+
+                        if (split.size < 2) return mutableStateOf(IntSize.Zero)
+
+                        return mutableStateOf(IntSize(split[0].toInt(), split[1].toInt()))
+                    }
+
+                    override fun SaverScope.save(value: MutableState<IntSize>): String {
+                        return "${value.value.width}x${value.value.height}"
+                    }
+                }) {
                     mutableStateOf(IntSize(0, context.dpAsPx(50).toInt()))
                 }
 

@@ -2,7 +2,6 @@ package dev.zwander.cellreader.data.components
 
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -15,7 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import dev.zwander.cellreader.data.util.isWear
+import dev.zwander.cellreader.data.util.rememberIsWear
 
 @Composable
 fun WearSafeText(
@@ -37,9 +36,7 @@ fun WearSafeText(
     style: TextStyle = LocalTextStyle.current,
 ) {
     val context = LocalContext.current
-    val isWear = remember {
-        context.isWear
-    }
+    val isWear = context.rememberIsWear()
 
     if (isWear) {
         androidx.wear.compose.material.Text(
