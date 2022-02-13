@@ -55,12 +55,14 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                     setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                         override fun onNothingSelected() {
-                            data.dataSets.forEach { (it as SelectableLineDataSet).isSelected = false }
+                            data.dataSets.forEach { set -> (set as SelectableLineDataSet).isSelected = false }
+                            notifyDataSetChanged()
                         }
                         override fun onValueSelected(e: Entry, h: Highlight) {
-                            val dataset = data.dataSets[h.dataSetIndex] as SelectableLineDataSet
-                            data.dataSets.forEach { (it as SelectableLineDataSet).isSelected = false }
-                            dataset.isSelected = true
+                            data.dataSets.forEachIndexed { index, set ->
+                                (set as SelectableLineDataSet).isSelected = index == h.dataSetIndex
+                            }
+                            notifyDataSetChanged()
                         }
                     })
 
