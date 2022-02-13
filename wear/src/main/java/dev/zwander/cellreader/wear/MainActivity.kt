@@ -27,8 +27,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         super.onCreate(savedInstanceState)
 
         launch {
-            DataHandler.getInstance(this@MainActivity)
-                .addHandle(this@MainActivity)
+            DataHandler.addHandle(this@MainActivity, this@MainActivity)
         }
 
         setContent {
@@ -42,8 +41,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         super.onDestroy()
 
         launch {
-            DataHandler.getInstance(this@MainActivity)
-                .removeHandle(this@MainActivity)
+            DataHandler.removeHandle(this@MainActivity, this@MainActivity)
 
             this@MainActivity.cancel()
         }

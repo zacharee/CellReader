@@ -16,6 +16,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import androidx.glance.wear.tiles.GlanceTileService
+import androidx.wear.tiles.EventBuilders
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
@@ -32,6 +33,18 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
     )
 
     private val wm by lazy { getSystemService(WINDOW_SERVICE) as WindowManager }
+
+    override fun onTileEnterEvent(requestParams: EventBuilders.TileEnterEvent) {
+        launch {
+            DataHandler.addHandle(this@CellTile, this@CellTile)
+        }
+    }
+
+    override fun onTileLeaveEvent(requestParams: EventBuilders.TileLeaveEvent) {
+        launch {
+            DataHandler.removeHandle(this@CellTile, this@CellTile)
+        }
+    }
 
     @Composable
     override fun Content() {
@@ -118,23 +131,9 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
         }
     }
 
-    override fun onCreate() {
-        super.onCreate()
-
-        launch {
-            DataHandler.getInstance(this@CellTile)
-                .addHandle(this@CellTile)
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
 
-        launch {
-            DataHandler.getInstance(this@CellTile)
-                .removeHandle(this@CellTile)
-
-            this@CellTile.cancel()
-        }
+        cancel()
     }
 }

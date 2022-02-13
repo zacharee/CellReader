@@ -39,6 +39,14 @@ class DataHandler private constructor(private val context: Context) {
                 instance = this
             }
         }
+
+        suspend fun addHandle(context: Context, handle: Any) {
+            getInstance(context).addHandle(handle)
+        }
+
+        suspend fun removeHandle(context: Context, handle: Any) {
+            getInstance(context).removeHandle(handle)
+        }
     }
 
     private var loadCellInfosJob: Job? = null
