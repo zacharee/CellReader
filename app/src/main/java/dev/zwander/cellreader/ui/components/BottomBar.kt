@@ -113,45 +113,24 @@ private fun BoxScope.BottomBar(
 ) {
     val dialogButtons = remember {
         listOf(
-            DialogButtonInfo(
-                BottomDialogPage.GRAPH,
-                R.drawable.chart,
-                R.string.signal_graph
+            listOf(
+                DialogButtonInfo(
+                    BottomDialogPage.GRAPH,
+                    R.drawable.chart,
+                    R.string.signal_graph
+                ),
             ),
-            DialogButtonInfo(
-                BottomDialogPage.SUPPORTERS,
-                R.drawable.heart,
-                R.string.supporters
-            ),
-            DialogButtonInfo(
-                BottomDialogPage.ABOUT,
-                R.drawable.about,
-                R.string.about
-            )
-        )
-    }
-
-    val links = remember {
-        listOf(
-            BottomBarLinkInfo(
-                R.drawable.website,
-                R.string.website,
-                "https://zwander.dev"
-            ),
-            BottomBarLinkInfo(
-                R.drawable.github,
-                R.string.github,
-                "https://github.com/zacharee"
-            ),
-            BottomBarLinkInfo(
-                R.drawable.patreon,
-                R.string.patreon,
-                "https://patreon.com/zacharywander"
-            ),
-            BottomBarLinkInfo(
-                R.drawable.twitter,
-                R.string.twitter,
-                "https://twitter.com/Wander1236"
+            listOf(
+                DialogButtonInfo(
+                    BottomDialogPage.SUPPORTERS,
+                    R.drawable.heart,
+                    R.string.supporters
+                ),
+                DialogButtonInfo(
+                    BottomDialogPage.ABOUT,
+                    R.drawable.about,
+                    R.string.about
+                ),
             )
         )
     }
@@ -208,35 +187,31 @@ private fun BoxScope.BottomBar(
                 backgroundColor = Color.Transparent,
                 elevation = 0.dp,
             ) {
-                Spacer(Modifier.weight(1f))
-
-                links.forEach { linkInfo ->
-                    LinkIcon(
-                        icon = painterResource(id = linkInfo.iconRes),
-                        link = linkInfo.link,
-                        desc = stringResource(id = linkInfo.descRes)
-                    )
-                }
-
                 Spacer(Modifier.size(16.dp))
 
-                dialogButtons.forEach { buttonInfo ->
-                    WearSafeIconButton(
-                        onClick = {
-                            onDialogChange(
-                                if (whichDialog == buttonInfo.whichDialog) null else buttonInfo.whichDialog
+                dialogButtons.forEachIndexed { index, section ->
+                    section.forEach { buttonInfo ->
+                        WearSafeIconButton(
+                            onClick = {
+                                onDialogChange(
+                                    if (whichDialog == buttonInfo.whichDialog) null else buttonInfo.whichDialog
+                                )
+                            }
+                        ) {
+                            WearSafeIcon(
+                                painter = painterResource(id = buttonInfo.iconRes),
+                                contentDescription = stringResource(id = buttonInfo.descRes),
+                                tint = if (whichDialog == buttonInfo.whichDialog) Color.White else null
                             )
                         }
-                    ) {
-                        WearSafeIcon(
-                            painter = painterResource(id = buttonInfo.iconRes),
-                            contentDescription = stringResource(id = buttonInfo.descRes),
-                            tint = if (whichDialog == buttonInfo.whichDialog) Color.White else null
-                        )
+                    }
+
+                    if (index < dialogButtons.lastIndex) {
+                        Spacer(Modifier.weight(1f))
                     }
                 }
 
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.size(16.dp))
             }
         }
 
