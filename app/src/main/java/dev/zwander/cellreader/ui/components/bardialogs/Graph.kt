@@ -26,12 +26,20 @@ import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.GraphInfo
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.SelectableLineDataSet
+import dev.zwander.cellreader.data.components.CardCheckbox
 import dev.zwander.cellreader.data.util.toColorInt
 
 @Composable
 fun Graph(points: Map<Int, GraphInfo>) {
     var followData by remember {
         mutableStateOf(true)
+    }
+    val enabledSubIds = remember {
+        mutableStateListOf<Int>()
+    }
+
+    LaunchedEffect(key1 = points.keys) {
+        enabledSubIds.addAll(points.keys)
     }
 
     val textColor = MaterialTheme.colors.onSurface.toColorInt()
@@ -55,9 +63,12 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                     setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                         override fun onNothingSelected() {
-                            data.dataSets.forEach { set -> (set as SelectableLineDataSet).isSelected = false }
+                            data.dataSets.forEach { set ->
+                                (set as SelectableLineDataSet).isSelected = false
+                            }
                             notifyDataSetChanged()
                         }
+
                         override fun onValueSelected(e: Entry, h: Highlight) {
                             data.dataSets.forEachIndexed { index, set ->
                                 (set as SelectableLineDataSet).isSelected = index == h.dataSetIndex
@@ -73,12 +84,15 @@ fun Graph(points: Map<Int, GraphInfo>) {
                         override fun onChartGestureEnd(
                             me: MotionEvent?,
                             lastPerformedGesture: ChartTouchListener.ChartGesture?
-                        ) {}
+                        ) {
+                        }
 
                         override fun onChartGestureStart(
                             me: MotionEvent?,
                             lastPerformedGesture: ChartTouchListener.ChartGesture?
-                        ) {}
+                        ) {
+                        }
+
                         override fun onChartLongPressed(me: MotionEvent?) {}
                         override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {}
                         override fun onChartSingleTapped(me: MotionEvent?) {}
@@ -87,7 +101,9 @@ fun Graph(points: Map<Int, GraphInfo>) {
                             me2: MotionEvent?,
                             velocityX: Float,
                             velocityY: Float
-                        ) {}
+                        ) {
+                        }
+
                         override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {
                             if (dX != prevDist) {
                                 prevDist = dX
@@ -99,7 +115,11 @@ fun Graph(points: Map<Int, GraphInfo>) {
             },
             update = {
                 it.data = LineData(
-                    points.flatMap { (_, graphInfo) ->
+                    points.flatMap { (subId, graphInfo) ->
+                        if (!enabledSubIds.contains(subId)) {
+                            return@flatMap listOf()
+                        }
+
                         graphInfo.lines.toSortedMap().map { (_, line) ->
                             SelectableLineDataSet(line.line, line.label, line).apply {
                                 this.mode = LineDataSet.Mode.LINEAR
@@ -134,22 +154,33 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
         Spacer(Modifier.size(8.dp))
 
-        Card(
-            onClick = {
-                followData = !followData
-            },
-            modifier = Modifier.padding(16.dp)
-        ) {
+        if (points.keys.size > 1) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
-                Text(stringResource(id = R.string.maintain_scroll))
-
-                Spacer(Modifier.weight(1f))
-
-                Checkbox(checked = followData, onCheckedChange = { followData = !followData })
+                points.keys.forEach { subId ->
+                    CardCheckbox(
+                        isChecked = enabledSubIds.contains(subId),
+                        onCheckedChanged = {
+                            if (it) {
+                                enabledSubIds.add(subId)
+                            } else if (enabledSubIds.size > 1) {
+                                enabledSubIds.remove(subId)
+                            }
+                        },
+                        text = stringResource(id = R.string.chart_sim_format, subId),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
+
+        CardCheckbox(
+            isChecked = followData,
+            onCheckedChanged = { followData = it },
+            text = stringResource(id = R.string.maintain_scroll),
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

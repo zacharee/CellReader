@@ -152,4 +152,6 @@
     <string name="legend_csi_rsrq">%d: %s CSI RSRQ</string>
     <string name="legend_ss_sinr">%d: %s SS SinR</string>
     <string name="legend_csi_sinr">%d: %s CSI SinR</string>
+
+    <string name="chart_sim_format">SIM %d</string>
 </resources>
