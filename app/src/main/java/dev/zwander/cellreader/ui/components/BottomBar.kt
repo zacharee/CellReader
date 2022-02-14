@@ -25,9 +25,13 @@ import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.data.BottomBarLinkInfo
 import dev.zwander.cellreader.data.data.BottomDialogPage
 import dev.zwander.cellreader.data.data.DialogButtonInfo
+import dev.zwander.cellreader.data.data.GraphInfo
+import dev.zwander.cellreader.data.util.populatePoints
 import dev.zwander.cellreader.ui.components.bardialogs.About
 import dev.zwander.cellreader.ui.components.bardialogs.Graph
 import dev.zwander.cellreader.ui.components.bardialogs.Supporters
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @Composable
 fun BoxScope.BottomBarScrimContainer() {
@@ -147,6 +151,19 @@ private fun BoxScope.BottomBar(
         )
     }
 
+    val points = remember {
+        mutableStateMapOf<Int, GraphInfo>()
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = Unit) {
+        while (isActive) {
+            populatePoints(points, context)
+            delay(1000)
+        }
+    }
+
     Column(
         modifier = Modifier
             .background(
@@ -222,7 +239,7 @@ private fun BoxScope.BottomBar(
             mapOf<BottomDialogPage, @Composable()() -> Unit>(
                 BottomDialogPage.SUPPORTERS to { Supporters() },
                 BottomDialogPage.ABOUT to { About() },
-                BottomDialogPage.GRAPH to { Graph() }
+                BottomDialogPage.GRAPH to { Graph(points) }
             )
         }
 

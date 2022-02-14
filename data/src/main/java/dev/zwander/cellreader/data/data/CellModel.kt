@@ -6,11 +6,11 @@ import android.telephony.*
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
 
 object CellModel : CellModelBase() {
     val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
     val telephonies = mutableStateMapOf<Int, TelephonyManager>()
-    val strengthPoints = MutableLiveData<Map<Int, GraphInfo>>()
 
     val telephonyCallbacks = HashMap<Int, TelephonyCallback>()
     @Suppress("DEPRECATION")
@@ -33,7 +33,6 @@ object CellModel : CellModelBase() {
         super.clear()
         signalStrengths.clear()
         telephonies.clear()
-        strengthPoints.value = mapOf()
     }
 }
 

@@ -12,9 +12,7 @@ import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthLteWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthNrWrapper
 
-fun populatePoints(context: Context) {
-    val strengthPoints = HashMap(CellModel.strengthPoints.value ?: mapOf())
-
+fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context) {
     CellModel.strengthInfos.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)
@@ -246,6 +244,4 @@ fun populatePoints(context: Context) {
             }
         }
     }
-
-    CellModel.strengthPoints.value = strengthPoints
 }

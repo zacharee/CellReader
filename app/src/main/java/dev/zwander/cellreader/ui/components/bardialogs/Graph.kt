@@ -5,7 +5,6 @@ import android.view.MotionEvent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,18 +22,12 @@ import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.CardCheckbox
-import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.toColorInt
-import java.lang.Integer.max
 
 @Composable
-fun Graph() {
-    val _points by CellModel.strengthPoints.observeAsState()
-    val points by derivedStateOf {
-        _points ?: mapOf()
-    }
-
+fun Graph(points: Map<Int, GraphInfo>) {
     var followData by remember {
         mutableStateOf(true)
     }
@@ -124,7 +117,7 @@ fun Graph() {
                         }
 
                         graphInfo.lines.toSortedMap().map { (_, line) ->
-                            SelectableLineDataSet(line.line.drop(max(0, line.line.size - 150)).toMutableList(), line.label, line).apply {
+                            SelectableLineDataSet(line.lineWindow, line.label, line).apply {
                                 this.mode = LineDataSet.Mode.LINEAR
                                 this.fillColor = if (isSelected) Color.WHITE else line.color
                                 this.circleColors = listOf(fillColor)

@@ -17,7 +17,6 @@ import dev.zwander.cellreader.data.data.TelephonyListener
 import dev.zwander.cellreader.data.data.TelephonyListenerCallback
 import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.util.populatePoints
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
 import kotlinx.coroutines.*
@@ -95,8 +94,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         if (subs.allSubscriptionInfoList.isEmpty()) {
             init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
         }
-
-        updateGraph()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -252,15 +249,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             lastUpdate.set(currentTime)
 
             sendBroadcast(Intent(this, SignalWidgetReceiver::class.java).setAction(SignalWidgetReceiver.ACTION_REFRESH))
-        }
-    }
-
-    private fun updateGraph() {
-        async {
-            while (isActive) {
-                populatePoints(this@UpdaterService)
-                delay(1000)
-            }
         }
     }
 
