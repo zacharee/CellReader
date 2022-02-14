@@ -147,6 +147,11 @@ private fun BoxScope.BottomBar(
                 R.drawable.patreon,
                 R.string.patreon,
                 "https://patreon.com/zacharywander"
+            ),
+            BottomBarLinkInfo(
+                R.drawable.twitter,
+                R.string.twitter,
+                "https://twitter.com/Wander1236"
             )
         )
     }

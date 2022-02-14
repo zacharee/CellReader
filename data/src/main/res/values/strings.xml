@@ -24,6 +24,7 @@
     <string name="open_app">Open App</string>
     <string name="signal_graph">Signal Graph</string>
     <string name="maintain_scroll">Maintain Scroll</string>
+    <string name="twitter">Twitter</string>
 
     <string name="level_format">Level</string>
     <string name="timestamp_format">Timestamp</string>
