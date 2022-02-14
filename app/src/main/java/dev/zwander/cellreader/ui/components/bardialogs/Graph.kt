@@ -124,7 +124,7 @@ fun Graph() {
                         }
 
                         graphInfo.lines.toSortedMap().map { (_, line) ->
-                            SelectableLineDataSet(line.line.drop(max(0, line.line.size - 500)).toMutableList(), line.label, line).apply {
+                            SelectableLineDataSet(line.line.drop(max(0, line.line.size - 300)).toMutableList(), line.label, line).apply {
                                 this.mode = LineDataSet.Mode.LINEAR
                                 this.fillColor = if (isSelected) Color.WHITE else line.color
                                 this.circleColors = listOf(fillColor)
