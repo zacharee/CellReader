@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,8 @@ import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 fun ServiceState(
     serviceState: ServiceStateWrapper
 ) {
+    val context = LocalContext.current
+
     with (serviceState) {
         WearSafeText(
             text = stringResource(id = R.string.service_state),
@@ -45,7 +48,7 @@ fun ServiceState(
             FormatText(
                 R.string.roaming_type_format,
                 HashSet(networkRegistrationInfos?.map { it.roamingType } ?: listOf())
-                    .joinToString("/") { ServiceStateWrapper.roamingTypeToString(it) }
+                    .joinToString("/") { ServiceStateWrapper.roamingTypeToString(context, it) }
             )
         } else {
             FormatText(
@@ -57,7 +60,7 @@ fun ServiceState(
 
         FormatText(
             R.string.state_format,
-            setOf(dataRegState, voiceRegState).joinToString("/") { ServiceStateWrapper.rilServiceStateToString(it) }
+            setOf(dataRegState, voiceRegState).joinToString("/") { ServiceStateWrapper.rilServiceStateToString(context, it) }
         )
         FormatText(R.string.emergency_only_format, "$emergencyOnly")
 
@@ -65,6 +68,7 @@ fun ServiceState(
             R.string.network_type_format,
             setOf(dataNetworkType, voiceNetworkType).joinToString("/") {
                 ServiceStateWrapper.rilRadioTechnologyToString(
+                    context,
                     ServiceStateWrapper.networkTypeToRilRadioTechnology(
                         it
                     )
@@ -72,8 +76,7 @@ fun ServiceState(
             }
         )
 
-        FormatText(R.string.bandwidths_format, cellBandwidths.joinToString(", "))
-        FormatText(R.string.duplex_format, duplexModeToString(duplexMode))
+        FormatText(R.string.duplex_format, duplexModeToString(context, duplexMode))
         FormatText(R.string.channel_format, "$channelNumber")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -102,7 +103,8 @@ fun CellModelBase.SIMCard(
                         BitmapFactory.decodeByteArray(bitmap, 0, bitmap.size)?.asImageBitmap()?.let {
                             Image(
                                 bitmap = it, contentDescription = null,
-                                modifier = Modifier.size((16 * LocalDensity.current.fontScale).dp)
+                                modifier = Modifier
+                                    .size((16 * LocalDensity.current.fontScale).dp)
                                     .align(Alignment.CenterVertically)
                                     .shadow(
                                         elevation = 8.dp,
@@ -114,10 +116,17 @@ fun CellModelBase.SIMCard(
                             Spacer(Modifier.size(8.dp))
                         }
                     }
+
+                    val type = ServiceStateWrapper.rilRadioTechnologyToString(
+                        context,
+                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subInfo?.id]?.dataNetworkType ?: 0)
+                    )
+
                     WearSafeText(
-                        text = "${subInfo?.carrierName}",
+                        text = "${subInfo?.carrierName} $type (${rplmn})",
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold
                     )
 
@@ -154,19 +163,18 @@ fun CellModelBase.SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.rplmn_format, rplmn)
-                        FormatText(R.string.network_type_format,
-                            ServiceStateWrapper.rilRadioTechnologyToString(
-                                ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subInfo?.id]?.dataNetworkType ?: 0)
-                            )
-                        )
                         FormatText(R.string.carrier_aggregation_format, "${serviceStates[subInfo?.id]?.isUsingCarrierAggregation}")
+
+                        serviceStates[subInfo?.id]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
+                            if (bandwidths.isNotBlank()) {
+                                FormatText(R.string.bandwidths_format, bandwidths)
+                            }
+                        }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             FormatText(R.string.nr_state_format, "${
-                                CellUtils.nrStateToString(
-                                    serviceStates[subInfo?.id]?.nrState ?: -100)}/" +
-                                    CellUtils.frequencyRangeToString(serviceStates[subInfo?.id]?.nrFrequencyRange ?: -100)
+                                CellUtils.nrStateToString(context, serviceStates[subInfo?.id]?.nrState ?: -100)}/" +
+                                CellUtils.frequencyRangeToString(context, serviceStates[subInfo?.id]?.nrFrequencyRange ?: -100)
                             )
                         }
                     }

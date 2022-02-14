@@ -1,11 +1,13 @@
 package dev.zwander.cellreader.data.util
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.telephony.CellInfo
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
 import android.telephony.SubscriptionManager
+import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.wrappers.*
 import kotlin.math.absoluteValue
 
@@ -24,33 +26,38 @@ val String?.asMccMnc: String
     ).insert(3, "-").toString()
 
 object CellUtils {
-    fun connectionStatusToString(connectionStatus: Int): String {
-        return when (connectionStatus) {
-            CellInfo.CONNECTION_NONE -> "None"
-            CellInfo.CONNECTION_SECONDARY_SERVING -> "Secondary Serving"
-            CellInfo.CONNECTION_PRIMARY_SERVING -> "Primary Serving"
-            else -> "Unknown"
-        }
+    fun connectionStatusToString(context: Context, connectionStatus: Int): String {
+        return context.resources.getString(
+            when (connectionStatus) {
+                CellInfo.CONNECTION_NONE -> R.string.none
+                CellInfo.CONNECTION_SECONDARY_SERVING -> R.string.secondary_serving
+                CellInfo.CONNECTION_PRIMARY_SERVING -> R.string.primary_serving
+                else -> R.string.unknown
+            }
+        )
     }
 
-    fun nrStateToString(@NetworkRegistrationInfo.NRState nrState: Int): String {
-        return when (nrState) {
-            NetworkRegistrationInfo.NR_STATE_RESTRICTED -> "RESTRICTED"
-            NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED -> "NOT_RESTRICTED"
-            NetworkRegistrationInfo.NR_STATE_CONNECTED -> "CONNECTED"
-            else -> "NONE"
-        }
+    fun nrStateToString(context: Context, @NetworkRegistrationInfo.NRState nrState: Int): String {
+        return context.resources.getString(
+            when (nrState) {
+                NetworkRegistrationInfo.NR_STATE_RESTRICTED -> R.string.restricted
+                NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED -> R.string.not_restricted
+                NetworkRegistrationInfo.NR_STATE_CONNECTED -> R.string.connected
+                else -> R.string.none
+            }
+        )
     }
 
-    fun frequencyRangeToString(@ServiceState.FrequencyRange range: Int): String {
-        return when (range) {
-            ServiceState.FREQUENCY_RANGE_UNKNOWN -> "UNKNOWN"
-            ServiceState.FREQUENCY_RANGE_LOW -> "LOW"
-            ServiceState.FREQUENCY_RANGE_MID -> "MID"
-            ServiceState.FREQUENCY_RANGE_HIGH -> "HIGH"
-            ServiceState.FREQUENCY_RANGE_MMWAVE -> "MMWAVE"
-            else -> range.toString()
-        }
+    fun frequencyRangeToString(context: Context, @ServiceState.FrequencyRange range: Int): String {
+        return context.resources.getString(
+            when (range) {
+                ServiceState.FREQUENCY_RANGE_LOW -> R.string.low
+                ServiceState.FREQUENCY_RANGE_MID -> R.string.mid
+                ServiceState.FREQUENCY_RANGE_HIGH -> R.string.high
+                ServiceState.FREQUENCY_RANGE_MMWAVE -> R.string.mmwave
+                else -> R.string.unknown
+            }
+        )
     }
 
     object CellInfoComparator : Comparator<CellInfoWrapper> {
@@ -170,48 +177,58 @@ inline fun Int.onNegAvail(block: (Int) -> Unit) {
     if (this != -1) block(this)
 }
 
-fun duplexModeToString(duplex: Int): String {
-    return when (duplex) {
-        ServiceState.DUPLEX_MODE_FDD -> "FDD"
-        ServiceState.DUPLEX_MODE_TDD -> "TDD"
-        else -> "UNKNOWN"
-    }
+fun duplexModeToString(context: Context, duplex: Int): String {
+    return context.resources.getString(
+        when (duplex) {
+            ServiceState.DUPLEX_MODE_FDD -> R.string.fdd
+            ServiceState.DUPLEX_MODE_TDD -> R.string.tdd
+            else -> R.string.unknown
+        }
+    )
 }
 
-fun domainToString(@NetworkRegistrationInfo.Domain domain: Int): String {
-    return when (domain) {
-        NetworkRegistrationInfo.DOMAIN_CS -> "CS"
-        NetworkRegistrationInfo.DOMAIN_PS -> "PS"
-        NetworkRegistrationInfo.DOMAIN_CS_PS -> "CS_PS"
-        else -> "UNKNOWN"
-    }
+fun domainToString(context: Context, @NetworkRegistrationInfo.Domain domain: Int): String {
+    return context.resources.getString(
+        when (domain) {
+            NetworkRegistrationInfo.DOMAIN_CS -> R.string.cs
+            NetworkRegistrationInfo.DOMAIN_PS -> R.string.ps
+            NetworkRegistrationInfo.DOMAIN_CS_PS -> R.string.cs_ps
+            else -> R.string.unknown
+        }
+    )
 }
 
-fun subscriptionTypeToString(type: Int): String {
-    return when (type) {
-        SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM -> "Local SIM"
-        SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM -> "Remote SIM"
-        else -> "Unknown"
-    }
+fun subscriptionTypeToString(context: Context, type: Int): String {
+    return context.resources.getString(
+        when (type) {
+            SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM -> R.string.local_sim
+            SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM -> R.string.remote_sim
+            else -> R.string.unknown
+        }
+    )
 }
 
-fun profileClassToString(clazz: Int): String {
-    return when (clazz) {
-        SubscriptionManager.PROFILE_CLASS_OPERATIONAL -> "Operational"
-        SubscriptionManager.PROFILE_CLASS_PROVISIONING -> "Provisioning"
-        SubscriptionManager.PROFILE_CLASS_TESTING -> "Testing"
-        SubscriptionManager.PROFILE_CLASS_UNSET -> "Unset"
-        else -> "Unknown"
-    }
+fun profileClassToString(context: Context, clazz: Int): String {
+    return context.resources.getString(
+        when (clazz) {
+            SubscriptionManager.PROFILE_CLASS_OPERATIONAL -> R.string.operational
+            SubscriptionManager.PROFILE_CLASS_PROVISIONING -> R.string.provisioning
+            SubscriptionManager.PROFILE_CLASS_TESTING -> R.string.testing
+            SubscriptionManager.PROFILE_CLASS_UNSET -> R.string.unset
+            else -> R.string.unknown
+        }
+    )
 }
 
-fun nameSourceToString(source: Int): String {
-    return when (source) {
-        SubscriptionManager.NAME_SOURCE_CARRIER -> "Carrier"
-        SubscriptionManager.NAME_SOURCE_CARRIER_ID -> "Carrier ID"
-        SubscriptionManager.NAME_SOURCE_SIM_SPN -> "SIM SPN"
-        SubscriptionManager.NAME_SOURCE_SIM_PNN -> "SIM PNN"
-        SubscriptionManager.NAME_SOURCE_USER_INPUT -> "User Input"
-        else -> "Unknown"
-    }
+fun nameSourceToString(context: Context, source: Int): String {
+    return context.resources.getString(
+        when (source) {
+            SubscriptionManager.NAME_SOURCE_CARRIER -> R.string.carrier
+            SubscriptionManager.NAME_SOURCE_CARRIER_ID -> R.string.carrier_id
+            SubscriptionManager.NAME_SOURCE_SIM_SPN -> R.string.sim_spn
+            SubscriptionManager.NAME_SOURCE_SIM_PNN -> R.string.sim_pnn
+            SubscriptionManager.NAME_SOURCE_USER_INPUT -> R.string.user_input
+            else -> R.string.unknown
+        }
+    )
 }

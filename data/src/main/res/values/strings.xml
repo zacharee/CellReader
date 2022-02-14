@@ -155,4 +155,76 @@
     <string name="legend_csi_sinr">%d: %s CSI SinR</string>
 
     <string name="chart_sim_format">SIM %d</string>
+
+    <string name="none">None</string>
+    <string name="secondary_serving">Secondary Serving</string>
+    <string name="primary_serving">Primary Serving</string>
+    <string name="restricted">Restricted</string>
+    <string name="not_restricted">Not Restricted</string>
+    <string name="connected">Connected</string>
+    <string name="low">Low</string>
+    <string name="mid">Mid</string>
+    <string name="high">High</string>
+    <string name="mmwave">mmWave</string>
+    <string name="fdd">FDD</string>
+    <string name="tdd">TDD</string>
+    <string name="cs">CS</string>
+    <string name="ps">PS</string>
+    <string name="cs_ps">CS + PS</string>
+    <string name="local_sim">Local SIM</string>
+    <string name="remote_sim">Remote SIM</string>
+    <string name="operational">Operational</string>
+    <string name="provisioning">Provisioning</string>
+    <string name="testing">Testing</string>
+    <string name="unset">Unset</string>
+    <string name="carrier">Carrier</string>
+    <string name="carrier_id">Carrier ID</string>
+    <string name="sim_spn">SIM SPN</string>
+    <string name="sim_pnn">SIM PNN</string>
+    <string name="user_input">User Input</string>
+    <string name="not_roaming">Not Roaming</string>
+    <string name="domestic">Domestic</string>
+    <string name="international">International</string>
+    <string name="in_service">In Service</string>
+    <string name="out_of_service">Out of Service</string>
+    <string name="emergency_only">Emergency Only</string>
+    <string name="power_off">Power Off</string>
+
+    <string name="gprs">GPRS</string>
+    <string name="edge">EDGE</string>
+    <string name="umts">UMTS</string>
+    <string name="cdma_is95a">CDMA-IS95A</string>
+    <string name="cdma_is95b">CDMA-IS95B</string>
+    <string name="one_xrtt">1xRTT</string>
+    <string name="evdo_rev_0">EvDo-rev.0</string>
+    <string name="evdo_rev_a">EvDo-rev.A</string>
+    <string name="hsdpa">HSDPA</string>
+    <string name="hsupa">HSUPA</string>
+    <string name="hspa">HSPA</string>
+    <string name="evdo_rev_b">EvDo-rev.B</string>
+    <string name="ehrpd">eHRPD</string>
+    <string name="hspap">HSPA+</string>
+    <string name="iwlan">IWLAN</string>
+    <string name="td_scdma">TD-SCDMA</string>
+    <string name="lte_ca">LTE CA</string>
+    <string name="nr_sa">NR SA</string>
+
+    <string name="home">Home</string>
+    <string name="not_reg_searching">Searching Not Registered</string>
+    <string name="denied">Denied</string>
+    <string name="roaming">Roaming</string>
+    <string name="voice">Voice</string>
+    <string name="data">Data</string>
+    <string name="sms">SMS</string>
+    <string name="video">Video</string>
+    <string name="emergency">Emergency</string>
+
+    <string name="wwan">WWAN</string>
+    <string name="wlan">WLAN</string>
+    <string name="invalid">Invalid</string>
+    <string name="geran">GERAN</string>
+    <string name="utran">UTRAN</string>
+    <string name="eutran">EUTRAN</string>
+    <string name="cdma_2000">CDMA2000</string>
+    <string name="ngran">NGRAN</string>
 </resources>

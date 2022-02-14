@@ -565,11 +565,11 @@ public class AccessNetworkUtils {
         int arfcnOffset = 0;
         for (AccessNetworkConstants.NgranArfcnFrequency nrArfcnFrequency : AccessNetworkConstants.
                 NgranArfcnFrequency.values()) {
-            if (nrArfcn >= nrArfcnFrequency.rangeFirst
-                    && nrArfcn <= nrArfcnFrequency.rangeLast) {
-                globalKhz = nrArfcnFrequency.globalKhz;
-                rangeOffset = nrArfcnFrequency.rangeOffset;
-                arfcnOffset = nrArfcnFrequency.arfcnOffset;
+            if (nrArfcn >= nrArfcnFrequency.getRangeFirst()
+                    && nrArfcn <= nrArfcnFrequency.getRangeLast()) {
+                globalKhz = nrArfcnFrequency.getGlobalKhz();
+                rangeOffset = nrArfcnFrequency.getRangeOffset();
+                arfcnOffset = nrArfcnFrequency.getArfcnOffset();
                 break;
             }
         }
@@ -584,11 +584,11 @@ public class AccessNetworkUtils {
         int low = 0;
         int offset = 0;
         for (AccessNetworkConstants.EutranBandArfcnFrequency earfcnFrequency : AccessNetworkConstants.EutranBandArfcnFrequency.values()) {
-            if (band == earfcnFrequency.band) {
+            if (band == earfcnFrequency.getBand()) {
                 if (isInEarfcnRange(earfcn, earfcnFrequency, isUplink)) {
-                    low = isUplink ? earfcnFrequency.uplinkLowKhz : earfcnFrequency.downlinkLowKhz;
-                    offset = isUplink ? earfcnFrequency.uplinkOffset
-                            : earfcnFrequency.downlinkOffset;
+                    low = isUplink ? earfcnFrequency.getUplinkLowKhz() : earfcnFrequency.getDownlinkLowKhz();
+                    offset = isUplink ? earfcnFrequency.getUplinkOffset()
+                            : earfcnFrequency.getDownlinkOffset();
                     break;
                 } else {
                     return INVALID_FREQUENCY;
@@ -611,10 +611,10 @@ public class AccessNetworkUtils {
     private static boolean isInEarfcnRange(int earfcn, AccessNetworkConstants.EutranBandArfcnFrequency earfcnFrequency,
             boolean isUplink) {
         if (isUplink) {
-            return earfcn >= earfcnFrequency.uplinkOffset && earfcn <= earfcnFrequency.uplinkRange;
+            return earfcn >= earfcnFrequency.getUplinkOffset() && earfcn <= earfcnFrequency.getUplinkRange();
         } else {
-            return earfcn >= earfcnFrequency.downlinkOffset
-                    && earfcn <= earfcnFrequency.downlinkRange;
+            return earfcn >= earfcnFrequency.getDownlinkOffset()
+                    && earfcn <= earfcnFrequency.getDownlinkRange();
         }
     }
 
@@ -630,10 +630,10 @@ public class AccessNetworkUtils {
         int offsetKhz = 0;
         for (AccessNetworkConstants.UtranBandArfcnFrequency uarfcnFrequency : AccessNetworkConstants.
                 UtranBandArfcnFrequency.values()) {
-            if (band == uarfcnFrequency.band) {
+            if (band == uarfcnFrequency.getBand()) {
                 if (isInUarfcnRange(uarfcn, uarfcnFrequency, isUplink)) {
-                    offsetKhz = isUplink ? uarfcnFrequency.uplinkOffset
-                            : uarfcnFrequency.downlinkOffset;
+                    offsetKhz = isUplink ? uarfcnFrequency.getUplinkOffset()
+                            : uarfcnFrequency.getDownlinkOffset();
                     break;
                 } else {
                     return INVALID_FREQUENCY;
@@ -677,12 +677,12 @@ public class AccessNetworkUtils {
     private static boolean isInUarfcnRange(int uarfcn, AccessNetworkConstants.UtranBandArfcnFrequency uarfcnFrequency,
                                            boolean isUplink) {
         if (isUplink) {
-            return uarfcn >= uarfcnFrequency.uplinkRangeFirst
-                    && uarfcn <= uarfcnFrequency.uplinkRangeLast;
+            return uarfcn >= uarfcnFrequency.getUplinkRangeFirst()
+                    && uarfcn <= uarfcnFrequency.getUplinkRangeLast();
         } else {
-            if (uarfcnFrequency.downlinkRangeFirst != 0 && uarfcnFrequency.downlinkRangeLast != 0) {
-                return uarfcn >= uarfcnFrequency.downlinkRangeFirst
-                        && uarfcn <= uarfcnFrequency.downlinkRangeLast;
+            if (uarfcnFrequency.getDownlinkRangeFirst() != 0 && uarfcnFrequency.getDownlinkRangeLast() != 0) {
+                return uarfcn >= uarfcnFrequency.getDownlinkRangeFirst()
+                        && uarfcn <= uarfcnFrequency.getDownlinkRangeLast();
             } else {
                 // BAND_C, BAND_D, BAND_E and BAND_F do not have the downlink range.
                 return true;
@@ -705,12 +705,12 @@ public class AccessNetworkUtils {
         int frequency = 0;
         for (AccessNetworkConstants.GeranBandArfcnFrequency arfcnFrequency : AccessNetworkConstants.
                 GeranBandArfcnFrequency.values()) {
-            if (band == arfcnFrequency.band) {
-                if (arfcn >= arfcnFrequency.arfcnRangeFirst
-                        && arfcn <= arfcnFrequency.arfcnRangeLast) {
-                    uplinkFrequencyFirst = arfcnFrequency.uplinkFrequencyFirst;
-                    downlinkOffset = arfcnFrequency.downlinkOffset;
-                    arfcnOffset = arfcnFrequency.arfcnOffset;
+            if (band == arfcnFrequency.getBand()) {
+                if (arfcn >= arfcnFrequency.getArfcnRangeFirst()
+                        && arfcn <= arfcnFrequency.getArfcnRangeLast()) {
+                    uplinkFrequencyFirst = arfcnFrequency.getUplinkFrequencyFirst();
+                    downlinkOffset = arfcnFrequency.getDownlinkOffset();
+                    arfcnOffset = arfcnFrequency.getArfcnOffset();
                     frequency = convertArfcnToFrequency(arfcn, uplinkFrequencyFirst,
                             arfcnOffset);
                     break;

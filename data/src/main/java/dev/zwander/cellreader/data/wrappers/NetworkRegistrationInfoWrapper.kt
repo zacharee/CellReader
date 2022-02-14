@@ -1,8 +1,10 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.content.Context
 import android.os.Build
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.NetworkRegistrationInfo.RegistrationState
+import dev.zwander.cellreader.data.R
 
 data class NetworkRegistrationInfoWrapper(
     val domain: Int,
@@ -21,27 +23,30 @@ data class NetworkRegistrationInfoWrapper(
     val isUsingCarrierAggregation: Boolean,
 ) {
     companion object {
-        fun registrationStateToString(@RegistrationState registrationState: Int): String {
-            when (registrationState) {
-                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING -> return "NOT_REG_OR_SEARCHING"
-                NetworkRegistrationInfo.REGISTRATION_STATE_HOME -> return "HOME"
-                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING -> return "NOT_REG_SEARCHING"
-                NetworkRegistrationInfo.REGISTRATION_STATE_DENIED -> return "DENIED"
-                NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN -> return "UNKNOWN"
-                NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING -> return "ROAMING"
-            }
-            return "Unknown reg state $registrationState"
+        fun registrationStateToString(context: Context, @RegistrationState registrationState: Int): String {
+            return context.resources.getString(
+                when (registrationState) {
+                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING -> R.string.not_roaming
+                    NetworkRegistrationInfo.REGISTRATION_STATE_HOME -> R.string.home
+                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING -> R.string.not_reg_searching
+                    NetworkRegistrationInfo.REGISTRATION_STATE_DENIED -> R.string.denied
+                    NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING -> R.string.unknown
+                    else -> R.string.unknown
+                }
+            )
         }
 
-        fun serviceTypeToString(@NetworkRegistrationInfo.ServiceType serviceType: Int): String {
-            when (serviceType) {
-                NetworkRegistrationInfo.SERVICE_TYPE_VOICE -> return "VOICE"
-                NetworkRegistrationInfo.SERVICE_TYPE_DATA -> return "DATA"
-                NetworkRegistrationInfo.SERVICE_TYPE_SMS -> return "SMS"
-                NetworkRegistrationInfo.SERVICE_TYPE_VIDEO -> return "VIDEO"
-                NetworkRegistrationInfo.SERVICE_TYPE_EMERGENCY -> return "EMERGENCY"
-            }
-            return "Unknown service type $serviceType"
+        fun serviceTypeToString(context: Context, @NetworkRegistrationInfo.ServiceType serviceType: Int): String {
+            return context.resources.getString(
+                when (serviceType) {
+                    NetworkRegistrationInfo.SERVICE_TYPE_VOICE -> R.string.voice
+                    NetworkRegistrationInfo.SERVICE_TYPE_DATA -> R.string.data
+                    NetworkRegistrationInfo.SERVICE_TYPE_SMS -> R.string.sms
+                    NetworkRegistrationInfo.SERVICE_TYPE_VIDEO -> R.string.video
+                    NetworkRegistrationInfo.SERVICE_TYPE_EMERGENCY -> R.string.emergency
+                    else -> R.string.unknown
+                }
+            )
         }
     }
 

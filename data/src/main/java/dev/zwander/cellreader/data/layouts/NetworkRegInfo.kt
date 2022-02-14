@@ -7,6 +7,7 @@ import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -21,6 +22,8 @@ import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 fun NetworkRegInfo(
     networkRegistrationInfoList: List<NetworkRegistrationInfoWrapper>
 ) {
+    val context = LocalContext.current
+
     networkRegistrationInfoList.forEach { networkRegistrationInfo ->
         Card(
             elevation = 0.dp,
@@ -38,12 +41,14 @@ fun NetworkRegInfo(
                     FormatText(
                         R.string.transport_format,
                         AccessNetworkConstants.transportTypeToString(
+                            context,
                             transportType
                         )
                     )
                     FormatText(
                         R.string.access_format,
                         ServiceStateWrapper.rilRadioTechnologyToString(
+                            context,
                             ServiceStateWrapper.networkTypeToRilRadioTechnology(
                                 accessNetworkTechnology
                             )
@@ -97,6 +102,7 @@ fun NetworkRegInfo(
                     FormatText(
                         R.string.roaming_format,
                         ServiceStateWrapper.roamingTypeToString(
+                            context,
                             roamingType
                         )
                     )
@@ -104,6 +110,7 @@ fun NetworkRegInfo(
                     FormatText(
                         R.string.registration_state_format,
                         NetworkRegistrationInfoWrapper.registrationStateToString(
+                            context,
                             registrationState
                         )
                     )
@@ -117,10 +124,11 @@ fun NetworkRegInfo(
                         R.string.services_format,
                         availableServices.joinToString(", ") {
                             NetworkRegistrationInfoWrapper.serviceTypeToString(
+                                context,
                                 it
                             )
                         })
-                    FormatText(R.string.domain_format, domainToString(domain))
+                    FormatText(R.string.domain_format, domainToString(context, domain))
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         FormatText(
                             R.string.carrier_aggregation_format,
@@ -129,7 +137,7 @@ fun NetworkRegInfo(
                     }
                     FormatText(
                         R.string.nr_state_format,
-                        CellUtils.nrStateToString(nrState)
+                        CellUtils.nrStateToString(context, nrState)
                     )
 
                     cellIdentity?.apply {

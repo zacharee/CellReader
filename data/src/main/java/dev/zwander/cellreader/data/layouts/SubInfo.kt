@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,8 @@ import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 fun SubInfo(
     subscriptionInfo: SubscriptionInfoWrapper
 ) {
+    val context = LocalContext.current
+
     with (subscriptionInfo) {
         PaddedDivider(
             modifier = Modifier
@@ -48,17 +51,17 @@ fun SubInfo(
                 FormatText(R.string.carrier_id_format, "$carrierId")
                 FormatText(
                     R.string.subscription_type_format,
-                    subscriptionTypeToString(subscriptionType)
+                    subscriptionTypeToString(context, subscriptionType)
                 )
             }
             FormatText(R.string.subscription_id_format, "$id")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 FormatText(
                     R.string.profile_class_format,
-                    profileClassToString(profileClass)
+                    profileClassToString(context, profileClass)
                 )
             }
-            FormatText(R.string.name_source_format, nameSourceToString(nameSource))
+            FormatText(R.string.name_source_format, nameSourceToString(context, nameSource))
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 FormatText(R.string.opportunistic_format, "$opportunistic")
             }

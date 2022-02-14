@@ -57,7 +57,7 @@ fun SignalCard(
             FormatText(R.string.registered_format, isRegistered.toString())
             FormatText(
                 R.string.cell_connection_status_format,
-                CellUtils.connectionStatusToString(connectionStatus)
+                CellUtils.connectionStatusToString(context, connectionStatus)
             )
             FormatText(R.string.timestamp_format, timeStamp)
 

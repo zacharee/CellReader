@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.content.Context
 import android.os.Build
 import android.telephony.AccessNetworkConstants
 import android.telephony.Annotation.NetworkType
@@ -7,6 +8,7 @@ import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
 import android.telephony.ServiceState.RoamingType
 import android.telephony.TelephonyManager
+import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.util.AccessNetworkUtils
 
 data class ServiceStateWrapper(
@@ -73,55 +75,55 @@ data class ServiceStateWrapper(
             }
         }
 
-        fun roamingTypeToString(@RoamingType roamingType: Int): String {
-            when (roamingType) {
-                ServiceState.ROAMING_TYPE_NOT_ROAMING -> return "NOT_ROAMING"
-                ServiceState.ROAMING_TYPE_UNKNOWN -> return "UNKNOWN"
-                ServiceState.ROAMING_TYPE_DOMESTIC -> return "DOMESTIC"
-                ServiceState.ROAMING_TYPE_INTERNATIONAL -> return "INTERNATIONAL"
-            }
-            return "Unknown roaming type $roamingType"
-        }
-
-        fun rilServiceStateToString(serviceState: Int): String {
-            return when (serviceState) {
-                ServiceState.STATE_IN_SERVICE -> "IN_SERVICE"
-                ServiceState.STATE_OUT_OF_SERVICE -> "OUT_OF_SERVICE"
-                ServiceState.STATE_EMERGENCY_ONLY -> "EMERGENCY_ONLY"
-                ServiceState.STATE_POWER_OFF -> "POWER_OFF"
-                else -> "UNKNOWN"
-            }
-        }
-
-        fun rilRadioTechnologyToString(rt: Int): String {
-            val rtString: String
-            when (rt) {
-                ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN -> rtString = "Unknown"
-                ServiceState.RIL_RADIO_TECHNOLOGY_GPRS -> rtString = "GPRS"
-                ServiceState.RIL_RADIO_TECHNOLOGY_EDGE -> rtString = "EDGE"
-                ServiceState.RIL_RADIO_TECHNOLOGY_UMTS -> rtString = "UMTS"
-                ServiceState.RIL_RADIO_TECHNOLOGY_IS95A -> rtString = "CDMA-IS95A"
-                ServiceState.RIL_RADIO_TECHNOLOGY_IS95B -> rtString = "CDMA-IS95B"
-                ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT -> rtString = "1xRTT"
-                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0 -> rtString = "EvDo-rev.0"
-                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A -> rtString = "EvDo-rev.A"
-                ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA -> rtString = "HSDPA"
-                ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA -> rtString = "HSUPA"
-                ServiceState.RIL_RADIO_TECHNOLOGY_HSPA -> rtString = "HSPA"
-                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B -> rtString = "EvDo-rev.B"
-                ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD -> rtString = "eHRPD"
-                ServiceState.RIL_RADIO_TECHNOLOGY_LTE -> rtString = "LTE"
-                ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP -> rtString = "HSPAP"
-                ServiceState.RIL_RADIO_TECHNOLOGY_GSM -> rtString = "GSM"
-                ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN -> rtString = "IWLAN"
-                ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA -> rtString = "TD-SCDMA"
-                ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA -> rtString = "LTE_CA"
-                ServiceState.RIL_RADIO_TECHNOLOGY_NR -> rtString = "NR_SA"
-                else -> {
-                    rtString = "Unexpected"
+        fun roamingTypeToString(context: Context, @RoamingType roamingType: Int): String {
+            return context.resources.getString(
+                when (roamingType) {
+                    ServiceState.ROAMING_TYPE_NOT_ROAMING -> R.string.not_roaming
+                    ServiceState.ROAMING_TYPE_DOMESTIC -> R.string.domestic
+                    ServiceState.ROAMING_TYPE_INTERNATIONAL -> R.string.international
+                    else -> R.string.unknown
                 }
-            }
-            return rtString
+            )
+        }
+
+        fun rilServiceStateToString(context: Context, serviceState: Int): String {
+            return context.resources.getString(
+                when (serviceState) {
+                    ServiceState.STATE_IN_SERVICE -> R.string.in_service
+                    ServiceState.STATE_OUT_OF_SERVICE -> R.string.out_of_service
+                    ServiceState.STATE_EMERGENCY_ONLY -> R.string.emergency_only
+                    ServiceState.STATE_POWER_OFF -> R.string.power_off
+                    else -> R.string.unknown
+                }
+            )
+        }
+
+        fun rilRadioTechnologyToString(context: Context, rt: Int): String {
+            return context.resources.getString(
+                when (rt) {
+                    ServiceState.RIL_RADIO_TECHNOLOGY_GPRS -> R.string.gprs
+                    ServiceState.RIL_RADIO_TECHNOLOGY_EDGE -> R.string.edge
+                    ServiceState.RIL_RADIO_TECHNOLOGY_UMTS -> R.string.umts
+                    ServiceState.RIL_RADIO_TECHNOLOGY_IS95A -> R.string.cdma_is95a
+                    ServiceState.RIL_RADIO_TECHNOLOGY_IS95B -> R.string.cdma_is95b
+                    ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT -> R.string.one_xrtt
+                    ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0 -> R.string.evdo_rev_0
+                    ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A -> R.string.evdo_rev_a
+                    ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA -> R.string.hsdpa
+                    ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA -> R.string.hsupa
+                    ServiceState.RIL_RADIO_TECHNOLOGY_HSPA -> R.string.hspa
+                    ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B -> R.string.evdo_rev_b
+                    ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD -> R.string.ehrpd
+                    ServiceState.RIL_RADIO_TECHNOLOGY_LTE -> R.string.lte
+                    ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP -> R.string.hspap
+                    ServiceState.RIL_RADIO_TECHNOLOGY_GSM -> R.string.gsm
+                    ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN -> R.string.iwlan
+                    ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA -> R.string.td_scdma
+                    ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA -> R.string.lte_ca
+                    ServiceState.RIL_RADIO_TECHNOLOGY_NR -> R.string.nr_sa
+                    else -> R.string.unknown
+                }
+            )
         }
     }
 
