@@ -118,41 +118,47 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     private fun init(subscriptions: List<Int>) {
         with (CellModel) {
             telephonies.putAll(
-                subscriptions.map {
-                    cellInfos[it] = listOf()
-                    strengthInfos[it] = listOf()
+                subscriptions.mapNotNull {
                     subInfos[it] = subs.getActiveSubscriptionInfo(it)?.let { subInfo -> SubscriptionInfoWrapper(subInfo, this@UpdaterService) }
-                    subIds.add(it)
 
-                    launch(Dispatchers.IO) {
-                        betweenUtils.queueSubscriptionInfo(subInfos)
-                        betweenUtils.queueNewSubId(subIds)
-                    }
+                    if (subInfos[it] != null) {
+                        cellInfos[it] = listOf()
+                        strengthInfos[it] = listOf()
 
-                    it to telephony.createForSubscriptionId(it).also { telephony ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            val callback = telephonyCallbacks[it] ?: TelephonyListener(it, this@UpdaterService).apply {
-                                telephonyCallbacks[it] = this
-                            }
+                        subIds.add(it)
 
-                            telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
-                        } else {
-                            val listener = telephonyListeners[it] ?: StateListener(it, this@UpdaterService).apply {
-                                telephonyListeners[it] = this
-                            }
-
-                            @Suppress("DEPRECATION")
-                            telephony.listen(
-                                listener,
-                                PhoneStateListener.LISTEN_SERVICE_STATE or
-                                        PhoneStateListener.LISTEN_CELL_INFO or
-                                        PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
-                            )
+                        launch(Dispatchers.IO) {
+                            betweenUtils.queueSubscriptionInfo(subInfos)
+                                betweenUtils.queueNewSubId(subIds)
                         }
 
-                        updateCellInfo(it, telephony.allCellInfo)
-                        updateSignal(it, telephony.signalStrength)
-                        updateServiceState(it, telephony.serviceState)
+                        it to telephony.createForSubscriptionId(it).also { telephony ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val callback = telephonyCallbacks[it] ?: TelephonyListener(it, this@UpdaterService).apply {
+                                    telephonyCallbacks[it] = this
+                                }
+
+                                telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
+                            } else {
+                                val listener = telephonyListeners[it] ?: StateListener(it, this@UpdaterService).apply {
+                                    telephonyListeners[it] = this
+                                }
+
+                                @Suppress("DEPRECATION")
+                                telephony.listen(
+                                    listener,
+                                    PhoneStateListener.LISTEN_SERVICE_STATE or
+                                            PhoneStateListener.LISTEN_CELL_INFO or
+                                            PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                                )
+                            }
+
+                            updateCellInfo(it, telephony.allCellInfo)
+                            updateSignal(it, telephony.signalStrength)
+                            updateServiceState(it, telephony.serviceState)
+                        }
+                    } else {
+                        null
                     }
                 }
             )
