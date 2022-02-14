@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package dev.zwander.cellreader.ui.components
 
 import androidx.activity.OnBackPressedCallback
@@ -22,19 +20,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
-import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
+import dev.zwander.cellreader.data.data.BottomBarLinkInfo
+import dev.zwander.cellreader.data.data.BottomDialogPage
+import dev.zwander.cellreader.data.data.DialogButtonInfo
 import dev.zwander.cellreader.ui.components.bardialogs.About
 import dev.zwander.cellreader.ui.components.bardialogs.Graph
 import dev.zwander.cellreader.ui.components.bardialogs.Supporters
-import kotlinx.coroutines.delay
 
 @Composable
 fun BoxScope.BottomBarScrimContainer() {
     var expanded by remember {
         mutableStateOf(false)
     }
+
     var scrimFullSize by remember {
         mutableStateOf(false)
     }
@@ -107,9 +107,6 @@ private fun BoxScope.BottomBar(
     whichDialog: BottomDialogPage?,
     onDialogChange: (BottomDialogPage?) -> Unit
 ) {
-    val points = remember {
-        mutableStateMapOf<Int, GraphInfo>()
-    }
     val context = LocalContext.current
 
     val dialogButtons = remember {
@@ -150,13 +147,6 @@ private fun BoxScope.BottomBar(
                 "https://patreon.com/zacharywander"
             )
         )
-    }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            populatePoints(points = points, context = context)
-            delay(1000)
-        }
     }
 
     Column(
@@ -229,7 +219,7 @@ private fun BoxScope.BottomBar(
             mapOf<BottomDialogPage, @Composable()() -> Unit>(
                 BottomDialogPage.SUPPORTERS to { Supporters() },
                 BottomDialogPage.ABOUT to { About() },
-                BottomDialogPage.GRAPH to { Graph(points) }
+                BottomDialogPage.GRAPH to { Graph() }
             )
         }
 

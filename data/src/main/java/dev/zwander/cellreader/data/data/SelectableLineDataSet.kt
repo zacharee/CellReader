@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.data
+package dev.zwander.cellreader.data.data
 
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet

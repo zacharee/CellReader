@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.data
+package dev.zwander.cellreader.data.data
 
 data class BottomBarLinkInfo(
     val iconRes: Int,

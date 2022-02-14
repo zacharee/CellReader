@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package dev.zwander.cellreader.ui.components.bardialogs
 
 import android.graphics.Color
@@ -7,6 +5,7 @@ import android.view.MotionEvent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,15 +21,19 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
-import com.github.mikephil.charting.utils.Utils
-import dev.zwander.cellreader.data.GraphInfo
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.components.CardCheckbox
+import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.toColorInt
 
 @Composable
-fun Graph(points: Map<Int, GraphInfo>) {
+fun Graph() {
+    val _points by CellModel.strengthPoints.observeAsState()
+    val points by derivedStateOf {
+        _points ?: mapOf()
+    }
+
     var followData by remember {
         mutableStateOf(true)
     }
@@ -49,7 +52,6 @@ fun Graph(points: Map<Int, GraphInfo>) {
     ) {
         AndroidView(
             factory = {
-                Utils.init(it)
                 LineChart(it).apply {
                     xAxis.textColor = textColor
                     axisLeft.textColor = textColor

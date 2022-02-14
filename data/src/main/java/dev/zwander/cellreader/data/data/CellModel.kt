@@ -4,12 +4,13 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.lifecycle.MutableLiveData
 
 object CellModel : CellModelBase() {
     val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
     val telephonies = mutableStateMapOf<Int, TelephonyManager>()
+    val strengthPoints = MutableLiveData<Map<Int, GraphInfo>>()
 
     val telephonyCallbacks = HashMap<Int, TelephonyCallback>()
     @Suppress("DEPRECATION")
@@ -32,6 +33,7 @@ object CellModel : CellModelBase() {
         super.clear()
         signalStrengths.clear()
         telephonies.clear()
+        strengthPoints.value = mapOf()
     }
 }
 
@@ -72,9 +74,4 @@ interface TelephonyListenerCallback {
     fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>)
     fun updateSignal(subId: Int, strength: SignalStrength?)
     fun updateServiceState(subId: Int, serviceState: ServiceState?)
-}
-
-@Composable
-fun ProvideCellModel(block: @Composable() CellModel.() -> Unit) {
-    CellModel.block()
 }

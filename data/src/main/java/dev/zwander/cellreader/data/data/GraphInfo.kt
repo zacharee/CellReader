@@ -1,4 +1,4 @@
-package dev.zwander.cellreader.data
+package dev.zwander.cellreader.data.data
 
 import androidx.compose.runtime.mutableStateMapOf
 

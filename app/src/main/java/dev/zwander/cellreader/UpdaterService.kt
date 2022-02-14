@@ -3,7 +3,6 @@ package dev.zwander.cellreader
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
-import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -18,6 +17,7 @@ import dev.zwander.cellreader.data.data.TelephonyListener
 import dev.zwander.cellreader.data.data.TelephonyListenerCallback
 import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.util.populatePoints
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
 import kotlinx.coroutines.*
@@ -33,8 +33,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
     private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
-
-    private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_EXIT) {
@@ -97,6 +95,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         if (subs.allSubscriptionInfoList.isEmpty()) {
             init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
         }
+
+        updateGraph()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -239,7 +239,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     private var lastUpdate = AtomicLong(0L)
 
-    private suspend fun updateWidgets() {
+    private fun updateWidgets() {
         val currentTime = System.currentTimeMillis()
 
         if (currentTime - lastUpdate.get() >= 1000) {
@@ -247,15 +247,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
             sendBroadcast(Intent(this, SignalWidgetReceiver::class.java).setAction(SignalWidgetReceiver.ACTION_REFRESH))
         }
+    }
 
-//        SignalWidget().updateAll(this@UpdaterService)
-//        val ids = appWidgetManager.getAppWidgetIds(ComponentName(this, SignalWidgetReceiver::class.java))
-//        val intent = Intent(this, SignalWidgetReceiver::class.java)
-//
-//        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-//        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-//
-//        sendBroadcast(intent)
+    private fun updateGraph() {
+        async {
+            while (isActive) {
+                populatePoints(this@UpdaterService)
+                delay(1000)
+            }
+        }
     }
 
     private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) : SubscriptionManager.OnSubscriptionsChangedListener() {
