@@ -107,8 +107,6 @@ private fun BoxScope.BottomBar(
     whichDialog: BottomDialogPage?,
     onDialogChange: (BottomDialogPage?) -> Unit
 ) {
-    val context = LocalContext.current
-
     val dialogButtons = remember {
         listOf(
             DialogButtonInfo(
@@ -164,6 +162,11 @@ private fun BoxScope.BottomBar(
                     applyTop = false,
                     applyBottom = true,
                 )
+            )
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {}
             )
             .align(Alignment.BottomCenter)
     ) {
