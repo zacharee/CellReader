@@ -26,6 +26,7 @@ import dev.zwander.cellreader.data.components.CardCheckbox
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.toColorInt
+import java.lang.Integer.max
 
 @Composable
 fun Graph() {
@@ -123,7 +124,7 @@ fun Graph() {
                         }
 
                         graphInfo.lines.toSortedMap().map { (_, line) ->
-                            SelectableLineDataSet(line.line, line.label, line).apply {
+                            SelectableLineDataSet(line.line.drop(max(0, line.line.size - 500)).toMutableList(), line.label, line).apply {
                                 this.mode = LineDataSet.Mode.LINEAR
                                 this.fillColor = if (isSelected) Color.WHITE else line.color
                                 this.circleColors = listOf(fillColor)
