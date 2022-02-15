@@ -140,6 +140,8 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                 if (followData) {
                     it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
+                } else {
+                    it.invalidate()
                 }
             },
             modifier = Modifier
