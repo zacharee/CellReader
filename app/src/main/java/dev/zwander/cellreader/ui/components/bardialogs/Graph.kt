@@ -26,10 +26,6 @@ import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.toColorInt
 
-var chartScaleX by mutableStateOf(0.5f)
-
-var chartScaleY by mutableStateOf(1f)
-
 @Composable
 fun Graph(points: Map<Int, GraphInfo>) {
     var followData by remember {
@@ -60,9 +56,6 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                     legend.isWordWrapEnabled = true
                     legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
-
-                    setVisibleXRangeMinimum(10f)
-                    setVisibleXRangeMaximum(50f)
 
                     setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                         override fun onNothingSelected() {
@@ -100,17 +93,13 @@ fun Graph(points: Map<Int, GraphInfo>) {
                             velocityX: Float,
                             velocityY: Float
                         ) {}
+                        override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {}
 
                         override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {
                             if (dX != prevDist) {
                                 prevDist = dX
                                 followData = false
                             }
-                        }
-
-                        override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {
-                            chartScaleX = scaleX
-                            chartScaleY = scaleY
                         }
                     }
                 }
@@ -138,13 +127,12 @@ fun Graph(points: Map<Int, GraphInfo>) {
                     this.setDrawValues(false)
                 }
 
+                it.setVisibleXRangeMinimum(10f)
+                it.setVisibleXRangeMaximum(50f)
+
                 it.isDoubleTapToZoomEnabled = false
                 it.maxHighlightDistance = 20f
                 it.xAxis.granularity = 1f
-
-                if (chartScaleX != it.scaleX || chartScaleY != it.scaleY) {
-                    it.zoom(chartScaleX, chartScaleY, it.data.xMax, 0f)
-                }
 
                 if (followData) {
                     it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
