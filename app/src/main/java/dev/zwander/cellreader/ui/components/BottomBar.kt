@@ -142,8 +142,11 @@ private fun BoxScope.BottomBar(
     val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
+        var currentX = 0
+
         while (isActive) {
-            populatePoints(points, context)
+            populatePoints(points, context, currentX)
+            currentX++
             delay(1000)
         }
     }

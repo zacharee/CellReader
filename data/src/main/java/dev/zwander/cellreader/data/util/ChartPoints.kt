@@ -12,7 +12,7 @@ import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthLteWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthNrWrapper
 
-fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context) {
+fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
     CellModel.strengthInfos.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)
@@ -34,7 +34,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                 strengthPoints[subId]!!.lines[label]!!.apply {
                     line.add(
                         Entry(
-                            line.size.toFloat(),
+                            maxX.toFloat(),
                             info.dbm.toFloat()
                         )
                     )
@@ -55,7 +55,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                     strengthPoints[subId]!!.lines[label]!!.apply {
                         line.add(
                             Entry(
-                                line.size.toFloat(),
+                                maxX.toFloat(),
                                 rssi.toFloat()
                             )
                         )
@@ -76,7 +76,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                     strengthPoints[subId]!!.lines[label]!!.apply {
                         line.add(
                             Entry(
-                                line.size.toFloat(),
+                                maxX.toFloat(),
                                 rsrq.toFloat()
                             )
                         )
@@ -97,7 +97,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                     strengthPoints[subId]!!.lines[label]!!.apply {
                         line.add(
                             Entry(
-                                line.size.toFloat(),
+                                maxX.toFloat(),
                                 rssnr.toFloat()
                             )
                         )
@@ -120,7 +120,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                         strengthPoints[subId]!!.lines[label]!!.apply {
                             line.add(
                                 Entry(
-                                    line.size.toFloat(),
+                                    maxX.toFloat(),
                                     it.toFloat()
                                 )
                             )
@@ -142,7 +142,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                         strengthPoints[subId]!!.lines[label]!!.apply {
                             line.add(
                                 Entry(
-                                    line.size.toFloat(),
+                                    maxX.toFloat(),
                                     it.toFloat()
                                 )
                             )
@@ -165,7 +165,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                         strengthPoints[subId]!!.lines[label]!!.apply {
                             line.add(
                                 Entry(
-                                    line.size.toFloat(),
+                                    maxX.toFloat(),
                                     it.toFloat()
                                 )
                             )
@@ -188,7 +188,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                         strengthPoints[subId]!!.lines[label]!!.apply {
                             line.add(
                                 Entry(
-                                    line.size.toFloat(),
+                                    maxX.toFloat(),
                                     it.toFloat()
                                 )
                             )
@@ -211,7 +211,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                         strengthPoints[subId]!!.lines[label]!!.apply {
                             line.add(
                                 Entry(
-                                    line.size.toFloat(),
+                                    maxX.toFloat(),
                                     it.toFloat()
                                 )
                             )
@@ -234,7 +234,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context)
                         strengthPoints[subId]!!.lines[label]!!.apply {
                             line.add(
                                 Entry(
-                                    line.size.toFloat(),
+                                    maxX.toFloat(),
                                     it.toFloat()
                                 )
                             )
