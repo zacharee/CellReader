@@ -14,6 +14,10 @@ data class DataSpecificRegistrationInfoWrapper(
         info.isDcNrRestricted,
         info.isNrAvailable,
         info.isEnDcAvailable,
-        info.vopsSupportInfo?.let { vops -> VopsSupportInfoWrapper.newInstance(vops) },
+        try {
+            info.vopsSupportInfo?.let { vops -> VopsSupportInfoWrapper.newInstance(vops) }
+        } catch (e: Throwable) {
+            null
+        },
     )
 }

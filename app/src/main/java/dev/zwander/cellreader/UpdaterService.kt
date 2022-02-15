@@ -150,7 +150,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                 )
                             }
 
-                            updateCellInfo(it, telephony.allCellInfo)
+                            updateCellInfo(it, telephony.allCellInfo ?: mutableListOf())
                             updateSignal(it, telephony.signalStrength)
                             updateServiceState(it, telephony.serviceState)
                         }

@@ -78,6 +78,10 @@ data class NetworkRegistrationInfoWrapper(
         info.voiceSpecificInfo?.let { VoiceSpecificRegistrationInfoWrapper(it) },
         info.dataSpecificInfo?.let { DataSpecificRegistrationInfoWrapper(it) },
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.registeredPlmn else null,
-        info.isUsingCarrierAggregation
+        try {
+            info.isUsingCarrierAggregation
+        } catch (e: Throwable) {
+            false
+        }
     )
 }

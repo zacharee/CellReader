@@ -219,7 +219,10 @@ data class ServiceStateWrapper(
             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
         )?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE
 
-    fun getNetworkRegistrationInfo(domain: Int, transportType: Int): NetworkRegistrationInfoWrapper? {
+    fun getNetworkRegistrationInfo(
+        domain: Int,
+        transportType: Int
+    ): NetworkRegistrationInfoWrapper? {
         return networkRegistrationInfos?.firstOrNull {
             it.transportType == transportType
                     && (it.domain and domain) != 0
@@ -248,7 +251,11 @@ data class ServiceStateWrapper(
         state.nrFrequencyRange,
         state.channelNumber,
         ArrayList(state.cellBandwidths.toList()),
-        state.arfcnRsrpBoost,
+        try {
+            state.arfcnRsrpBoost
+        } catch (e: Throwable) {
+            0
+        },
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             ArrayList(state.networkRegistrationInfoList.map { NetworkRegistrationInfoWrapper(it) })
         } else {
