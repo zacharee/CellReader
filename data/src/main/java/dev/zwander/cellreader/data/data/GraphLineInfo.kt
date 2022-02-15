@@ -1,8 +1,11 @@
 package dev.zwander.cellreader.data.data
 
+import android.graphics.Color
 import androidx.compose.runtime.*
+import androidx.lifecycle.MutableLiveData
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineDataSet
 
 data class GraphLineInfo(
     val subId: Int,
@@ -16,25 +19,40 @@ data class GraphLineInfo(
 
     var isSelected by mutableStateOf(false)
 
-    val lineWindow = mutableStateListOf<Entry>()
+    var dataSet by mutableStateOf<SelectableLineDataSet?>(null)
+
+    private val _lineWindow = MutableLiveData<MutableList<Entry>>(mutableListOf()).apply {
+        observeForever {
+            dataSet = SelectableLineDataSet(it, label, this@GraphLineInfo).apply {
+                this.mode = LineDataSet.Mode.LINEAR
+                this.setDrawCircles(false)
+                this.axisDependency = axis
+                this.highLightColor = Color.WHITE
+            }
+        }
+    }
 
     val line: MutableList<Entry> = object : ArrayList<Entry>() {
         override fun add(element: Entry): Boolean {
-            lineWindow.add(element)
+            _lineWindow.value?.add(element)
 
-            if (lineWindow.size > WINDOW_SIZE) {
-                lineWindow.removeAt(0)
+            if ((_lineWindow.value?.size ?: 0) > WINDOW_SIZE) {
+                _lineWindow.value?.removeAt(0)
             }
+
+            _lineWindow.postValue(_lineWindow.value)
 
             return super.add(element)
         }
 
         override fun add(index: Int, element: Entry) {
-            if (lineWindow.size >= WINDOW_SIZE) {
-                lineWindow.removeAt(0)
+            _lineWindow.value?.add(element)
+
+            if ((_lineWindow.value?.size ?: 0) > WINDOW_SIZE) {
+                _lineWindow.value?.removeAt(0)
             }
 
-            lineWindow.add(index, element)
+            _lineWindow.postValue(_lineWindow.value)
 
             super.add(index, element)
         }
@@ -48,12 +66,14 @@ data class GraphLineInfo(
         }
 
         override fun removeAll(elements: Collection<Entry>): Boolean {
-            lineWindow.removeAll(elements)
+            _lineWindow.value?.removeAll(elements)
+
             return super.removeAll(elements.toSet())
         }
 
         override fun remove(element: Entry): Boolean {
-            lineWindow.remove(element)
+            _lineWindow.value?.remove(element)
+
             return super.remove(element)
         }
     }

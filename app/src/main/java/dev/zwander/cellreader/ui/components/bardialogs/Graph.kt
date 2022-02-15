@@ -31,12 +31,9 @@ fun Graph(points: Map<Int, GraphInfo>) {
     var followData by remember {
         mutableStateOf(true)
     }
-    val enabledSubIds = remember {
-        mutableStateListOf<Int>()
-    }
 
-    LaunchedEffect(key1 = points.keys) {
-        enabledSubIds.addAll(points.keys)
+    val disabledSubIds = remember {
+        mutableStateListOf<Int>()
     }
 
     val textColor = MaterialTheme.colors.onSurface.toColorInt()
@@ -107,19 +104,15 @@ fun Graph(points: Map<Int, GraphInfo>) {
             update = {
                 it.data = LineData(
                     points.flatMap { (subId, graphInfo) ->
-                        if (!enabledSubIds.contains(subId)) {
+                        if (disabledSubIds.contains(subId)) {
                             return@flatMap listOf()
                         }
 
-                        graphInfo.lines.toSortedMap().map { (_, line) ->
-                            SelectableLineDataSet(line.lineWindow, line.label, line).apply {
-                                this.mode = LineDataSet.Mode.LINEAR
-                                this.fillColor = if (isSelected) Color.WHITE else line.color
+                        graphInfo.sortedLines.map { (_, line) ->
+                            line.dataSet!!.apply {
+                                this.fillColor = if (line.isSelected) Color.WHITE else line.color
                                 this.circleColors = listOf(fillColor)
                                 this.colors = listOf(fillColor)
-                                this.setDrawCircles(false)
-                                this.axisDependency = line.axis
-                                this.highLightColor = Color.WHITE
                             }
                         }
                     }
@@ -129,10 +122,14 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                 it.setVisibleXRangeMinimum(10f)
                 it.setVisibleXRangeMaximum(50f)
+                it.setVisibleYRangeMinimum(3f, YAxis.AxisDependency.LEFT)
+                it.setVisibleYRangeMinimum(3f, YAxis.AxisDependency.RIGHT)
 
                 it.isDoubleTapToZoomEnabled = false
                 it.maxHighlightDistance = 20f
                 it.xAxis.granularity = 1f
+                it.axisLeft.granularity = 1f
+                it.axisRight.granularity = 1f
 
                 if (followData) {
                     it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
@@ -155,12 +152,12 @@ fun Graph(points: Map<Int, GraphInfo>) {
             ) {
                 points.keys.forEach { subId ->
                     CardCheckbox(
-                        isChecked = enabledSubIds.contains(subId),
+                        isChecked = !disabledSubIds.contains(subId),
                         onCheckedChanged = {
                             if (it) {
-                                enabledSubIds.add(subId)
-                            } else if (enabledSubIds.size > 1) {
-                                enabledSubIds.remove(subId)
+                                disabledSubIds.remove(subId)
+                            } else if (disabledSubIds.size < points.keys.size) {
+                                disabledSubIds.add(subId)
                             }
                         },
                         text = stringResource(id = R.string.chart_sim_format, subId),
