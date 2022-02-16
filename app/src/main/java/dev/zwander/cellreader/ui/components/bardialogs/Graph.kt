@@ -156,7 +156,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
                         onCheckedChanged = {
                             if (it) {
                                 disabledSubIds.remove(subId)
-                            } else if (disabledSubIds.size < points.keys.size) {
+                            } else if (disabledSubIds.size < points.keys.size - 1) {
                                 disabledSubIds.add(subId)
                             }
                         },
