@@ -12,6 +12,7 @@
     <string name="cdma">CDMA</string>
     <string name="wcdma">WCDMA</string>
     <string name="tdscdma">TDSCDMA</string>
+    <string name="evdo">EvDO</string>
     <string name="lte">LTE</string>
     <string name="nr">NR</string>
     <string name="unknown">Unknown</string>
@@ -143,7 +144,7 @@
     <string name="ul_freqs_format">UL Freqs</string>
     <string name="freqs_format">Freqs</string>
 
-    <string name="legend_strength">%d: %s Strength</string>
+    <string name="legend_rsrp">%d: %s RSRP</string>
     <string name="legend_rssi">%d: %s RSSI</string>
     <string name="legend_rsrq">%d: %s RSRQ</string>
     <string name="legend_rssnr">%d: %s RSSnR</string>
@@ -153,6 +154,11 @@
     <string name="legend_csi_rsrq">%d: %s CSI RSRQ</string>
     <string name="legend_ss_sinr">%d: %s SS SinR</string>
     <string name="legend_csi_sinr">%d: %s CSI SinR</string>
+    <string name="legend_ecio">%d: %s Ec/Io</string>
+    <string name="legend_dbm">%d: %s dBm</string>
+    <string name="legend_evdo_snr">%d: EvDO SnR</string>
+    <string name="legend_ecno">%d: %s EcNo</string>
+    <string name="legend_rscp">%d: %s RSCP</string>
 
     <string name="chart_sim_format">SIM %d</string>
 
