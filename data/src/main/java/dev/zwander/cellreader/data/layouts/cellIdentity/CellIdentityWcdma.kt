@@ -27,9 +27,9 @@ fun CellIdentityWcdmaWrapper.CellIdentityWcdma(
         uarfcn.onAvail {
             FormatText(R.string.uarfcn_format, it.toString())
         }
-        (mnc + mcc).apply {
+        plmn?.apply {
             if (isNotBlank()) {
-                FormatText(R.string.operator_format, this)
+                FormatText(R.string.operator_format, this.asMccMnc)
             }
         }
 
