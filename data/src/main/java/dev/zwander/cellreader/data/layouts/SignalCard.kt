@@ -39,14 +39,14 @@ fun SignalCard(
         modifier = modifier,
         basicInfo = {
             with(cellInfo) {
-                CellSignalStrength(
-                    cellSignalStrength = cellSignalStrength,
+                CellIdentity(
+                    cellIdentity = cellIdentity,
                     simple = true,
                     advanced = false
                 )
 
-                CellIdentity(
-                    cellIdentity = cellIdentity,
+                CellSignalStrength(
+                    cellSignalStrength = cellSignalStrength,
                     simple = true,
                     advanced = false
                 )
