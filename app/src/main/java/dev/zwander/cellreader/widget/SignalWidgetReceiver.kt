@@ -43,10 +43,16 @@ class SignalWidget : GlanceAppWidget() {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
-        val size = LocalSize.current
+        CompositionLocalProvider {
+            val context = LocalContext.current
+            val size = LocalSize.current
 
-        with(CellModel) {
+            val subIds = CellModel.subIds.value
+            val subInfos = CellModel.subInfos.value
+            val serviceStates = CellModel.serviceStates.value
+            val strengthInfos = CellModel.strengthInfos.value
+            val cellInfos = CellModel.cellInfos.value
+
             Box(
                 modifier = GlanceModifier.cornerRadius(8.dp)
                     .appWidgetBackground()
@@ -55,7 +61,7 @@ class SignalWidget : GlanceAppWidget() {
                 LazyColumn(
                     modifier = GlanceModifier.fillMaxSize()
                 ) {
-                    sortedSubIds.forEachIndexed { _, t ->
+                    subIds!!.forEachIndexed { _, t ->
                         item(t.toLong()) {
                             Box(
                                 modifier = GlanceModifier.padding(bottom = 4.dp)
@@ -68,7 +74,7 @@ class SignalWidget : GlanceAppWidget() {
                                         .padding(bottom = 4.dp, top = 4.dp),
                                     horizontalAlignment = Alignment.Horizontal.CenterHorizontally
                                 ) {
-                                    val subInfo = subInfos[t]
+                                    val subInfo = subInfos!![t]
 
                                     Row(
                                         verticalAlignment = Alignment.Vertical.CenterVertically
@@ -98,7 +104,7 @@ class SignalWidget : GlanceAppWidget() {
                                     }
 
                                     val rplmn =
-                                        serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
+                                        serviceStates!![subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
                                             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                                         )
                                             ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
@@ -119,7 +125,7 @@ class SignalWidget : GlanceAppWidget() {
 
                                         FormatWidgetText(
                                             name = context.resources.getString(R.string.carrier_aggregation_format),
-                                            value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
+                                            value = serviceStates!![subInfo?.id]?.isUsingCarrierAggregation
                                         )
 
                                         Spacer(GlanceModifier.defaultWeight())
@@ -129,7 +135,7 @@ class SignalWidget : GlanceAppWidget() {
                         }
 
                         itemsIndexed(
-                            strengthInfos[t]!!,
+                            strengthInfos!![t]!!,
                             { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
                             StrengthCard(
                                 strength = item,
@@ -139,7 +145,7 @@ class SignalWidget : GlanceAppWidget() {
                         }
 
                         itemsIndexed(
-                            cellInfos[t]!!,
+                            cellInfos!![t]!!,
                             { _, item ->
                                 "$t:${item.cellIdentity}".hashCode().toLong()
                             }) { _, item ->

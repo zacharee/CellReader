@@ -19,7 +19,10 @@ import io.gsonfire.TypeSelector
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BetweenUtils private constructor(private val context: Context) {
     companion object {
@@ -286,13 +289,13 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun queueNewSubId(currentIds: List<Int>) {
+    suspend fun queueNewSubId(currentIds: Collection<Int>) {
         enqueue(subIdMutex) {
             sendNewSubId(currentIds)
         }
     }
 
-    private suspend fun sendNewSubId(currentIds: List<Int>) {
+    private suspend fun sendNewSubId(currentIds: Collection<Int>) {
         subIdMutex.sendInfo(
             otherGson,
             SUB_ID_PATH,
@@ -302,13 +305,13 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun retrieveNewSubId(dataItem: DataItem): ArrayList<Int> {
+    suspend fun retrieveNewSubId(dataItem: DataItem): TreeSet<Int> {
         return retrieveInfo(
             otherGson,
             dataItem,
             SUB_ID_KEY,
-            arrayListOf(),
-            object : TypeToken<ArrayList<Int>>() {}
+            TreeSet(),
+            object : TypeToken<TreeSet<Int>>() {}
         )
     }
 

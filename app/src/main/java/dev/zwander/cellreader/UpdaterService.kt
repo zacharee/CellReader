@@ -17,10 +17,14 @@ import dev.zwander.cellreader.data.data.TelephonyListener
 import dev.zwander.cellreader.data.data.TelephonyListenerCallback
 import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.SubsComparator
+import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
 import kotlinx.coroutines.*
+import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.collections.HashMap
 
 class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
     companion object {
@@ -115,30 +119,38 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     private fun init(subscriptions: List<Int>) {
         with (CellModel) {
             telephonies.putAll(
-                subscriptions.mapNotNull {
-                    subInfos[it] = subs.getActiveSubscriptionInfo(it)?.let { subInfo -> SubscriptionInfoWrapper(subInfo, this@UpdaterService) }
+                subscriptions.mapNotNull { subId ->
+                    subInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                        it!![subId] = subs.getActiveSubscriptionInfo(subId)?.let { subInfo -> SubscriptionInfoWrapper(subInfo, this@UpdaterService) }
+                    }
 
-                    if (subInfos[it] != null) {
-                        cellInfos[it] = listOf()
-                        strengthInfos[it] = listOf()
-
-                        subIds.add(it)
-
-                        launch(Dispatchers.IO) {
-                            betweenUtils.queueSubscriptionInfo(subInfos)
-                                betweenUtils.queueNewSubId(subIds)
+                    if (subInfos.value!![subId] != null) {
+                        cellInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                            it!![subId] = listOf()
+                        }
+                        strengthInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                            it!![subId] = listOf()
                         }
 
-                        it to telephony.createForSubscriptionId(it).also { telephony ->
+                        subIds.update({ TreeSet(SubsComparator(primaryCell.value!!)).apply { addAll(it!!) } }) {
+                            it!!.add(subId)
+                        }
+
+                        launch(Dispatchers.IO) {
+                            betweenUtils.queueSubscriptionInfo(subInfos.value!!)
+                                betweenUtils.queueNewSubId(subIds.value!!)
+                        }
+
+                        subId to telephony.createForSubscriptionId(subId).also { telephony ->
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                val callback = telephonyCallbacks[it] ?: TelephonyListener(it, this@UpdaterService).apply {
-                                    telephonyCallbacks[it] = this
+                                val callback = telephonyCallbacks[subId] ?: TelephonyListener(subId, this@UpdaterService).apply {
+                                    telephonyCallbacks[subId] = this
                                 }
 
                                 telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
                             } else {
-                                val listener = telephonyListeners[it] ?: StateListener(it, this@UpdaterService).apply {
-                                    telephonyListeners[it] = this
+                                val listener = telephonyListeners[subId] ?: StateListener(subId, this@UpdaterService).apply {
+                                    telephonyListeners[subId] = this
                                 }
 
                                 @Suppress("DEPRECATION")
@@ -150,9 +162,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                 )
                             }
 
-                            updateCellInfo(it, telephony.allCellInfo ?: mutableListOf())
-                            updateSignal(it, telephony.signalStrength)
-                            updateServiceState(it, telephony.serviceState)
+                            updateCellInfo(subId, telephony.allCellInfo ?: mutableListOf())
+                            updateSignal(subId, telephony.signalStrength)
+                            updateServiceState(subId, telephony.serviceState)
                         }
                     } else {
                         null
@@ -175,10 +187,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val newInfo = sorted.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
             launch(Dispatchers.Main) {
-                cellInfos[subId] = newInfo
+                cellInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!![subId] = newInfo
+                }
 
                 launch(Dispatchers.IO) {
-                    betweenUtils.queueCellInfos(cellInfos)
+                    betweenUtils.queueCellInfos(cellInfos.value!!)
                 }
 
                 updateWidgets()
@@ -212,11 +226,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
         launch(Dispatchers.Main) {
             with (CellModel) {
-                signalStrengths[subId] = strength
-                strengthInfos[subId] = newInfo
+                signalStrengths.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!![subId] = strength
+                }
+                strengthInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!![subId] = newInfo
+                }
 
                 launch(Dispatchers.IO) {
-                    betweenUtils.queueSignalStrengths(strengthInfos)
+                    betweenUtils.queueSignalStrengths(strengthInfos.value!!)
                 }
 
                 updateWidgets()
@@ -229,10 +247,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val wrapped = serviceState?.run { ServiceStateWrapper(this) }
 
             launch(Dispatchers.Main) {
-                serviceStates[subId] = wrapped
+                serviceStates.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!![subId] = wrapped
+                }
 
                 launch(Dispatchers.IO) {
-                    betweenUtils.queueServiceState(serviceStates)
+                    betweenUtils.queueServiceState(serviceStates.value!!)
                 }
 
                 updateWidgets()
@@ -273,10 +293,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 } else {
                     newList.forEach { subInfo ->
                         withContext(Dispatchers.Main) {
-                            CellModel.subInfos[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                            CellModel.subInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                                it!![subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                            }
 
                             withContext(Dispatchers.IO) {
-                                betweenUtils.queueSubscriptionInfo(CellModel.subInfos)
+                                betweenUtils.queueSubscriptionInfo(CellModel.subInfos.value!!)
                             }
 
                             updateWidgets()
@@ -285,7 +307,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 }
 
                 withContext(Dispatchers.Main) {
-                    CellModel.primaryCell = defaultId
+                    CellModel.primaryCell.value = defaultId
                     updateWidgets()
                 }
 

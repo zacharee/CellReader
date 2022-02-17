@@ -7,7 +7,9 @@ import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.Wearable
 import dev.zwander.cellreader.data.BetweenUtils
+import dev.zwander.cellreader.data.SubsComparator
 import dev.zwander.cellreader.data.data.CellModelWear
+import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
@@ -16,6 +18,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class DataHandler private constructor(private val context: Context) {
     interface IDataHandler {
@@ -23,7 +28,7 @@ class DataHandler private constructor(private val context: Context) {
         fun onNewSignalStrengths(strengths: Map<Int, List<CellSignalStrengthWrapper>>)
         fun onNewServiceStates(states: Map<Int, ServiceStateWrapper?>)
         fun onNewSubInfos(infos: Map<Int, SubscriptionInfoWrapper?>)
-        fun onNewSubIds(subIds: List<Int>)
+        fun onNewSubIds(subIds: Collection<Int>)
         fun onNewPrimaryCell(primaryCell: Int)
         fun onClear()
     }
@@ -163,25 +168,25 @@ class DataHandler private constructor(private val context: Context) {
         val callback: ((IDataHandler) -> Unit) = {
             when(path) {
                 BetweenUtils.CELL_INFOS_PATH -> {
-                    it.onNewCellInfos(CellModelWear.cellInfos)
+                    it.onNewCellInfos(CellModelWear.cellInfos.value!!)
                 }
                 BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH -> {
-                    it.onNewSignalStrengths(CellModelWear.strengthInfos)
+                    it.onNewSignalStrengths(CellModelWear.strengthInfos.value!!)
                 }
                 BetweenUtils.SERVICE_STATE_PATH -> {
-                    it.onNewServiceStates(CellModelWear.serviceStates)
+                    it.onNewServiceStates(CellModelWear.serviceStates.value!!)
                 }
                 BetweenUtils.SUB_INFO_PATH -> {
-                    it.onNewSubInfos(CellModelWear.subInfos)
+                    it.onNewSubInfos(CellModelWear.subInfos.value!!)
                 }
                 BetweenUtils.SUB_ID_PATH -> {
-                    it.onNewSubIds(CellModelWear.subIds)
+                    it.onNewSubIds(CellModelWear.subIds.value!!)
                 }
                 BetweenUtils.CLEAR_PATH -> {
                     it.onClear()
                 }
                 BetweenUtils.PRIMARY_CELL_PATH -> {
-                    it.onNewPrimaryCell(CellModelWear.primaryCell)
+                    it.onNewPrimaryCell(CellModelWear.primaryCell.value!!)
                 }
             }
         }
@@ -199,7 +204,9 @@ class DataHandler private constructor(private val context: Context) {
             val cellInfos = betweenUtils.retrieveCellInfos(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.cellInfos.putAll(cellInfos)
+                CellModelWear.cellInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!!.putAll(cellInfos)
+                }
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -212,7 +219,9 @@ class DataHandler private constructor(private val context: Context) {
             val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.strengthInfos.putAll(signalStrengths)
+                CellModelWear.strengthInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!!.putAll(signalStrengths)
+                }
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -225,7 +234,9 @@ class DataHandler private constructor(private val context: Context) {
             val serviceState = betweenUtils.retrieveServiceState(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.serviceStates.putAll(serviceState)
+                CellModelWear.serviceStates.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!!.putAll(serviceState)
+                }
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -235,10 +246,12 @@ class DataHandler private constructor(private val context: Context) {
     private suspend fun updateSubInfo(item: DataItem) = coroutineScope {
         loadSubInfoJob?.cancel()
         loadSubInfoJob = async(Dispatchers.IO) {
-            val subInfo = betweenUtils.retrieveSubscriptionInfo(item)
+            val subInfos = betweenUtils.retrieveSubscriptionInfo(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.subInfos.putAll(subInfo)
+                CellModelWear.subInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                    it!!.putAll(subInfos)
+                }
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -248,11 +261,13 @@ class DataHandler private constructor(private val context: Context) {
     private suspend fun addSubId(item: DataItem) = coroutineScope {
         addSubIdJob?.cancel()
         addSubIdJob = async(Dispatchers.IO) {
-            val subId = betweenUtils.retrieveNewSubId(item)
+            val subIds = betweenUtils.retrieveNewSubId(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.subIds.clear()
-                CellModelWear.subIds.addAll(subId)
+                CellModelWear.subIds.update({ TreeSet(SubsComparator(CellModelWear.primaryCell.value!!)).apply { addAll(it!!) } }) {
+                    it!!.clear()
+                    it.addAll(subIds)
+                }
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -265,7 +280,7 @@ class DataHandler private constructor(private val context: Context) {
             val primaryCell = betweenUtils.retrievePrimaryCell(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.primaryCell = primaryCell
+                CellModelWear.primaryCell.value = primaryCell
                 updateHandlers(item.uri.path)
                 updateTiles()
             }

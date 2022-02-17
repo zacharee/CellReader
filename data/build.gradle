@@ -54,6 +54,7 @@ dependencies {
     api "androidx.glance:glance-wear-tiles:$glance_version"
 
     api "androidx.compose.material:material:$compose_version"
+    api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api 'androidx.wear.compose:compose-material:1.0.0-alpha16'
     api 'androidx.wear.compose:compose-foundation:1.0.0-alpha16'
 

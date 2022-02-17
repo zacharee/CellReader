@@ -8,6 +8,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -59,103 +61,106 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
+    val subIds by CellModelWear.subIds.observeAsState()
+    val subInfos by CellModelWear.subInfos.observeAsState()
+    val cellInfos by CellModelWear.cellInfos.observeAsState()
+    val strengthInfos by CellModelWear.strengthInfos.observeAsState()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         vignette = {
             Vignette(vignettePosition = VignettePosition.TopAndBottom)
         },
     ) {
-        with(CellModelWear) {
-            Crossfade(targetState = sortedSubIds.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    if (it) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    } else {
-                        ScalingLazyColumn(
-                            state = state,
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.spacedBy(0.dp)
-                        ) {
-                            sortedSubIds.forEachIndexed { subIndex, t ->
-                                item(t) {
-                                    SIMCard(
-                                        subInfo = subInfos[t],
-                                        expanded = expanded[t.toString()] ?: false,
-                                        onExpand = { expanded[t.toString()] = it },
-                                        showingCells = showingCells[t] ?: true,
-                                        onShowingCells = { showingCells[t] = it },
+        Crossfade(targetState = subIds!!.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (it) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    ScalingLazyColumn(
+                        state = state,
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        subIds!!.forEachIndexed { subIndex, t ->
+                            item(t) {
+                                SIMCard(
+                                    subInfo = subInfos!![t],
+                                    expanded = expanded[t.toString()] ?: false,
+                                    onExpand = { expanded[t.toString()] = it },
+                                    showingCells = showingCells[t] ?: true,
+                                    onShowingCells = { showingCells[t] = it },
+                                    modifier = Modifier
+                                        .padding(bottom = 8.dp),
+                                )
+                            }
+
+                            val lastCellIndex = cellInfos!![t]?.lastIndex ?: 0
+                            val lastStrengthIndex = strengthInfos!![t]?.lastIndex ?: 0
+                            val cellInfosEmpty = cellInfos!![t]?.isEmpty() ?: true
+
+                            strengthInfos!![t]?.let { strengthInfo ->
+                                itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
+                                    val isFinal = index == lastStrengthIndex && cellInfosEmpty
+
+                                    AnimatedVisibility(
+                                        visible = showingCells[t] != false,
                                         modifier = Modifier
-                                            .padding(bottom = 8.dp),
-                                    )
-                                }
-
-                                val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
-                                val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
-                                val cellInfosEmpty = cellInfos[t]?.isEmpty() ?: true
-
-                                strengthInfos[t]?.let { strengthInfo ->
-                                    itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
-                                        val isFinal = index == lastStrengthIndex && cellInfosEmpty
-
-                                        AnimatedVisibility(
-                                            visible = showingCells[t] != false,
+                                            .padding(bottom = if (!isFinal || subIndex != subIds!!.size - 1) 8.dp else 0.dp),
+                                        enter = fadeIn() + expandIn(
+                                            clip = false,
+                                            expandFrom = Alignment.TopEnd
+                                        ),
+                                        exit = shrinkOut(
+                                            clip = false,
+                                            shrinkTowards = Alignment.TopEnd
+                                        ) + fadeOut()
+                                    ) {
+                                        CellSignalStrengthCard(
+                                            cellSignalStrength = item,
+                                            isFinal = isFinal,
                                             modifier = Modifier
-                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                            enter = fadeIn() + expandIn(
-                                                clip = false,
-                                                expandFrom = Alignment.TopEnd
-                                            ),
-                                            exit = shrinkOut(
-                                                clip = false,
-                                                shrinkTowards = Alignment.TopEnd
-                                            ) + fadeOut()
-                                        ) {
-                                            CellSignalStrengthCard(
-                                                cellSignalStrength = item,
-                                                isFinal = isFinal,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                            )
-                                        }
+                                                .fillMaxWidth()
+                                        )
                                     }
                                 }
+                            }
 
-                                cellInfos[t]?.let { cellInfo ->
-                                    itemsIndexed(
-                                        cellInfo,
-                                        { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
-                                        val isFinal = index == lastCellIndex
+                            cellInfos!![t]?.let { cellInfo ->
+                                itemsIndexed(
+                                    cellInfo,
+                                    { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                                    val isFinal = index == lastCellIndex
 
-                                        AnimatedVisibility(
-                                            visible = showingCells[t] != false,
-                                            modifier = Modifier
-                                                .padding(bottom = if (!isFinal || subIndex != sortedSubIds.lastIndex) 8.dp else 0.dp),
-                                            enter = fadeIn() + expandIn(
-                                                clip = false,
-                                                expandFrom = Alignment.TopEnd
-                                            ),
-                                            exit = shrinkOut(
-                                                clip = false,
-                                                shrinkTowards = Alignment.TopEnd
-                                            ) + fadeOut()
-                                        ) {
-                                            val key = remember(item.cellIdentity) {
-                                                "$t:${item.cellIdentity}"
-                                            }
-
-                                            SignalCard(
-                                                cellInfo = item,
-                                                isFinal = isFinal,
-                                                expanded = expanded[key] ?: false,
-                                                onExpand = { expanded[key] = it },
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                            )
+                                    AnimatedVisibility(
+                                        visible = showingCells[t] != false,
+                                        modifier = Modifier
+                                            .padding(bottom = if (!isFinal || subIndex != subIds!!.size - 1) 8.dp else 0.dp),
+                                        enter = fadeIn() + expandIn(
+                                            clip = false,
+                                            expandFrom = Alignment.TopEnd
+                                        ),
+                                        exit = shrinkOut(
+                                            clip = false,
+                                            shrinkTowards = Alignment.TopEnd
+                                        ) + fadeOut()
+                                    ) {
+                                        val key = remember(item.cellIdentity) {
+                                            "$t:${item.cellIdentity}"
                                         }
+
+                                        SignalCard(
+                                            cellInfo = item,
+                                            isFinal = isFinal,
+                                            expanded = expanded[key] ?: false,
+                                            onExpand = { expanded[key] = it },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        )
                                     }
                                 }
                             }

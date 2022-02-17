@@ -10,10 +10,9 @@ import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.GraphLineInfo
 import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.*
-import kotlin.math.max
 
 fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
-    CellModel.strengthInfos.forEach { (subId, infos) ->
+    CellModel.strengthInfos.value!!.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)
         }
@@ -21,14 +20,6 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
         infos.forEach { info ->
             val typeString = info.typeString(context)
             val line = strengthPoints[subId]!!
-
-//            addToLine(
-//                line.lines,
-//                subId,
-//                context.resources.getString(R.string.legend_strength, subId, typeString),
-//                maxX,
-//                info.dbm.toFloat()
-//            )
 
             info.onCast<CellSignalStrengthGsmWrapper> {
                 addToLine(

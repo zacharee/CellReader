@@ -14,10 +14,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.MutableLiveData
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.reflect.javaType
 
 fun Modifier.angledGradient(colors: List<Pair<Float, Color>>, degrees: Float) = this.then(
     Modifier.drawBehind {
@@ -87,4 +91,10 @@ fun String.toColorString(): String {
 
 fun Color.toColorInt(): Int {
     return android.graphics.Color.argb(alpha, red, green, blue)
+}
+
+inline fun <reified T> MutableLiveData<T>.update(copy: (T?) -> T, block: (T?) -> Unit) {
+    block(value)
+
+    this.value = copy(value)
 }

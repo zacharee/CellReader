@@ -1,44 +1,40 @@
 package dev.zwander.cellreader.data.data
 
-import androidx.compose.runtime.*
+import androidx.lifecycle.MutableLiveData
 import dev.zwander.cellreader.data.SubsComparator
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
+import java.util.*
 
 interface ICellModel {
-    var primaryCell: Int
-    val subIds: MutableList<Int>
-    val cellInfos: MutableMap<Int, List<CellInfoWrapper>>
-    val strengthInfos: MutableMap<Int, List<CellSignalStrengthWrapper>>
-    val subInfos: MutableMap<Int, SubscriptionInfoWrapper?>
-    val serviceStates: MutableMap<Int, ServiceStateWrapper?>
-
-    val sortedSubIds: List<Int>
+    val primaryCell: MutableLiveData<Int>
+    val subIds: MutableLiveData<TreeSet<Int>>
+    val cellInfos: MutableLiveData<HashMap<Int, List<CellInfoWrapper>>>
+    val strengthInfos: MutableLiveData<HashMap<Int, List<CellSignalStrengthWrapper>>>
+    val subInfos: MutableLiveData<HashMap<Int, SubscriptionInfoWrapper?>>
+    val serviceStates: MutableLiveData<HashMap<Int, ServiceStateWrapper?>>
 
     fun clear()
 }
 
 open class CellModelBase : ICellModel {
-    override var primaryCell by mutableStateOf(0)
+    override val primaryCell = MutableLiveData(0)
 
-    override val subIds = mutableStateListOf<Int>()
-    override val cellInfos = mutableStateMapOf<Int, List<CellInfoWrapper>>()
-    override val strengthInfos = mutableStateMapOf<Int, List<CellSignalStrengthWrapper>>()
-    override val subInfos = mutableStateMapOf<Int, SubscriptionInfoWrapper?>()
-    override val serviceStates = mutableStateMapOf<Int, ServiceStateWrapper?>()
-
-    override val sortedSubIds: List<Int>
-        get() = subIds.sortedWith(SubsComparator(primaryCell))
+    override val subIds by lazy { MutableLiveData<TreeSet<Int>>(TreeSet(SubsComparator(primaryCell.value!!))) }
+    override val cellInfos = MutableLiveData<HashMap<Int, List<CellInfoWrapper>>>(hashMapOf())
+    override val strengthInfos = MutableLiveData<HashMap<Int, List<CellSignalStrengthWrapper>>>(hashMapOf())
+    override val subInfos = MutableLiveData<HashMap<Int, SubscriptionInfoWrapper?>>(hashMapOf())
+    override val serviceStates = MutableLiveData<HashMap<Int, ServiceStateWrapper?>>(hashMapOf())
 
     override fun clear() {
-        primaryCell = 0
+        primaryCell.value = 0
 
-        subIds.clear()
-        cellInfos.clear()
-        strengthInfos.clear()
-        subInfos.clear()
-        serviceStates.clear()
+        subIds.value = TreeSet(SubsComparator(primaryCell.value!!))
+        cellInfos.value = hashMapOf()
+        strengthInfos.value = hashMapOf()
+        subInfos.value = hashMapOf()
+        serviceStates.value = hashMapOf()
     }
 }

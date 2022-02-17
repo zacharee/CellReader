@@ -4,13 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.MutableLiveData
-import kotlinx.coroutines.flow.MutableStateFlow
 
 object CellModel : CellModelBase() {
-    val signalStrengths = mutableStateMapOf<Int, SignalStrength?>()
-    val telephonies = mutableStateMapOf<Int, TelephonyManager>()
+    val signalStrengths = MutableLiveData<MutableMap<Int, SignalStrength?>>(mutableMapOf())
+    val telephonies = HashMap<Int, TelephonyManager>()
 
     val telephonyCallbacks = HashMap<Int, TelephonyCallback>()
     @Suppress("DEPRECATION")
@@ -31,7 +29,7 @@ object CellModel : CellModelBase() {
 
     override fun clear() {
         super.clear()
-        signalStrengths.clear()
+        signalStrengths.value = hashMapOf()
         telephonies.clear()
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.listSaver
@@ -41,7 +42,7 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
-import dev.zwander.cellreader.data.data.CellModelBase
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
@@ -49,7 +50,7 @@ import kotlinx.coroutines.delay
 
 @SuppressLint("MissingPermission")
 @Composable
-fun CellModelBase.SIMCard(
+fun SIMCard(
     subInfo: SubscriptionInfoWrapper?,
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
@@ -59,6 +60,8 @@ fun CellModelBase.SIMCard(
     signalStrength: SignalStrength? = null
 ) {
     val context = LocalContext.current
+    val serviceStates by CellModel.serviceStates.observeAsState()
+    val subInfos by CellModel.subInfos.observeAsState()
 
     @Composable
     fun contents() {
@@ -82,12 +85,12 @@ fun CellModelBase.SIMCard(
                     bottom = 0.dp
                 )
             ) {
-                var rplmn by remember(serviceStates[subInfo?.id]) {
+                var rplmn by remember(serviceStates!![subInfo?.id]) {
                     mutableStateOf("000-000")
                 }
 
-                LaunchedEffect(key1 = serviceStates[subInfo?.id]) {
-                    rplmn = serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
+                LaunchedEffect(key1 = serviceStates!![subInfo?.id]) {
+                    rplmn = serviceStates!![subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                     )
                         ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
@@ -119,7 +122,7 @@ fun CellModelBase.SIMCard(
 
                     val type = ServiceStateWrapper.rilRadioTechnologyToString(
                         context,
-                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subInfo?.id]?.dataNetworkType ?: 0)
+                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates!![subInfo?.id]?.dataNetworkType ?: 0)
                     )
 
                     WearSafeText(
@@ -163,9 +166,9 @@ fun CellModelBase.SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[subInfo?.id]?.isUsingCarrierAggregation}")
+                        FormatText(R.string.carrier_aggregation_format, "${serviceStates!![subInfo?.id]?.isUsingCarrierAggregation}")
 
-                        serviceStates[subInfo?.id]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
+                        serviceStates!![subInfo?.id]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
                             if (bandwidths.isNotBlank()) {
                                 FormatText(R.string.bandwidths_format, bandwidths)
                             }
@@ -173,8 +176,8 @@ fun CellModelBase.SIMCard(
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             FormatText(R.string.nr_state_format, "${
-                                CellUtils.nrStateToString(context, serviceStates[subInfo?.id]?.nrState ?: -100)}/" +
-                                CellUtils.frequencyRangeToString(context, serviceStates[subInfo?.id]?.nrFrequencyRange ?: -100)
+                                CellUtils.nrStateToString(context, serviceStates!![subInfo?.id]?.nrState ?: -100)}/" +
+                                CellUtils.frequencyRangeToString(context, serviceStates!![subInfo?.id]?.nrFrequencyRange ?: -100)
                             )
                         }
                     }
@@ -254,7 +257,9 @@ fun CellModelBase.SIMCard(
                                     modifier = Modifier.onSizeChanged {
                                         subSize = it
                                     },
-                                    signalStrength = signalStrength
+                                    signalStrength = signalStrength,
+                                    serviceStates = serviceStates!!,
+                                    subInfos = subInfos!!
                                 )
                             }
 

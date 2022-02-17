@@ -15,13 +15,16 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.components.PaddedDivider
-import dev.zwander.cellreader.data.data.CellModelBase
+import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
+import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 
 @SuppressLint("MissingPermission")
 @Composable
-fun CellModelBase.AdvancedSubInfo(
+fun AdvancedSubInfo(
     subId: Int,
     modifier: Modifier = Modifier,
+    serviceStates: Map<Int, ServiceStateWrapper?>,
+    subInfos: Map<Int, SubscriptionInfoWrapper?>,
     signalStrength: SignalStrength? = null
 ) {
     Box(

@@ -4,6 +4,8 @@ import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -53,9 +55,13 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
             DpSize((px.x / this.density).dp, (px.y / this.density).dp)
         } }
 
-        val items = CellModelWear.sortedSubIds.map { subId ->
-            val cellInfo = CellModelWear.cellInfos[subId]
-            val strength = CellModelWear.strengthInfos[subId]
+        val subIds by CellModelWear.subIds.observeAsState()
+        val cellInfos by CellModelWear.cellInfos.observeAsState()
+        val strengthInfos by CellModelWear.strengthInfos.observeAsState()
+
+        val items = subIds!!.map { subId ->
+            val cellInfo = cellInfos!![subId]
+            val strength = strengthInfos!![subId]
 
             cellInfo?.get(0)?.let {
                 TileItemInfo(
