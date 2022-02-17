@@ -65,6 +65,7 @@ fun MainContent() {
     val subInfos by CellModelWear.subInfos.observeAsState()
     val cellInfos by CellModelWear.cellInfos.observeAsState()
     val strengthInfos by CellModelWear.strengthInfos.observeAsState()
+    val serviceStates by CellModelWear.serviceStates.observeAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -89,7 +90,9 @@ fun MainContent() {
                         subIds!!.forEachIndexed { subIndex, t ->
                             item(t) {
                                 SIMCard(
-                                    subInfo = subInfos!![t],
+                                    subId = t,
+                                    subInfos = subInfos!!,
+                                    serviceStates = serviceStates!!,
                                     expanded = expanded[t.toString()] ?: false,
                                     onExpand = { expanded[t.toString()] = it },
                                     showingCells = showingCells[t] ?: true,

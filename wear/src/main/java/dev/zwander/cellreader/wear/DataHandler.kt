@@ -204,8 +204,9 @@ class DataHandler private constructor(private val context: Context) {
             val cellInfos = betweenUtils.retrieveCellInfos(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.cellInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                CellModelWear.cellInfos.update {
                     it!!.putAll(cellInfos)
+                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -219,8 +220,9 @@ class DataHandler private constructor(private val context: Context) {
             val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.strengthInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                CellModelWear.strengthInfos.update {
                     it!!.putAll(signalStrengths)
+                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -234,8 +236,9 @@ class DataHandler private constructor(private val context: Context) {
             val serviceState = betweenUtils.retrieveServiceState(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.serviceStates.update({ HashMap(it ?: hashMapOf()) }) {
+                CellModelWear.serviceStates.update {
                     it!!.putAll(serviceState)
+                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -249,8 +252,9 @@ class DataHandler private constructor(private val context: Context) {
             val subInfos = betweenUtils.retrieveSubscriptionInfo(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.subInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                CellModelWear.subInfos.update {
                     it!!.putAll(subInfos)
+                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -264,9 +268,8 @@ class DataHandler private constructor(private val context: Context) {
             val subIds = betweenUtils.retrieveNewSubId(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.subIds.update({ TreeSet(SubsComparator(CellModelWear.primaryCell.value!!)).apply { addAll(it!!) } }) {
-                    it!!.clear()
-                    it.addAll(subIds)
+                CellModelWear.subIds.update {
+                    TreeSet(SubsComparator(CellModelWear.primaryCell.value!!)).also { s -> s.addAll(subIds) }
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()

@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +40,6 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
-import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
@@ -51,7 +48,9 @@ import kotlinx.coroutines.delay
 @SuppressLint("MissingPermission")
 @Composable
 fun SIMCard(
-    subInfo: SubscriptionInfoWrapper?,
+    subId: Int,
+    subInfos: Map<Int, SubscriptionInfoWrapper?>,
+    serviceStates: Map<Int, ServiceStateWrapper?>,
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
     showingCells: Boolean,
@@ -60,8 +59,6 @@ fun SIMCard(
     signalStrength: SignalStrength? = null
 ) {
     val context = LocalContext.current
-    val serviceStates by CellModel.serviceStates.observeAsState()
-    val subInfos by CellModel.subInfos.observeAsState()
 
     @Composable
     fun contents() {
@@ -85,12 +82,12 @@ fun SIMCard(
                     bottom = 0.dp
                 )
             ) {
-                var rplmn by remember(serviceStates!![subInfo?.id]) {
+                var rplmn by remember(serviceStates[subId]) {
                     mutableStateOf("000-000")
                 }
 
-                LaunchedEffect(key1 = serviceStates!![subInfo?.id]) {
-                    rplmn = serviceStates!![subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
+                LaunchedEffect(key1 = serviceStates[subId]) {
+                    rplmn = serviceStates[subId]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                     )
                         ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
@@ -102,7 +99,7 @@ fun SIMCard(
                 ) {
                     Spacer(Modifier.weight(1f))
 
-                    subInfo?.iconBitmap?.let { bitmap ->
+                    subInfos[subId]?.iconBitmap?.let { bitmap ->
                         BitmapFactory.decodeByteArray(bitmap, 0, bitmap.size)?.asImageBitmap()?.let {
                             Image(
                                 bitmap = it, contentDescription = null,
@@ -122,11 +119,11 @@ fun SIMCard(
 
                     val type = ServiceStateWrapper.rilRadioTechnologyToString(
                         context,
-                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates!![subInfo?.id]?.dataNetworkType ?: 0)
+                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subId]?.dataNetworkType ?: 0)
                     )
 
                     WearSafeText(
-                        text = "${subInfo?.carrierName} $type (${rplmn})",
+                        text = "${subInfos[subId]?.carrierName} $type (${rplmn})",
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -166,9 +163,9 @@ fun SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.carrier_aggregation_format, "${serviceStates!![subInfo?.id]?.isUsingCarrierAggregation}")
+                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[subId]?.isUsingCarrierAggregation}")
 
-                        serviceStates!![subInfo?.id]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
+                        serviceStates[subId]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
                             if (bandwidths.isNotBlank()) {
                                 FormatText(R.string.bandwidths_format, bandwidths)
                             }
@@ -176,8 +173,8 @@ fun SIMCard(
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             FormatText(R.string.nr_state_format, "${
-                                CellUtils.nrStateToString(context, serviceStates!![subInfo?.id]?.nrState ?: -100)}/" +
-                                CellUtils.frequencyRangeToString(context, serviceStates!![subInfo?.id]?.nrFrequencyRange ?: -100)
+                                CellUtils.nrStateToString(context, serviceStates[subId]?.nrState ?: -100)}/" +
+                                CellUtils.frequencyRangeToString(context, serviceStates[subId]?.nrFrequencyRange ?: -100)
                             )
                         }
                     }
@@ -185,7 +182,7 @@ fun SIMCard(
 
                 val scroll = rememberCarouselScrollState()
 
-                var subSize by rememberSaveable(inputs = arrayOf(subInfo?.id), saver = object : Saver<MutableState<IntSize>, String> {
+                var subSize by rememberSaveable(inputs = arrayOf(subId), saver = object : Saver<MutableState<IntSize>, String> {
                     override fun restore(value: String): MutableState<IntSize> {
                         val split = value.split("x")
 
@@ -253,13 +250,13 @@ fun SIMCard(
                                     .verticalScroll(scroll)
                             ) {
                                 AdvancedSubInfo(
-                                    subId = subInfo?.id ?: 0,
+                                    subId = subId,
                                     modifier = Modifier.onSizeChanged {
                                         subSize = it
                                     },
                                     signalStrength = signalStrength,
-                                    serviceStates = serviceStates!!,
-                                    subInfos = subInfos!!
+                                    serviceStates = serviceStates,
+                                    subInfos = subInfos
                                 )
                             }
 

@@ -72,29 +72,14 @@ fun String.toColor(): Color {
     return Color(toColorString().toColorInt())
 }
 
-//https://stackoverflow.com/a/16348977/5496177
 fun String.toColorString(): String {
     return String.format("#%06X", (hashCode() * length * length % hashCode() + hashCode() % length) and 0xFFFFFF)
-
-//    var hash = 0
-//    for (i in indices) {
-//        hash = this[i].code + ((hash shl 5) - hash)
-//    }
-//    var colour = "#"
-//    for (i in 0..2) {
-//        val value = hash shr (i * 8) and 0xFF
-//        colour += ("00" + value.toString(16)).run { substring(length - 2) }
-//    }
-//
-//    return colour
 }
 
 fun Color.toColorInt(): Int {
     return android.graphics.Color.argb(alpha, red, green, blue)
 }
 
-inline fun <reified T> MutableLiveData<T>.update(copy: (T?) -> T, block: (T?) -> Unit) {
-    block(value)
-
-    this.value = copy(value)
+inline fun <reified T> MutableLiveData<T>.update(block: (T?) -> T) {
+    this.value = block(value)
 }

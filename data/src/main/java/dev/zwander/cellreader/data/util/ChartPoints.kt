@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.graphics.toColorInt
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.GraphInfo
@@ -12,6 +13,8 @@ import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.*
 
 fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
+    Utils.init(context)
+
     CellModel.strengthInfos.value!!.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)

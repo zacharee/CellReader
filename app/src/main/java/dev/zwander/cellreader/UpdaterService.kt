@@ -120,20 +120,24 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         with (CellModel) {
             telephonies.putAll(
                 subscriptions.mapNotNull { subId ->
-                    subInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                    subInfos.update {
                         it!![subId] = subs.getActiveSubscriptionInfo(subId)?.let { subInfo -> SubscriptionInfoWrapper(subInfo, this@UpdaterService) }
+                        HashMap(it)
                     }
 
                     if (subInfos.value!![subId] != null) {
-                        cellInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                        cellInfos.update {
                             it!![subId] = listOf()
+                            HashMap(it)
                         }
-                        strengthInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                        strengthInfos.update {
                             it!![subId] = listOf()
+                            HashMap(it)
                         }
 
-                        subIds.update({ TreeSet(SubsComparator(primaryCell.value!!)).apply { addAll(it!!) } }) {
+                        subIds.update {
                             it!!.add(subId)
+                            TreeSet(SubsComparator(primaryCell.value!!)).also { s-> s.addAll(it) }
                         }
 
                         launch(Dispatchers.IO) {
@@ -187,8 +191,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val newInfo = sorted.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
             launch(Dispatchers.Main) {
-                cellInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                cellInfos.update {
                     it!![subId] = newInfo
+                    HashMap(it)
                 }
 
                 launch(Dispatchers.IO) {
@@ -226,11 +231,13 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
         launch(Dispatchers.Main) {
             with (CellModel) {
-                signalStrengths.update({ HashMap(it ?: hashMapOf()) }) {
+                signalStrengths.update {
                     it!![subId] = strength
+                    HashMap(it)
                 }
-                strengthInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                strengthInfos.update {
                     it!![subId] = newInfo
+                    HashMap(it)
                 }
 
                 launch(Dispatchers.IO) {
@@ -247,8 +254,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val wrapped = serviceState?.run { ServiceStateWrapper(this) }
 
             launch(Dispatchers.Main) {
-                serviceStates.update({ HashMap(it ?: hashMapOf()) }) {
+                serviceStates.update {
                     it!![subId] = wrapped
+                    HashMap(it)
                 }
 
                 launch(Dispatchers.IO) {
@@ -293,8 +301,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 } else {
                     newList.forEach { subInfo ->
                         withContext(Dispatchers.Main) {
-                            CellModel.subInfos.update({ HashMap(it ?: hashMapOf()) }) {
+                            CellModel.subInfos.update {
                                 it!![subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                                HashMap(it)
                             }
 
                             withContext(Dispatchers.IO) {
@@ -308,6 +317,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
                 withContext(Dispatchers.Main) {
                     CellModel.primaryCell.value = defaultId
+                    CellModel.subIds.update {
+                        TreeSet(SubsComparator(defaultId)).also { s -> s.addAll(it!!) }
+                    }
                     updateWidgets()
                 }
 

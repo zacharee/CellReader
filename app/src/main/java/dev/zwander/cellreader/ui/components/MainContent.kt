@@ -1,6 +1,5 @@
 package dev.zwander.cellreader.ui.components
 
-import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -40,8 +39,7 @@ fun MainContent() {
     val signalStrengths by CellModel.signalStrengths.observeAsState()
     val cellInfos by CellModel.cellInfos.observeAsState()
     val strengthInfos by CellModel.strengthInfos.observeAsState()
-
-    Log.e("CellReader", "subIds $subIds")
+    val serviceStates by CellModel.serviceStates.observeAsState()
 
     SelectionContainer {
         val state = rememberLazyListState()
@@ -62,7 +60,9 @@ fun MainContent() {
             subIds!!.forEachIndexed { subIndex, t ->
                 item(t) {
                     SIMCard(
-                        subInfo = subInfos!![t],
+                        subId = t,
+                        subInfos = subInfos!!,
+                        serviceStates = serviceStates!!,
                         expanded = expanded[t.toString()] ?: false,
                         onExpand = { expanded[t.toString()] = it },
                         showingCells = showingCells[t] ?: true,

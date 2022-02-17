@@ -15,11 +15,11 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.CardCheckbox
 import dev.zwander.cellreader.data.data.GraphInfo
@@ -102,6 +102,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
                 }
             },
             update = {
+                Utils.init(it.context)
                 it.data = LineData(
                     points.flatMap { (subId, graphInfo) ->
                         if (disabledSubIds.contains(subId)) {
