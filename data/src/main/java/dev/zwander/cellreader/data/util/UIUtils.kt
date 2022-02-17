@@ -21,6 +21,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.random.Random
 import kotlin.reflect.javaType
 
 fun Modifier.angledGradient(colors: List<Pair<Float, Color>>, degrees: Float) = this.then(
@@ -73,7 +74,7 @@ fun String.toColor(): Color {
 }
 
 fun String.toColorString(): String {
-    return String.format("#%06X", (hashCode() * length * length % hashCode() + hashCode() % length) and 0xFFFFFF)
+    return String.format("#%06X", (hashCode() * length * length % hashCode() + hashCode() % length + Random(hashCode()).run { nextBits(nextBits(nextBits(500))) }) and 0xFFFFFF)
 }
 
 fun Color.toColorInt(): Int {
