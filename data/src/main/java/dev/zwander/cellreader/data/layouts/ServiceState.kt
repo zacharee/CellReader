@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.PaddedDivider
 import dev.zwander.cellreader.data.components.WearSafeText
+import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.duplexModeToString
 import dev.zwander.cellreader.data.util.onNegAvail
@@ -23,7 +24,7 @@ fun ServiceState(
 ) {
     val context = LocalContext.current
 
-    with (serviceState) {
+    with(serviceState) {
         WearSafeText(
             text = stringResource(id = R.string.service_state),
             modifier = Modifier.fillMaxWidth(),
@@ -60,7 +61,10 @@ fun ServiceState(
 
         FormatText(
             R.string.state_format,
-            setOf(dataRegState, voiceRegState).joinToString("/") { ServiceStateWrapper.rilServiceStateToString(context, it) }
+            setOf(
+                dataRegState,
+                voiceRegState
+            ).joinToString("/") { ServiceStateWrapper.rilServiceStateToString(context, it) }
         )
         FormatText(R.string.emergency_only_format, "$emergencyOnly")
 
@@ -112,19 +116,34 @@ fun ServiceState(
             FormatText(R.string.arfcn_rsrp_boost_format, "$arfcnRsrpBoost")
         }
 
-        PaddedDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp)
-        )
-
-        WearSafeText(
-            text = stringResource(id = R.string.network_registrations),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
-
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            PaddedDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp)
+            )
+
+            WearSafeText(
+                text = stringResource(id = R.string.network_registrations),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            networkRegistrationInfos?.distinctBy { it.cellIdentity?.globalCellId }
+                ?.flatMap {
+                    it.cellIdentity?.bands?.map { band ->
+                        "${it.cellIdentity.typeString(context)} $band"
+                    } ?: listOf()
+                }
+                ?.joinToString(", ").apply {
+                    if (!isNullOrBlank()) {
+                        FormatText(
+                            textId = R.string.bands_format,
+                            textFormat = this
+                        )
+                    }
+                }
+
             networkRegistrationInfos?.let {
                 NetworkRegInfo(networkRegistrationInfoList = networkRegistrationInfos)
             }

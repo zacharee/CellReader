@@ -144,6 +144,9 @@
     <string name="ul_freqs_format">UL Freqs</string>
     <string name="freqs_format">Freqs</string>
 
+    <string name="data_specific_info">Data Specific Info</string>
+    <string name="voice_specific_info">Voice Specific Info</string>
+
     <string name="legend_rsrp">%d: %s RSRP</string>
     <string name="legend_rssi">%d: %s RSSI</string>
     <string name="legend_rsrq">%d: %s RSRQ</string>
