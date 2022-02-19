@@ -7,17 +7,15 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import dev.zwander.cellreader.data.BetweenUtils
-import dev.zwander.cellreader.data.data.CellModel
-import dev.zwander.cellreader.data.data.StateListener
-import dev.zwander.cellreader.data.data.TelephonyListener
-import dev.zwander.cellreader.data.data.TelephonyListenerCallback
-import dev.zwander.cellreader.data.util.CellUtils
+import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.SubsComparator
+import dev.zwander.cellreader.data.data.*
+import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
@@ -98,6 +96,29 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         if (subs.allSubscriptionInfoList.isEmpty()) {
             init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
         }
+
+//        PermissionUtils.checkShizukuPermission {
+//            if (it == PackageManager.PERMISSION_GRANTED) {
+//                Shizuku.bindUserService(
+//                    Shizuku.UserServiceArgs(ComponentName(this, ShizukuUserService::class.java))
+//                        .processNameSuffix(":privileged")
+//                        .version(503),
+//                    object : ServiceConnection {
+//                        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+//                            CellModel.service = IShizukuUserService.Stub.asInterface(service)
+//
+//                            CellModel.privilegedCallbacks.forEach { (subId, callback) ->
+//                                CellModel.service!!.registerPrivilegedListener(subId, callback)
+//                            }
+//                        }
+//
+//                        override fun onServiceDisconnected(name: ComponentName?) {
+//                            CellModel.service = null
+//                        }
+//                    }
+//                )
+//            }
+//        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -150,8 +171,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                 val callback = telephonyCallbacks[subId] ?: TelephonyListener(subId, this@UpdaterService).apply {
                                     telephonyCallbacks[subId] = this
                                 }
+                                val privileged = privilegedCallbacks[subId] ?: PhysicalChannelConfigListener(this@UpdaterService).apply {
+                                    privilegedCallbacks[subId] = this
+                                }
 
                                 telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
+                                service?.registerPrivilegedListener(subId, privileged)
                             } else {
                                 val listener = telephonyListeners[subId] ?: StateListener(subId, this@UpdaterService).apply {
                                     telephonyListeners[subId] = this
@@ -266,6 +291,14 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 updateWidgets()
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun updatePhysicalChannelConfigs(
+        subId: Int,
+        configs: List<PhysicalChannelConfig>
+    ) {
+        Log.e("CellReader", "${subId} ${configs.map { it.band }}")
     }
 
     private var lastUpdate = AtomicLong(0L)

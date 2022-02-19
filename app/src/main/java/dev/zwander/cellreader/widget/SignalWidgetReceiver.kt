@@ -125,7 +125,7 @@ class SignalWidget : GlanceAppWidget() {
 
                                         FormatWidgetText(
                                             name = context.resources.getString(R.string.carrier_aggregation_format),
-                                            value = serviceStates!![subInfo?.id]?.isUsingCarrierAggregation
+                                            value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
                                         )
 
                                         Spacer(GlanceModifier.defaultWeight())

@@ -21,7 +21,6 @@ import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
 import dev.zwander.cellreader.utils.PermissionUtils
 
-
 class MainActivity : ComponentActivity() {
     private val permReq =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
