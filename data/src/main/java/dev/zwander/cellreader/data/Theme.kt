@@ -1,8 +1,13 @@
 package dev.zwander.cellreader.data
 
+import android.os.Build
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.LocalOverScrollConfiguration
+import androidx.compose.foundation.gestures.OverScrollConfiguration
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
@@ -15,6 +20,7 @@ import androidx.wear.compose.material.Shapes
 import androidx.wear.compose.material.Typography
 import dev.zwander.cellreader.data.util.rememberIsWear
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CellReaderTheme(content: @Composable() () -> Unit) {
     val context = LocalContext.current
@@ -61,7 +67,15 @@ fun CellReaderTheme(content: @Composable() () -> Unit) {
                 medium = RoundedCornerShape(12.dp),
                 large = RoundedCornerShape(12.dp)
             ),
-            content = content
+            content = {
+                CompositionLocalProvider(
+                    LocalOverScrollConfiguration provides OverScrollConfiguration(
+                        forceShowAlways = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    )
+                ) {
+                    content()
+                }
+            }
         )
     }
 }
