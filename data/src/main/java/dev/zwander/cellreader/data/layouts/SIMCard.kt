@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.telephony.AccessNetworkConstants
+import android.telephony.NetworkRegistrationInfo
 import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import android.view.animation.AnticipateOvershootInterpolator
@@ -172,9 +173,13 @@ fun SIMCard(
                         }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            FormatText(R.string.nr_state_format, "${
-                                CellUtils.nrStateToString(context, serviceStates[subId]?.nrState ?: -100)}/" +
-                                CellUtils.frequencyRangeToString(context, serviceStates[subId]?.nrFrequencyRange ?: -100)
+                            FormatText(
+                                R.string.nr_state_format,
+                                CellUtils.formatNrStateAndConnectionString(
+                                    context,
+                                    serviceStates[subId]?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE,
+                                    serviceStates[subId]?.nrFrequencyRange ?: android.telephony.ServiceState.FREQUENCY_RANGE_UNKNOWN
+                                )
                             )
                         }
                     }

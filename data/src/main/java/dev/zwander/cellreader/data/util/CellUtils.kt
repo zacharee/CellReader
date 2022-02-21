@@ -37,6 +37,19 @@ object CellUtils {
         )
     }
 
+    @SuppressLint("InlinedApi")
+    fun formatNrStateAndConnectionString(context: Context, @NetworkRegistrationInfo.NRState nrState: Int, @ServiceState.FrequencyRange range: Int): String {
+        val includeNrState = nrState != NetworkRegistrationInfo.NR_STATE_CONNECTED
+        val includeNrRange = !includeNrState
+
+        val list = mutableListOf<String>()
+
+        if (includeNrState) list.add(nrStateToString(context, nrState))
+        if (includeNrRange) list.add(frequencyRangeToString(context, range))
+
+        return list.joinToString("/")
+    }
+
     fun nrStateToString(context: Context, @NetworkRegistrationInfo.NRState nrState: Int): String {
         return context.resources.getString(
             when (nrState) {
