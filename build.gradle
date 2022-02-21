@@ -2,7 +2,7 @@ buildscript {
     ext {
         compose_version = '1.2.0-alpha03'
         glance_version = "1.0.0-alpha02"
-        version_code = 7
+        version_code = 11
         version_name = "0.7"
     }
 }

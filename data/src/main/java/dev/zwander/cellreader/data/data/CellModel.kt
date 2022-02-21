@@ -5,6 +5,7 @@ import android.os.Build
 import android.telephony.*
 import android.telephony.emergency.EmergencyNumber
 import android.telephony.ims.ImsReasonInfo
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import com.android.internal.telephony.IPhoneStateListener
@@ -75,7 +76,8 @@ class TelephonyListener(
 class PhysicalChannelConfigListener(
     private val listenerCallback: TelephonyListenerCallback
 ) : IPrivilegedListener.Stub() {
-    override fun onPhysicalChannelConfigsChanged(subId: Int, configs: MutableList<Any?>) {
+    @Suppress("UNCHECKED_CAST")
+    override fun onPhysicalChannelConfigsChanged(subId: Int, configs: MutableList<Any?>, string: String?) {
         listenerCallback.updatePhysicalChannelConfigs(subId, configs as MutableList<PhysicalChannelConfig>)
     }
 }

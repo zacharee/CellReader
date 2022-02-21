@@ -15,11 +15,19 @@ import dev.zwander.cellreader.data.IShizukuUserService
 import kotlin.system.exitProcess
 
 @SuppressLint("WrongConstant")
-class ShizukuUserService() : IShizukuUserService.Stub() {
+class ShizukuUserService : IShizukuUserService.Stub {
+    constructor() {
+        Log.e("CellReader", "init")
+    }
+
     init {
+        Log.e("CellReader", "init")
+
         if (Looper.getMainLooper() == null) {
             Looper.prepare()
         }
+
+        Log.e("CellReader", "init")
     }
 
     private val context = (ActivityThread.systemMain().systemContext as Context)
@@ -28,6 +36,7 @@ class ShizukuUserService() : IShizukuUserService.Stub() {
     private val telephonyRegistryManager = context.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE) as TelephonyRegistryManager
 
     override fun destroy() {
+        Log.e("CellReader", "Destroyed")
         exitProcess(0)
     }
 
@@ -81,8 +90,9 @@ class ShizukuUserService() : IShizukuUserService.Stub() {
     @RequiresApi(Build.VERSION_CODES.S)
     inner class PhoneStateListenerSimple(private val subId: Int) : TelephonyCallback(), TelephonyCallback.PhysicalChannelConfigListener {
         override fun onPhysicalChannelConfigChanged(configs: MutableList<PhysicalChannelConfig>) {
+            Log.e("CellReader", "new configs $configs")
             privilegedListeners[subId]?.forEach {
-                it.onPhysicalChannelConfigsChanged(subId, configs)
+                it.onPhysicalChannelConfigsChanged(subId, configs, configs.toString())
             }
         }
     }

@@ -3,7 +3,10 @@ package dev.zwander.cellreader
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
@@ -15,11 +18,14 @@ import androidx.core.app.NotificationManagerCompat
 import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.*
+import dev.zwander.cellreader.data.service.ShizukuUserService
 import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
+import dev.zwander.cellreader.utils.PermissionUtils
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
 import kotlinx.coroutines.*
+import rikka.shizuku.Shizuku
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.HashMap
@@ -101,8 +107,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 //            if (it == PackageManager.PERMISSION_GRANTED) {
 //                Shizuku.bindUserService(
 //                    Shizuku.UserServiceArgs(ComponentName(this, ShizukuUserService::class.java))
-//                        .processNameSuffix(":privileged")
-//                        .version(503),
+//                        .processNameSuffix("privileged")
+//                        .version(BuildConfig.VERSION_CODE)
+//                        .debuggable(true)
+//                        .tag("CellReader"),
 //                    object : ServiceConnection {
 //                        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
 //                            CellModel.service = IShizukuUserService.Stub.asInterface(service)
@@ -297,9 +305,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun updatePhysicalChannelConfigs(
         subId: Int,
         configs: List<PhysicalChannelConfig>
-    ) {
-        Log.e("CellReader", "${subId} ${configs.map { it.band }}")
-    }
+    ) {}
 
     private var lastUpdate = AtomicLong(0L)
 
