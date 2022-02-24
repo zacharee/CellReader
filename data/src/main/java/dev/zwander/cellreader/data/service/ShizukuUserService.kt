@@ -10,8 +10,12 @@ import android.os.Looper
 import android.telephony.*
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.android.internal.telephony.ITelephony
+import dev.zwander.cellreader.data.INetworkScanCallback
 import dev.zwander.cellreader.data.IPrivilegedListener
 import dev.zwander.cellreader.data.IShizukuUserService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlin.system.exitProcess
 
 @SuppressLint("WrongConstant")
@@ -27,12 +31,15 @@ class ShizukuUserService : IShizukuUserService.Stub {
             Looper.prepare()
         }
 
+        ActivityThread.initializeMainlineModules()
+
         Log.e("CellReader", "init")
     }
 
     private val context = (ActivityThread.systemMain().systemContext as Context)
     private val listeners = mutableMapOf<Int, PhoneStateListenerSimple>()
     private val privilegedListeners = mutableMapOf<Int, MutableList<IPrivilegedListener>>()
+    private val telephony = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
     private val telephonyRegistryManager = context.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE) as TelephonyRegistryManager
 
     override fun destroy() {
@@ -56,6 +63,51 @@ class ShizukuUserService : IShizukuUserService.Stub {
         }
         privilegedListeners[subId]!!.remove(listener)
         updateListenerState(subId)
+    }
+
+    @SuppressLint("SoonBlockedPrivateApi", "MissingPermission")
+    override fun requestNetworkScan(subId: Int, request: NetworkScanRequest?, callback: INetworkScanCallback?): MutableList<Any?> {
+        ITelephony.Stub.asInterface(
+            TelephonyFrameworkInitializer
+                .getTelephonyServiceManager()
+                .telephonyServiceRegisterer
+                .get()
+        ).apply {
+            Log.e("CellReader", "stub $this")
+        }
+
+        return try {
+            telephony.createForSubscriptionId(subId)
+                .requestNetworkScan(
+                    request,
+                    Dispatchers.Main.asExecutor(),
+                    object : TelephonyScanManager.NetworkScanCallback() {
+                        override fun onComplete() {
+                            callback?.onComplete()
+                        }
+
+                        override fun onError(error: Int) {
+                            callback?.onError(error)
+                        }
+
+                        @SuppressLint("MissingPermission")
+                        override fun onResults(results: MutableList<CellInfo>) {
+                            callback?.onResults(results)
+                        }
+                    }
+                ).run { mutableListOf(subId, NetworkScan::class.java.getDeclaredField("mSubId").apply { isAccessible = true }.getInt(this)) }
+        } catch (e: Exception) {
+            Log.e("CellReader", "Error", e)
+
+            Log.e("CellReader", "${telephony.createForSubscriptionId(subId)
+                .availableNetworks}")
+
+            mutableListOf()
+        }
+    }
+
+    override fun cancelNetworkScan(subId: Int, scanId: Int) {
+        NetworkScan(subId, scanId).stopScan()
     }
 
     @RequiresApi(Build.VERSION_CODES.S)

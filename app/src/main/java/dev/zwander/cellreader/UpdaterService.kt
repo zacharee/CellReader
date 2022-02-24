@@ -110,6 +110,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 //                        .processNameSuffix("privileged")
 //                        .version(BuildConfig.VERSION_CODE)
 //                        .debuggable(true)
+//                        .daemon(false)
 //                        .tag("CellReader"),
 //                    object : ServiceConnection {
 //                        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -117,6 +118,49 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 //
 //                            CellModel.privilegedCallbacks.forEach { (subId, callback) ->
 //                                CellModel.service!!.registerPrivilegedListener(subId, callback)
+//                            }
+//
+//                            CellModel.subIds.value?.forEach { subId ->
+//                                CellModel.service!!.requestNetworkScan(
+//                                    subId,
+//                                    NetworkScanRequest(
+//                                        NetworkScanRequest.SCAN_TYPE_ONE_SHOT,
+//                                        arrayOf(
+//                                            AccessNetworkConstants.AccessNetworkType.GERAN,
+//                                            AccessNetworkConstants.AccessNetworkType.UTRAN,
+//                                            AccessNetworkConstants.AccessNetworkType.EUTRAN,
+//                                            AccessNetworkConstants.AccessNetworkType.CDMA2000,
+//                                            AccessNetworkConstants.AccessNetworkType.IWLAN,
+//                                            AccessNetworkConstants.AccessNetworkType.NGRAN
+//                                        ).map {
+//                                            RadioAccessSpecifier(
+//                                                it,
+//                                                null,
+//                                                null
+//                                            )
+//                                        }.toTypedArray(),
+//                                        0,
+//                                        10000,
+//                                        true,
+//                                        1,
+//                                        null
+//                                    ),
+//                                    object : INetworkScanCallback.Stub() {
+//                                        override fun onComplete() {
+//                                            Log.e("CellReader", "Scan complete for $subId")
+//                                        }
+//
+//                                        override fun onError(error: Int) {
+//                                            Log.e("CellReader", "Scan error for $subId $error")
+//                                        }
+//
+//                                        override fun onResults(results: MutableList<Any?>?) {
+//                                            val actualResults = results as MutableList<CellInfo>
+//
+//                                            Log.e("CellReader", "New results $actualResults")
+//                                        }
+//                                    }
+//                                )
 //                            }
 //                        }
 //
