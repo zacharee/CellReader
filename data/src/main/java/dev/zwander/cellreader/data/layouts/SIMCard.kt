@@ -124,7 +124,7 @@ fun SIMCard(
                     )
 
                     WearSafeText(
-                        text = "${subInfos[subId]?.carrierName} $type (${rplmn})",
+                        text = "${subInfos[subId]?.carrierName} (${rplmn}) - $type",
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
