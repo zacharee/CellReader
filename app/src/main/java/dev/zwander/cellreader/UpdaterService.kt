@@ -3,14 +3,10 @@ package dev.zwander.cellreader
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -18,14 +14,11 @@ import androidx.core.app.NotificationManagerCompat
 import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.*
-import dev.zwander.cellreader.data.service.ShizukuUserService
 import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
-import dev.zwander.cellreader.utils.PermissionUtils
 import dev.zwander.cellreader.widget.SignalWidgetReceiver
 import kotlinx.coroutines.*
-import rikka.shizuku.Shizuku
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.HashMap
@@ -191,6 +184,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     @SuppressLint("MissingPermission")
     private fun init(subscriptions: List<Int>) {
         with (CellModel) {
+            primaryCell.value = SubscriptionManager.getDefaultSubscriptionId()
             telephonies.putAll(
                 subscriptions.mapNotNull { subId ->
                     subInfos.update {

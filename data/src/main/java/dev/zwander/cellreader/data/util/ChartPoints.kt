@@ -14,11 +14,13 @@ import dev.zwander.cellreader.data.wrappers.*
 
 fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
     Utils.init(context)
-
+    
     CellModel.strengthInfos.value!!.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)
         }
+        
+        val simSlot = CellModel.subInfos.value!![subId]!!.simSlotIndex + 1
 
         infos.forEach { info ->
             val typeString = info.typeString(context)
@@ -30,7 +32,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     subId,
                     context.resources.getString(
                         R.string.legend_rssi,
-                        subId,
+                        simSlot,
                         typeString
                     ),
                     maxX,
@@ -45,7 +47,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                         subId,
                         context.resources.getString(
                             R.string.legend_dbm,
-                            subId,
+                            simSlot,
                             context.resources.getString(R.string.cdma)
                         ),
                         maxX,
@@ -59,7 +61,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                         subId,
                         context.resources.getString(
                             R.string.legend_dbm,
-                            subId,
+                            simSlot,
                             context.resources.getString(R.string.evdo)
                         ),
                         maxX,
@@ -73,7 +75,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                         subId,
                         context.resources.getString(
                             R.string.legend_ecio,
-                            subId,
+                            simSlot,
                             context.resources.getString(R.string.cdma)
                         ),
                         maxX,
@@ -87,7 +89,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                         subId,
                         context.resources.getString(
                             R.string.legend_ecio,
-                            subId,
+                            simSlot,
                             context.resources.getString(R.string.evdo)
                         ),
                         maxX,
@@ -101,7 +103,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                         subId,
                         context.resources.getString(
                             R.string.legend_evdo_snr,
-                            subId
+                            simSlot
                         ),
                         maxX,
                         evdoSnr.toFloat(),
@@ -116,7 +118,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     subId,
                     context.resources.getString(
                         R.string.legend_rssi,
-                        subId,
+                        simSlot,
                         typeString
                     ),
                     maxX,
@@ -128,7 +130,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     subId,
                     context.resources.getString(
                         R.string.legend_ecno,
-                        subId,
+                        simSlot,
                         typeString
                     ),
                     maxX,
@@ -141,7 +143,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     subId,
                     context.resources.getString(
                         R.string.legend_rscp,
-                        subId,
+                        simSlot,
                         typeString
                     ),
                     maxX,
@@ -155,7 +157,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     subId,
                     context.resources.getString(
                         R.string.legend_rscp,
-                        subId,
+                        simSlot,
                         typeString
                     ),
                     maxX,
@@ -167,7 +169,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                 addToLine(
                     line.lines,
                     subId,
-                    context.resources.getString(R.string.legend_rsrp, subId, typeString),
+                    context.resources.getString(R.string.legend_rsrp, simSlot, typeString),
                     maxX,
                     rsrp.toFloat()
                 )
@@ -175,7 +177,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                 addToLine(
                     line.lines,
                     subId,
-                    context.resources.getString(R.string.legend_rssi, subId, typeString),
+                    context.resources.getString(R.string.legend_rssi, simSlot, typeString),
                     maxX,
                     rssi.toFloat()
                 )
@@ -183,7 +185,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                 addToLine(
                     line.lines,
                     subId,
-                    context.resources.getString(R.string.legend_rsrq, subId, typeString),
+                    context.resources.getString(R.string.legend_rsrq, simSlot, typeString),
                     maxX,
                     rsrq.toFloat(),
                     YAxis.AxisDependency.RIGHT
@@ -192,7 +194,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                 addToLine(
                     line.lines,
                     subId,
-                    context.resources.getString(R.string.legend_rssnr, subId, typeString),
+                    context.resources.getString(R.string.legend_rssnr, simSlot, typeString),
                     maxX,
                     rssnr.toFloat(),
                     YAxis.AxisDependency.RIGHT
@@ -204,7 +206,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     addToLine(
                         line.lines,
                         subId,
-                        context.resources.getString(R.string.legend_ss_rsrp, subId, typeString),
+                        context.resources.getString(R.string.legend_ss_rsrp, simSlot, typeString),
                         maxX,
                         it.toFloat()
                     )
@@ -214,7 +216,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     addToLine(
                         line.lines,
                         subId,
-                        context.resources.getString(R.string.legend_csi_rsrp, subId, typeString),
+                        context.resources.getString(R.string.legend_csi_rsrp, simSlot, typeString),
                         maxX,
                         it.toFloat()
                     )
@@ -224,7 +226,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     addToLine(
                         line.lines,
                         subId,
-                        context.resources.getString(R.string.legend_ss_rsrq, subId, typeString),
+                        context.resources.getString(R.string.legend_ss_rsrq, simSlot, typeString),
                         maxX,
                         it.toFloat(),
                         YAxis.AxisDependency.RIGHT
@@ -235,7 +237,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     addToLine(
                         line.lines,
                         subId,
-                        context.resources.getString(R.string.legend_csi_rsrq, subId, typeString),
+                        context.resources.getString(R.string.legend_csi_rsrq, simSlot, typeString),
                         maxX,
                         it.toFloat(),
                         YAxis.AxisDependency.RIGHT
@@ -246,7 +248,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     addToLine(
                         line.lines,
                         subId,
-                        context.resources.getString(R.string.legend_ss_sinr, subId, typeString),
+                        context.resources.getString(R.string.legend_ss_sinr, simSlot, typeString),
                         maxX,
                         it.toFloat(),
                         YAxis.AxisDependency.RIGHT
@@ -257,7 +259,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
                     addToLine(
                         line.lines,
                         subId,
-                        context.resources.getString(R.string.legend_csi_sinr, subId, typeString),
+                        context.resources.getString(R.string.legend_csi_sinr, simSlot, typeString),
                         maxX,
                         it.toFloat(),
                         YAxis.AxisDependency.RIGHT

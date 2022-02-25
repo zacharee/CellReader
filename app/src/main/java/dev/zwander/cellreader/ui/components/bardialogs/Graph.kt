@@ -21,7 +21,9 @@ import com.github.mikephil.charting.listener.OnChartGestureListener
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.SubsComparator
 import dev.zwander.cellreader.data.components.CardCheckbox
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.toColorInt
@@ -104,7 +106,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
             update = {
                 Utils.init(it.context)
                 it.data = LineData(
-                    points.flatMap { (subId, graphInfo) ->
+                    points.toSortedMap(SubsComparator(CellModel.primaryCell.value!!)).flatMap { (subId, graphInfo) ->
                         if (disabledSubIds.contains(subId)) {
                             return@flatMap listOf()
                         }
