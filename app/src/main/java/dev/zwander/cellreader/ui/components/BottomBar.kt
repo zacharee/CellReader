@@ -22,7 +22,6 @@ import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
-import dev.zwander.cellreader.data.data.BottomBarLinkInfo
 import dev.zwander.cellreader.data.data.BottomDialogPage
 import dev.zwander.cellreader.data.data.DialogButtonInfo
 import dev.zwander.cellreader.data.data.GraphInfo

@@ -40,6 +40,10 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
     val textColor = MaterialTheme.colors.onSurface.toColorInt()
 
+    val sortedPoints by derivedStateOf {
+        points.toSortedMap(SubsComparator(CellModel.primaryCell.value!!))
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -106,7 +110,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
             update = {
                 Utils.init(it.context)
                 it.data = LineData(
-                    points.toSortedMap(SubsComparator(CellModel.primaryCell.value!!)).flatMap { (subId, graphInfo) ->
+                    sortedPoints.flatMap { (subId, graphInfo) ->
                         if (disabledSubIds.contains(subId)) {
                             return@flatMap listOf()
                         }
@@ -153,7 +157,11 @@ fun Graph(points: Map<Int, GraphInfo>) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
-                points.keys.forEach { subId ->
+                sortedPoints.forEach { (subId, line) ->
+                    if (line.lines.any { (_, v) -> v.line.isEmpty() }) {
+                        return@forEach
+                    }
+
                     CardCheckbox(
                         isChecked = !disabledSubIds.contains(subId),
                         onCheckedChanged = {
@@ -163,7 +171,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
                                 disabledSubIds.add(subId)
                             }
                         },
-                        text = stringResource(id = R.string.chart_sim_format, subId),
+                        text = stringResource(id = R.string.chart_sim_format, CellModel.subInfos.value!![subId]!!.simSlotIndex + 1),
                         modifier = Modifier.weight(1f)
                     )
                 }
