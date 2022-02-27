@@ -13,6 +13,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
@@ -35,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -45,6 +45,7 @@ import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 import kotlinx.coroutines.delay
+import kotlin.math.absoluteValue
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -185,7 +186,7 @@ fun SIMCard(
                     }
                 }
 
-                val scroll = rememberCarouselScrollState()
+                val listState = rememberLazyListState()
 
                 var subSize by rememberSaveable(inputs = arrayOf(subId), saver = object : Saver<MutableState<IntSize>, String> {
                     override fun restore(value: String): MutableState<IntSize> {
@@ -223,8 +224,19 @@ fun SIMCard(
                     )
                 ) {
                     Column {
-                        val topAlpha by animateFloatAsState(targetValue = if (scroll.value > 0) 1f else 0f)
-                        val bottomAlpha by animateFloatAsState(targetValue = if (scroll.value < scroll.maxValue) 1f else 0f)
+                        val topAlpha by animateFloatAsState(
+                            targetValue = if (listState.firstVisibleItemScrollOffset > 0 || listState.layoutInfo.run {
+                                (visibleItemsInfo.firstOrNull()?.index ?: 0) > 0
+                            }) 1f else 0f
+                        )
+                        val bottomAlpha by animateFloatAsState(
+                            targetValue = if (listState.layoutInfo.run {
+                                (visibleItemsInfo.lastOrNull()?.run {
+                                    index < totalItemsCount - 1 ||
+                                            offset.absoluteValue < (size - viewportSize.height)
+                                } == true)
+                            }) 1f else 0f
+                        )
 
                         PaddedDivider(
                             modifier = Modifier.alpha(alpha = topAlpha)
@@ -240,8 +252,8 @@ fun SIMCard(
                             }
                             val scrollAlphaState by animateFloatAsState(targetValue = target)
 
-                            LaunchedEffect(key1 = scroll.isScrollInProgress) {
-                                target = if (scroll.isScrollInProgress) {
+                            LaunchedEffect(key1 = listState.isScrollInProgress) {
+                                target = if (listState.isScrollInProgress) {
                                     1f
                                 } else {
                                     delay(1000L)
@@ -251,8 +263,8 @@ fun SIMCard(
 
                             Box(
                                 modifier = Modifier
-                                    .height(min(subSize.height.asDp(), 300.dp))
-                                    .verticalScroll(scroll)
+                                    .height(300.dp)
+//                                    .verticalScroll(scroll)
                             ) {
                                 AdvancedSubInfo(
                                     subId = subId,
@@ -261,19 +273,10 @@ fun SIMCard(
                                     },
                                     signalStrength = signalStrength,
                                     serviceStates = serviceStates,
-                                    subInfos = subInfos
+                                    subInfos = subInfos,
+                                    scrollState = listState
                                 )
                             }
-
-                            Carousel(
-                                state = scroll,
-                                modifier = Modifier
-                                    .width(2.dp)
-                                    .height(min(subSize.height.asDp(), 300.dp))
-                                    .alpha(scrollAlphaState)
-                                    .align(Alignment.CenterEnd),
-                                colors = CarouselDefaults.colors(thumbColor = Color.White, backgroundColor = Color.Transparent)
-                            )
                         }
 
                         PaddedDivider(
