@@ -69,10 +69,6 @@ fun AdvancedSubInfo(
                         serviceStates[subId]?.apply {
                             ServiceState(serviceState = this)
                         }
-
-                        subInfos[subId]?.apply {
-                            SubInfo(subscriptionInfo = this)
-                        }
                     }
                 }
 
