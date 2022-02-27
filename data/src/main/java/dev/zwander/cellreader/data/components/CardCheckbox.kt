@@ -19,13 +19,15 @@ fun CardCheckbox(
     isChecked: Boolean,
     onCheckedChanged: (Boolean) -> Unit,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Card(
         onClick = {
             onCheckedChanged(!isChecked)
         },
-        modifier = modifier
+        modifier = modifier,
+        enabled = enabled
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -35,7 +37,11 @@ fun CardCheckbox(
 
             Spacer(Modifier.weight(1f))
 
-            Checkbox(checked = isChecked, onCheckedChange = onCheckedChanged)
+            Checkbox(
+                checked = isChecked,
+                onCheckedChange = onCheckedChanged,
+                enabled = enabled
+            )
         }
     }
 }
