@@ -285,7 +285,7 @@ private fun addToLine(lines: MutableMap<String, GraphLineInfo>, subId: Int, labe
 
 private fun createLineIfNotExists(lines: MutableMap<String, GraphLineInfo>, subId: Int, label: String, axis: YAxis.AxisDependency = YAxis.AxisDependency.LEFT) {
     if (!lines.containsKey(label)) {
-        val color = label.toColorString().toColorInt()
+        val color = label.toColorString().toLightEnoughColorInt()
         lines[label] = GraphLineInfo(subId, label, color, axis)
     }
 }
