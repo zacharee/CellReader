@@ -1,6 +1,7 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.os.Build
+import android.telephony.PhoneNumberUtils
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -44,7 +45,11 @@ fun SubInfo(
             modifier = Modifier.padding(8.dp)
         ) {
             FormatText(R.string.sim_slot_format, "$simSlotIndex")
-            FormatText(R.string.number_format, number ?: "")
+
+            number?.let { PhoneNumberUtils.formatNumber("+$number", "US") }?.let {
+                FormatText(R.string.number_format, it)
+
+            }
             FormatText(R.string.display_name_format, "$displayName")
             FormatText(R.string.carrier_name_format, "$carrierName")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
