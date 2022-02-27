@@ -42,7 +42,7 @@ fun ServiceState(
                     add(operatorAlphaShortRaw)
                     add(operatorAlphaLongRaw)
                 }
-            }.joinToString("/")
+            }.filterNotNull().joinToString("/")
         )
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
