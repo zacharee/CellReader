@@ -253,7 +253,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (CellModel) {
             if (infos.isEmpty()) {
-                infos.addAll(telephonies[subId]!!.allCellInfo)
+                infos.addAll(telephonies[subId]?.allCellInfo ?: listOf())
             }
 
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
