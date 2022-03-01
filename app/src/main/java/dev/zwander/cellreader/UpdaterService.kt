@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -252,9 +253,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     @SuppressLint("MissingPermission")
     override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (CellModel) {
-            if (infos.isEmpty()) {
-                infos.addAll(telephonies[subId]?.allCellInfo ?: listOf())
-            }
+//            if (infos.isEmpty()) {
+//                infos.addAll(telephonies[subId]?.allCellInfo ?: listOf())
+//            }
 
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
