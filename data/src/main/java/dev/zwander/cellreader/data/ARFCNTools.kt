@@ -10,6 +10,7 @@ import kotlin.math.absoluteValue
 //https://5g-tools.com/4g-lte-earfcn-calculator/
 //https://www.sqimway.com/lte_band.php
 //https://analog.intgckts.com/lte-carrier-frequency-and-earfcn/
+//https://www.etsi.org/deliver/etsi_ts/136100_136199/136101/16.07.00_60/ts_136101v160700p.pdf (5.7.3-1)
 
 //https://www.rfwireless-world.com/Terminology/UMTS-UARFCN-to-frequency-conversion.html
 //https://www.sqimway.com/umts_band.php
@@ -488,27 +489,27 @@ object EARFCNTable : TreeMap<IntRange, ARFCNContainer>(IntRangeComparator) {
                 ),
                 68336..68585 to ARFCNContainer(
                     1995, 68336,
-                    1695, 132972,
+                    1695, 68336 + 65536,
                     70
                 ),
                 68586..68935 to ARFCNContainer(
-                    617, 65586,
-                    663, 133122,
+                    617, 68586,
+                    663, 68586 + 65536,
                     71
                 ),
                 68936..68985 to ARFCNContainer(
                     461, 68936,
-                    451, 133472,
+                    451, 68936 + 65536,
                     72
                 ),
                 68986..69035 to ARFCNContainer(
                     460, 68986,
-                    450, 133522,
+                    450, 68986 + 65536,
                     73
                 ),
                 69036..69465 to ARFCNContainer(
                     1475, 69036,
-                    1427, 133572,
+                    1427, 69036 + 65536,
                     74
                 ),
                 69466..70315 to ARFCNContainer(
