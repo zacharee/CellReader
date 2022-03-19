@@ -17,9 +17,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,14 +24,12 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
@@ -45,10 +40,9 @@ import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
-import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission, InlinedApi")
 @Composable
 fun SIMCard(
     subId: Int,
@@ -189,22 +183,6 @@ fun SIMCard(
 
                 val listState = rememberLazyListState()
 
-                var subSize by rememberSaveable(inputs = arrayOf(subId), saver = object : Saver<MutableState<IntSize>, String> {
-                    override fun restore(value: String): MutableState<IntSize> {
-                        val split = value.split("x")
-
-                        if (split.size < 2) return mutableStateOf(IntSize.Zero)
-
-                        return mutableStateOf(IntSize(split[0].toInt(), split[1].toInt()))
-                    }
-
-                    override fun SaverScope.save(value: MutableState<IntSize>): String {
-                        return "${value.value.width}x${value.value.height}"
-                    }
-                }) {
-                    mutableStateOf(IntSize(0, context.dpAsPx(50).toInt()))
-                }
-
                 AnimatedVisibility(
                     visible = expanded,
                     enter = fadeIn() + expandVertically(
@@ -248,30 +226,12 @@ fun SIMCard(
                                 .heightIn(max = 300.dp)
                                 .animateContentSize()
                         ) {
-                            var target by remember {
-                                mutableStateOf(0f)
-                            }
-                            val scrollAlphaState by animateFloatAsState(targetValue = target)
-
-                            LaunchedEffect(key1 = listState.isScrollInProgress) {
-                                target = if (listState.isScrollInProgress) {
-                                    1f
-                                } else {
-                                    delay(1000L)
-                                    0f
-                                }
-                            }
-
                             Box(
                                 modifier = Modifier
                                     .height(300.dp)
-//                                    .verticalScroll(scroll)
                             ) {
                                 AdvancedSubInfo(
                                     subId = subId,
-                                    modifier = Modifier.onSizeChanged {
-                                        subSize = it
-                                    },
                                     signalStrength = signalStrength,
                                     serviceStates = serviceStates,
                                     subInfos = subInfos,
