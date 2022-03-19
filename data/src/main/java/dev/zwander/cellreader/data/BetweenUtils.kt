@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.common.GoogleApiAvailabilityLight
-import com.google.android.gms.common.GooglePlayServicesUtil
-import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.AvailabilityException
 import com.google.android.gms.common.api.GoogleApi
 import com.google.android.gms.wearable.*
@@ -63,6 +60,8 @@ class BetweenUtils private constructor(private val context: Context) {
         try {
             @Suppress("UNCHECKED_CAST")
             CellIdentityWrapper::class.java.classLoader?.loadClass(name) as Class<out CellIdentityWrapper>?
+        } catch (e: ClassNotFoundException) {
+            null
         } catch (e: Exception) {
             Log.e("CellReader", "error creating class", e)
             null
@@ -75,6 +74,8 @@ class BetweenUtils private constructor(private val context: Context) {
         try {
             @Suppress("UNCHECKED_CAST")
             VopsSupportInfoWrapper::class.java.classLoader?.loadClass(name) as Class<out VopsSupportInfoWrapper>?
+        } catch (e: ClassNotFoundException) {
+            null
         } catch (e: Exception) {
             Log.e("CellReader", "error creating class", e)
             null
@@ -87,6 +88,8 @@ class BetweenUtils private constructor(private val context: Context) {
         try {
             @Suppress("UNCHECKED_CAST")
             CellSignalStrengthWrapper::class.java.classLoader?.loadClass(name) as Class<out CellSignalStrengthWrapper>?
+        } catch (e: ClassNotFoundException) {
+            null
         } catch (e: Exception) {
             Log.e("CellReader", "error creating class", e)
             null
@@ -99,6 +102,8 @@ class BetweenUtils private constructor(private val context: Context) {
         try {
             @Suppress("UNCHECKED_CAST")
             CellInfoWrapper::class.java.classLoader?.loadClass(name) as Class<out CellInfoWrapper>?
+        } catch (e: ClassNotFoundException) {
+            null
         } catch (e: Exception) {
             Log.e("CellReader", "error creating class", e)
             null
@@ -129,23 +134,23 @@ class BetweenUtils private constructor(private val context: Context) {
             .wrap(NrVopsSupportInfoWrapper::class.java, NrVopsSupportInfoWrapper::class.java.canonicalName)
             .wrap(ServiceStateWrapper::class.java, ServiceStateWrapper::class.java.canonicalName)
 
-    private val cellInfoGson = baseWrapperGson
+    val cellInfoGson: Gson = baseWrapperGson
         .registerTypeSelector(CellInfoWrapper::class.java, cellInfoSelector)
         .createGsonBuilder()
         .create()
 
-    private val serviceStateGson = baseWrapperGson
+    val serviceStateGson: Gson = baseWrapperGson
         .registerTypeSelector(CellIdentityWrapper::class.java, cellIdentitySelector)
         .registerTypeSelector(VopsSupportInfoWrapper::class.java, vopsSupportInfoSelector)
         .createGsonBuilder()
         .create()
 
-    private val cellSignalStrengthGson = baseWrapperGson
+    val cellSignalStrengthGson: Gson = baseWrapperGson
         .registerTypeSelector(CellSignalStrengthWrapper::class.java, cellSignalStrengthSelector)
         .createGsonBuilder()
         .create()
 
-    private val otherGson = baseWrapperGson
+    val otherGson: Gson = baseWrapperGson
         .createGsonBuilder()
         .create()
 

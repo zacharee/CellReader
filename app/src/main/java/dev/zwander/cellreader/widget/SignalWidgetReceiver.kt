@@ -9,25 +9,30 @@ import android.os.Build
 import android.os.Bundle
 import android.telephony.AccessNetworkConstants
 import android.telephony.TelephonyManager
-import android.widget.RemoteViews
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.glance.*
 import androidx.glance.action.*
 import androidx.glance.appwidget.*
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
-import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import dev.zwander.cellreader.BuildConfig
 import dev.zwander.cellreader.MainActivity
 import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
+import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
@@ -35,143 +40,170 @@ import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
+import java.util.*
 
 class SignalWidget : GlanceAppWidget() {
-    override val stateDefinition = PreferencesGlanceStateDefinition
+    companion object {
+        val PRIMARY_CELL_KEY = intPreferencesKey("PRIMARY_CELL")
+        val SUB_IDS_KEY = stringSetPreferencesKey("SUB_IDS")
+        val CELL_INFOS_KEY = stringPreferencesKey("CELL_INFOS")
+        val STRENGTH_INFOS_KEY = stringPreferencesKey("STRENGTH_INFOS")
+        val SUB_INFOS_KEY = stringPreferencesKey("SUB_INFOS")
+        val SERVICE_STATES_KEY = stringPreferencesKey("SERVICE_STATES")
+        val SIGNAL_STRENGTHS_KEY = stringPreferencesKey("SIGNAL_STRENGTHS")
+    }
 
     override val sizeMode: SizeMode = SizeMode.Exact
 
     @Composable
     override fun Content() {
-        CompositionLocalProvider {
-            val context = LocalContext.current
-            val size = LocalSize.current
+        val context = LocalContext.current
+        val size = LocalSize.current
 
-            val subIds = CellModel.subIds.value
-            val subInfos = CellModel.subInfos.value
-            val serviceStates = CellModel.serviceStates.value
-            val strengthInfos = CellModel.strengthInfos.value
-            val cellInfos = CellModel.cellInfos.value
+        val betweenUtils = BetweenUtils.getInstance(context)
 
-            Box(
-                modifier = GlanceModifier.cornerRadius(8.dp)
-                    .appWidgetBackground()
-                    .fillMaxSize(),
+        val subIds = currentState(SUB_IDS_KEY)?.map { it.toInt() } ?: listOf()
+        val subInfos = betweenUtils.otherGson.fromJson<HashMap<Int, SubscriptionInfoWrapper?>>(
+            currentState(SUB_INFOS_KEY) ?: "",
+            object : TypeToken<HashMap<Int, SubscriptionInfoWrapper?>>(){}.type
+        ) ?: hashMapOf()
+        val serviceStates = betweenUtils.serviceStateGson.fromJson<HashMap<Int, ServiceStateWrapper?>>(
+            currentState(SERVICE_STATES_KEY) ?: "",
+            object : TypeToken<HashMap<Int, ServiceStateWrapper?>>(){}.type
+        ) ?: hashMapOf()
+        val strengthInfos = betweenUtils.cellSignalStrengthGson.fromJson<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(
+            currentState(STRENGTH_INFOS_KEY) ?: "",
+            object : TypeToken<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(){}.type
+        ) ?: hashMapOf()
+        val cellInfos = betweenUtils.cellInfoGson.fromJson<HashMap<Int, ArrayList<CellInfoWrapper>>>(
+            currentState(CELL_INFOS_KEY) ?: "",
+            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>(){}.type
+        ) ?: hashMapOf()
+
+//        val subIds = CellModel.subIds.value ?: TreeSet()
+//        val subInfos = CellModel.subInfos.value ?: hashMapOf()
+//        val serviceStates = CellModel.serviceStates.value ?: hashMapOf()
+//        val strengthInfos = CellModel.strengthInfos.value ?: hashMapOf()
+//        val cellInfos = CellModel.cellInfos.value ?: hashMapOf()
+
+        Box(
+            modifier = GlanceModifier.cornerRadius(8.dp)
+                .appWidgetBackground()
+                .fillMaxSize(),
+        ) {
+            LazyColumn(
+                modifier = GlanceModifier.fillMaxSize()
             ) {
-                LazyColumn(
-                    modifier = GlanceModifier.fillMaxSize()
-                ) {
-                    subIds!!.forEachIndexed { _, t ->
-                        item(t.toLong()) {
-                            Box(
-                                modifier = GlanceModifier.padding(bottom = 4.dp)
+                subIds.forEachIndexed { _, t ->
+                    item(t.toLong()) {
+                        Box(
+                            modifier = GlanceModifier.padding(bottom = 4.dp)
+                        ) {
+                            Column(
+                                modifier = GlanceModifier.wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .background(ImageProvider(R.drawable.sim_card_widget_background))
+                                    .cornerRadius(12.dp)
+                                    .padding(bottom = 4.dp, top = 4.dp),
+                                horizontalAlignment = Alignment.Horizontal.CenterHorizontally
                             ) {
-                                Column(
-                                    modifier = GlanceModifier.wrapContentHeight()
-                                        .fillMaxWidth()
-                                        .background(ImageProvider(R.drawable.sim_card_widget_background))
-                                        .cornerRadius(12.dp)
-                                        .padding(bottom = 4.dp, top = 4.dp),
-                                    horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+                                val subInfo = subInfos[t]
+
+                                Row(
+                                    verticalAlignment = Alignment.Vertical.CenterVertically
                                 ) {
-                                    val subInfo = subInfos!![t]
-
-                                    Row(
-                                        verticalAlignment = Alignment.Vertical.CenterVertically
-                                    ) {
-                                        subInfo?.iconBitmap?.let { bmp ->
-                                            Image(
-                                                provider = ImageProvider(
-                                                    Icon.createWithData(
-                                                        bmp,
-                                                        0,
-                                                        bmp.size
-                                                    )
-                                                ),
-                                                contentDescription = null,
-                                                modifier = GlanceModifier.size(16.dp)
-                                            )
-                                        }
-
-                                        Spacer(GlanceModifier.size(8.dp))
-
-                                        Text(
-                                            text = (subInfo?.carrierName ?: t.toString()),
-                                            style = TextStyle(
-                                                color = ColorProvider(Color.White)
-                                            )
+                                    subInfo?.iconBitmap?.let { bmp ->
+                                        Image(
+                                            provider = ImageProvider(
+                                                Icon.createWithData(
+                                                    bmp,
+                                                    0,
+                                                    bmp.size
+                                                )
+                                            ),
+                                            contentDescription = null,
+                                            modifier = GlanceModifier.size(16.dp)
                                         )
                                     }
 
-                                    val rplmn =
-                                        serviceStates!![subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
-                                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                                    Spacer(GlanceModifier.size(8.dp))
+
+                                    Text(
+                                        text = (subInfo?.carrierName ?: t.toString()),
+                                        style = TextStyle(
+                                            color = ColorProvider(Color.White)
                                         )
-                                            ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
-                                            ?.rplmn.asMccMnc
+                                    )
+                                }
 
-                                    Row(
-                                        verticalAlignment = Alignment.Vertical.CenterVertically,
-                                        modifier = GlanceModifier.fillMaxWidth()
-                                    ) {
-                                        Spacer(GlanceModifier.defaultWeight())
+                                val rplmn =
+                                    serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
+                                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                                    )
+                                        ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                                        ?.rplmn.asMccMnc
 
-                                        FormatWidgetText(
-                                            name = context.resources.getString(R.string.rplmn_format),
-                                            value = rplmn
-                                        )
+                                Row(
+                                    verticalAlignment = Alignment.Vertical.CenterVertically,
+                                    modifier = GlanceModifier.fillMaxWidth()
+                                ) {
+                                    Spacer(GlanceModifier.defaultWeight())
 
-                                        Spacer(GlanceModifier.defaultWeight())
+                                    FormatWidgetText(
+                                        name = context.resources.getString(R.string.rplmn_format),
+                                        value = rplmn
+                                    )
 
-                                        FormatWidgetText(
-                                            name = context.resources.getString(R.string.carrier_aggregation_format),
-                                            value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
-                                        )
+                                    Spacer(GlanceModifier.defaultWeight())
 
-                                        Spacer(GlanceModifier.defaultWeight())
-                                    }
+                                    FormatWidgetText(
+                                        name = context.resources.getString(R.string.carrier_aggregation_format),
+                                        value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
+                                    )
+
+                                    Spacer(GlanceModifier.defaultWeight())
                                 }
                             }
                         }
-
-                        itemsIndexed(
-                            strengthInfos!![t]!!,
-                            { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
-                            StrengthCard(
-                                strength = item,
-                                size = size,
-                                modifier = GlanceModifier.padding(bottom = 4.dp)
-                            )
-                        }
-
-                        itemsIndexed(
-                            cellInfos!![t]!!,
-                            { _, item ->
-                                "$t:${item.cellIdentity}".hashCode().toLong()
-                            }) { _, item ->
-                            SignalCard(
-                                cellInfo = item, size = size,
-                                modifier = GlanceModifier.padding(bottom = 4.dp)
-                            )
-                        }
                     }
 
-                    item {
-                        Box(
-                            modifier = GlanceModifier.fillMaxWidth()
-                                .background(ImageProvider(R.drawable.open_app_widget_background))
-                                .cornerRadius(12.dp)
-                                .padding(bottom = 8.dp, top = 8.dp)
-                                .clickable(onClick = actionStartActivity<MainActivity>()),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = context.resources.getString(R.string.open_app),
-                                style = TextStyle(
-                                    color = ColorProvider(Color.White)
-                                )
+                    itemsIndexed(
+                        strengthInfos[t]!!,
+                        { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
+                        StrengthCard(
+                            strength = item,
+                            size = size,
+                            modifier = GlanceModifier.padding(bottom = 4.dp)
+                        )
+                    }
+
+                    itemsIndexed(
+                        cellInfos[t]!!,
+                        { _, item ->
+                            "$t:${item.cellIdentity}".hashCode().toLong()
+                        }) { _, item ->
+                        SignalCard(
+                            cellInfo = item, size = size,
+                            modifier = GlanceModifier.padding(bottom = 4.dp)
+                        )
+                    }
+                }
+
+                item {
+                    Box(
+                        modifier = GlanceModifier.fillMaxWidth()
+                            .background(ImageProvider(R.drawable.open_app_widget_background))
+                            .cornerRadius(12.dp)
+                            .padding(bottom = 8.dp, top = 8.dp)
+                            .clickable(onClick = actionStartActivity<MainActivity>()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = context.resources.getString(R.string.open_app),
+                            style = TextStyle(
+                                color = ColorProvider(Color.White)
                             )
-                        }
+                        )
                     }
                 }
             }
@@ -424,7 +456,7 @@ class SignalWidgetReceiver : GlanceAppWidgetReceiver() {
         appWidgetId: Int,
         newOptions: Bundle
     ) {
-        appWidgetManager.updateAppWidget(appWidgetId, RemoteViews(context.packageName, R.layout.blank))
+//        appWidgetManager.updateAppWidget(appWidgetId, RemoteViews(context.packageName, R.layout.blank))
 
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     }
@@ -437,7 +469,7 @@ class SignalWidgetReceiver : GlanceAppWidgetReceiver() {
 
             val ids = appWidgetManager.getAppWidgetIds(componentName)
 
-            appWidgetManager.updateAppWidget(ids, RemoteViews(context.packageName, R.layout.blank))
+//            appWidgetManager.updateAppWidget(ids, RemoteViews(context.packageName, R.layout.blank))
 
             onUpdate(
                 context,
