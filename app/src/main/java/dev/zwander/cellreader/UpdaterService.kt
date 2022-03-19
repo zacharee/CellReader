@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -14,6 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
+import androidx.glance.state.GlanceState
 import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.*
@@ -351,27 +353,33 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     private var lastUpdate = AtomicLong(0L)
 
     private suspend fun updateWidgets() {
-        val currentTime = System.currentTimeMillis()
+        withContext(Dispatchers.Main) {
+            val currentTime = System.currentTimeMillis()
 
-        if (currentTime - lastUpdate.get() >= 1000) {
-            lastUpdate.set(currentTime)
+            if (currentTime - lastUpdate.get() >= 1000) {
+                lastUpdate.set(currentTime)
 
-            val subIds = CellModel.subIds.value!!.map(Any::toString).toSet()
-            val cellInfos = betweenUtils.cellInfoGson.toJson(CellModel.cellInfos.value)
-            val subInfos = betweenUtils.otherGson.toJson(CellModel.subInfos.value)
-            val serviceStates = betweenUtils.serviceStateGson.toJson(CellModel.serviceStates.value)
-            val strengthInfos = betweenUtils.cellSignalStrengthGson.toJson(CellModel.strengthInfos.value)
-
-            GlanceAppWidgetManager(this).getGlanceIds(SignalWidget::class.java).forEach { id ->
-                updateAppWidgetState(this, id) {
-                    it[SignalWidget.SUB_IDS_KEY] = subIds
-                    it[SignalWidget.CELL_INFOS_KEY] = cellInfos
-                    it[SignalWidget.SUB_INFOS_KEY] = subInfos
-                    it[SignalWidget.SERVICE_STATES_KEY] = serviceStates
-                    it[SignalWidget.STRENGTH_INFOS_KEY] = strengthInfos
-                }
+//                val subIds = CellModel.subIds.value!!.map(Any::toString).toSet()
+//                val cellInfos = betweenUtils.cellInfoGson.toJson(CellModel.cellInfos.value)
+//                val subInfos = betweenUtils.otherGson.toJson(CellModel.subInfos.value)
+//                val serviceStates = betweenUtils.serviceStateGson.toJson(CellModel.serviceStates.value)
+//                val strengthInfos = betweenUtils.cellSignalStrengthGson.toJson(CellModel.strengthInfos.value)
+//
+//                GlanceState.updateValue(
+//                    this@UpdaterService,
+//                    SignalWidget().stateDefinition,
+//                    "WIDGET_OPTIONS"
+//                ) {
+//                    it.toMutablePreferences().also {
+//                        it[SignalWidget.SUB_IDS_KEY] = subIds
+//                        it[SignalWidget.CELL_INFOS_KEY] = cellInfos
+//                        it[SignalWidget.SUB_INFOS_KEY] = subInfos
+//                        it[SignalWidget.SERVICE_STATES_KEY] = serviceStates
+//                        it[SignalWidget.STRENGTH_INFOS_KEY] = strengthInfos
+//                    }
+//                }
+                SignalWidget().updateAll(this@UpdaterService)
             }
-            SignalWidget().updateAll(this)
         }
     }
 

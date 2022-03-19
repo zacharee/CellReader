@@ -1,38 +1,32 @@
 package dev.zwander.cellreader.widget
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
-import android.os.Bundle
 import android.telephony.AccessNetworkConstants
 import android.telephony.TelephonyManager
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.glance.*
 import androidx.glance.action.*
 import androidx.glance.appwidget.*
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.layout.*
+import androidx.glance.state.GlanceStateDefinition
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import dev.zwander.cellreader.BuildConfig
 import dev.zwander.cellreader.MainActivity
 import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
-import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
@@ -40,57 +34,82 @@ import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
+import java.io.File
 import java.util.*
 
-class SignalWidget : GlanceAppWidget() {
+class SinglePreferenceGlanceStateDefinition(private val constantKey: String) : GlanceStateDefinition<Preferences> {
     companion object {
-        val PRIMARY_CELL_KEY = intPreferencesKey("PRIMARY_CELL")
-        val SUB_IDS_KEY = stringSetPreferencesKey("SUB_IDS")
-        val CELL_INFOS_KEY = stringPreferencesKey("CELL_INFOS")
-        val STRENGTH_INFOS_KEY = stringPreferencesKey("STRENGTH_INFOS")
-        val SUB_INFOS_KEY = stringPreferencesKey("SUB_INFOS")
-        val SERVICE_STATES_KEY = stringPreferencesKey("SERVICE_STATES")
-        val SIGNAL_STRENGTHS_KEY = stringPreferencesKey("SIGNAL_STRENGTHS")
+        @Volatile
+        private var store: DataStore<Preferences>? = null
     }
+
+    override fun getLocation(context: Context, fileKey: String): File {
+        return PreferencesGlanceStateDefinition.getLocation(context, constantKey)
+    }
+
+    override suspend fun getDataStore(context: Context, fileKey: String): DataStore<Preferences> {
+        return store ?: PreferencesGlanceStateDefinition.getDataStore(context, constantKey).apply {
+            store = this
+        }
+    }
+}
+
+class SignalWidget : GlanceAppWidget() {
+//    companion object {
+//        val PRIMARY_CELL_KEY = intPreferencesKey("PRIMARY_CELL")
+//        val SUB_IDS_KEY = stringSetPreferencesKey("SUB_IDS")
+//        val CELL_INFOS_KEY = stringPreferencesKey("CELL_INFOS")
+//        val STRENGTH_INFOS_KEY = stringPreferencesKey("STRENGTH_INFOS")
+//        val SUB_INFOS_KEY = stringPreferencesKey("SUB_INFOS")
+//        val SERVICE_STATES_KEY = stringPreferencesKey("SERVICE_STATES")
+//        val SIGNAL_STRENGTHS_KEY = stringPreferencesKey("SIGNAL_STRENGTHS")
+//    }
 
     override val sizeMode: SizeMode = SizeMode.Exact
 
+    override val stateDefinition = SinglePreferenceGlanceStateDefinition("WIDGET_OPTIONS")
+
+    @SuppressLint("InlinedApi")
     @Composable
     override fun Content() {
         val context = LocalContext.current
         val size = LocalSize.current
 
-        val betweenUtils = BetweenUtils.getInstance(context)
+//        val betweenUtils = BetweenUtils.getInstance(context)
+//
+//        val subIds = currentState(SUB_IDS_KEY)?.map { it.toInt() } ?: listOf()
+//        val subInfos = betweenUtils.otherGson.fromJson<HashMap<Int, SubscriptionInfoWrapper?>>(
+//            currentState(SUB_INFOS_KEY) ?: "",
+//            object : TypeToken<HashMap<Int, SubscriptionInfoWrapper?>>(){}.type
+//        ) ?: hashMapOf()
+//        val serviceStates = betweenUtils.serviceStateGson.fromJson<HashMap<Int, ServiceStateWrapper?>>(
+//            currentState(SERVICE_STATES_KEY) ?: "",
+//            object : TypeToken<HashMap<Int, ServiceStateWrapper?>>(){}.type
+//        ) ?: hashMapOf()
+//        val strengthInfos = betweenUtils.cellSignalStrengthGson.fromJson<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(
+//            currentState(STRENGTH_INFOS_KEY) ?: "",
+//            object : TypeToken<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(){}.type
+//        ) ?: hashMapOf()
+//        val cellInfos = betweenUtils.cellInfoGson.fromJson<HashMap<Int, ArrayList<CellInfoWrapper>>>(
+//            currentState(CELL_INFOS_KEY) ?: "",
+//            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>(){}.type
+//        ) ?: hashMapOf()
 
-        val subIds = currentState(SUB_IDS_KEY)?.map { it.toInt() } ?: listOf()
-        val subInfos = betweenUtils.otherGson.fromJson<HashMap<Int, SubscriptionInfoWrapper?>>(
-            currentState(SUB_INFOS_KEY) ?: "",
-            object : TypeToken<HashMap<Int, SubscriptionInfoWrapper?>>(){}.type
-        ) ?: hashMapOf()
-        val serviceStates = betweenUtils.serviceStateGson.fromJson<HashMap<Int, ServiceStateWrapper?>>(
-            currentState(SERVICE_STATES_KEY) ?: "",
-            object : TypeToken<HashMap<Int, ServiceStateWrapper?>>(){}.type
-        ) ?: hashMapOf()
-        val strengthInfos = betweenUtils.cellSignalStrengthGson.fromJson<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(
-            currentState(STRENGTH_INFOS_KEY) ?: "",
-            object : TypeToken<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(){}.type
-        ) ?: hashMapOf()
-        val cellInfos = betweenUtils.cellInfoGson.fromJson<HashMap<Int, ArrayList<CellInfoWrapper>>>(
-            currentState(CELL_INFOS_KEY) ?: "",
-            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>(){}.type
-        ) ?: hashMapOf()
-
-//        val subIds = CellModel.subIds.value ?: TreeSet()
-//        val subInfos = CellModel.subInfos.value ?: hashMapOf()
-//        val serviceStates = CellModel.serviceStates.value ?: hashMapOf()
-//        val strengthInfos = CellModel.strengthInfos.value ?: hashMapOf()
-//        val cellInfos = CellModel.cellInfos.value ?: hashMapOf()
+        val subIds = CellModel.subIds.value ?: TreeSet()
+        val subInfos = CellModel.subInfos.value ?: hashMapOf()
+        val serviceStates = CellModel.serviceStates.value ?: hashMapOf()
+        val strengthInfos = CellModel.strengthInfos.value ?: hashMapOf()
+        val cellInfos = CellModel.cellInfos.value ?: hashMapOf()
 
         Box(
             modifier = GlanceModifier.cornerRadius(8.dp)
                 .appWidgetBackground()
                 .fillMaxSize(),
         ) {
+            // We need this text so the widget actually updates.
+            // If the LazyColumn is first, updates aren't always rendered.
+            // TODO: Revisit this once Glance is more stable.
+            Text("")
             LazyColumn(
                 modifier = GlanceModifier.fillMaxSize()
             ) {
@@ -438,47 +457,11 @@ class SignalWidget : GlanceAppWidget() {
 }
 
 class SignalWidgetReceiver : GlanceAppWidgetReceiver() {
-    companion object {
-        const val ACTION_REFRESH = "${BuildConfig.APPLICATION_ID}.REFRESH"
-    }
-
     override val glanceAppWidget = SignalWidget()
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
 
         context.startForegroundService(Intent(context, UpdaterService::class.java))
-    }
-
-    override fun onAppWidgetOptionsChanged(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetId: Int,
-        newOptions: Bundle
-    ) {
-//        appWidgetManager.updateAppWidget(appWidgetId, RemoteViews(context.packageName, R.layout.blank))
-
-        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == ACTION_REFRESH) {
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            val componentName =
-                ComponentName(context.packageName, checkNotNull(javaClass.canonicalName))
-
-            val ids = appWidgetManager.getAppWidgetIds(componentName)
-
-//            appWidgetManager.updateAppWidget(ids, RemoteViews(context.packageName, R.layout.blank))
-
-            onUpdate(
-                context,
-                appWidgetManager,
-                ids
-            )
-            return
-        }
-
-        super.onReceive(context, intent)
     }
 }
