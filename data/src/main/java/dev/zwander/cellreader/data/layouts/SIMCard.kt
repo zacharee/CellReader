@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.util.*
@@ -143,7 +144,7 @@ fun SIMCard(
                         val rotation by animateFloatAsState(
                             targetValue = if (showingCells) 180f else 0f,
                             animationSpec = tween(
-                                durationMillis = 400,
+                                durationMillis = LocalAnimationDuration.current,
                                 easing = {
                                     AnticipateOvershootInterpolator().getInterpolation(it)
                                 }
@@ -208,7 +209,7 @@ fun SIMCard(
                     visible = expanded,
                     enter = fadeIn() + expandVertically(
                         animationSpec = tween(
-                            durationMillis = 400,
+                            durationMillis = LocalAnimationDuration.current,
                             easing = {
                                 anticipateDecelerateInterpolator(it)
                             }
@@ -216,7 +217,7 @@ fun SIMCard(
                     ),
                     exit = fadeOut() + shrinkVertically(
                         animationSpec = tween(
-                            durationMillis = 400,
+                            durationMillis = LocalAnimationDuration.current,
                             easing = {
                                 anticipateDecelerateInterpolator(it)
                             }

@@ -8,8 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -19,6 +21,8 @@ import androidx.wear.compose.material.Colors
 import androidx.wear.compose.material.Shapes
 import androidx.wear.compose.material.Typography
 import dev.zwander.cellreader.data.util.rememberIsWear
+
+val LocalAnimationDuration = staticCompositionLocalOf { 0 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -71,7 +75,8 @@ fun CellReaderTheme(content: @Composable() () -> Unit) {
                 CompositionLocalProvider(
                     LocalOverScrollConfiguration provides OverScrollConfiguration(
                         forceShowAlways = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                    )
+                    ),
+                    LocalAnimationDuration provides integerResource(id = android.R.integer.config_longAnimTime)
                 ) {
                     content()
                 }

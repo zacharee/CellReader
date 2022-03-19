@@ -15,6 +15,7 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
+import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.util.angledGradient
 import dev.zwander.cellreader.data.util.anticipateDecelerateInterpolator
@@ -92,7 +93,7 @@ fun ExpanderSignalCard(
                                     visible = expanded,
                                     enter = fadeIn() + expandVertically(
                                         animationSpec = tween(
-                                            durationMillis = 400,
+                                            durationMillis = LocalAnimationDuration.current,
                                             easing = {
                                                 anticipateDecelerateInterpolator(it)
                                             }
@@ -100,7 +101,7 @@ fun ExpanderSignalCard(
                                     ),
                                     exit = fadeOut() + shrinkVertically(
                                         animationSpec = tween(
-                                            durationMillis = 400,
+                                            durationMillis = LocalAnimationDuration.current,
                                             easing = {
                                                 anticipateDecelerateInterpolator(it)
                                             }

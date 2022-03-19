@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.R
 
 @Composable
@@ -34,7 +35,7 @@ fun Expander(
             val rotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 animationSpec = tween(
-                    durationMillis = 400,
+                    durationMillis = LocalAnimationDuration.current,
                     easing = {
                         AnticipateOvershootInterpolator().getInterpolation(it)
                     }
