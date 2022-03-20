@@ -22,8 +22,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.data.BottomDialogPage
@@ -100,13 +98,15 @@ fun BoxScope.BottomBarScrimContainer() {
     )
 
     Box(
-        modifier = Modifier.padding(
-            rememberInsetsPaddingValues(
-                insets = LocalWindowInsets.current.systemBars,
-                applyTop = true,
-                applyBottom = false,
+        modifier = Modifier
+            .padding(
+                WindowInsets.systemBars
+                    .only(
+                        WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                    )
+                    .asPaddingValues()
             )
-        ).align(Alignment.BottomCenter)
+            .align(Alignment.BottomCenter)
     ) {
         BottomBar(
             optionsExpanded = expanded,
@@ -174,12 +174,16 @@ private fun BoxScope.BottomBar(
                 )
             )
             .padding(
-                rememberInsetsPaddingValues(
-                    insets = LocalWindowInsets.current.systemBars,
-                    applyTop = false,
-                    applyBottom = true,
-                    applyEnd = LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE,
-                )
+                WindowInsets.systemBars
+                    .only(
+                        WindowInsetsSides.Bottom + WindowInsetsSides.Start
+                    )
+                    .add(
+                        if (LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE) WindowInsets.systemBars.only(
+                            WindowInsetsSides.End
+                        ) else WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+                    )
+                    .asPaddingValues()
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
