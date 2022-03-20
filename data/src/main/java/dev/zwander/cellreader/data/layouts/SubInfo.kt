@@ -50,7 +50,9 @@ fun SubInfo(
                 FormatText(R.string.number_format, it)
 
             }
-            FormatText(R.string.display_name_format, "$displayName")
+            displayName?.let {
+                FormatText(R.string.display_name_format, "$displayName")
+            }
             FormatText(R.string.carrier_name_format, "$carrierName")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 FormatText(R.string.carrier_id_format, "$carrierId")
