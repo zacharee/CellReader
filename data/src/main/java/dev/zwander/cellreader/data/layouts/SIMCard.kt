@@ -57,8 +57,10 @@ fun SIMCard(
 ) {
     val context = LocalContext.current
 
-    @Composable
-    fun contents() {
+    Card(
+        modifier = modifier,
+        backgroundColor = Color.Transparent
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -205,16 +207,16 @@ fun SIMCard(
                     Column {
                         val topAlpha by animateFloatAsState(
                             targetValue = if (listState.firstVisibleItemScrollOffset > 0 || listState.layoutInfo.run {
-                                (visibleItemsInfo.firstOrNull()?.index ?: 0) > 0
-                            }) 1f else 0f
+                                    (visibleItemsInfo.firstOrNull()?.index ?: 0) > 0
+                                }) 1f else 0f
                         )
                         val bottomAlpha by animateFloatAsState(
                             targetValue = if (listState.layoutInfo.run {
-                                (visibleItemsInfo.lastOrNull()?.run {
-                                    index < totalItemsCount - 1 ||
-                                            offset.absoluteValue < (size - viewportSize.height)
-                                } == true)
-                            }) 1f else 0f
+                                    (visibleItemsInfo.lastOrNull()?.run {
+                                        index < totalItemsCount - 1 ||
+                                                offset.absoluteValue < (size - viewportSize.height)
+                                    } == true)
+                                }) 1f else 0f
                         )
 
                         PaddedDivider(
@@ -255,12 +257,5 @@ fun SIMCard(
                     .height(20.dp)
             )
         }
-    }
-
-    Card(
-        modifier = modifier,
-        backgroundColor = Color.Transparent
-    ) {
-        contents()
     }
 }

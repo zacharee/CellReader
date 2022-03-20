@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.telephony.AccessNetworkConstants
@@ -128,24 +129,28 @@ data class ServiceStateWrapper(
     }
 
     val voiceRoamingType: Int
+        @SuppressLint("InlinedApi")
         get() = getNetworkRegistrationInfo(
             NetworkRegistrationInfo.DOMAIN_CS,
             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
         )?.roamingType ?: ServiceState.ROAMING_TYPE_NOT_ROAMING
 
     val dataRoamingType: Int
+        @SuppressLint("InlinedApi")
         get() = getNetworkRegistrationInfo(
             NetworkRegistrationInfo.DOMAIN_PS,
             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
         )?.roamingType ?: ServiceState.ROAMING_TYPE_NOT_ROAMING
 
     val voiceNetworkType: Int
+        @SuppressLint("InlinedApi")
         get() = getNetworkRegistrationInfo(
             NetworkRegistrationInfo.DOMAIN_CS,
             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
         )?.accessNetworkTechnology ?: TelephonyManager.NETWORK_TYPE_UNKNOWN
 
     val dataNetworkType: Int
+        @SuppressLint("InlinedApi")
         get() {
             val iwlanRegInfo = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN
@@ -182,6 +187,7 @@ data class ServiceStateWrapper(
         get() = networkTypeToRilRadioTechnology(dataNetworkType)
 
     val isSearching: Boolean
+        @SuppressLint("InlinedApi")
         get() {
             getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS,
@@ -214,6 +220,7 @@ data class ServiceStateWrapper(
         }
 
     val nrState: Int
+        @SuppressLint("InlinedApi")
         get() = getNetworkRegistrationInfo(
             NetworkRegistrationInfo.DOMAIN_PS,
             AccessNetworkConstants.TRANSPORT_TYPE_WWAN
