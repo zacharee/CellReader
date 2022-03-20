@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.ui.components
 
+import android.content.res.Configuration
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.*
@@ -7,12 +8,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -95,12 +99,22 @@ fun BoxScope.BottomBarScrimContainer() {
             ),
     )
 
-    BottomBar(
-        optionsExpanded = expanded,
-        expandStateChanged = { expanded = it },
-        whichDialog = whichDialog,
-        onDialogChange = { whichDialog = it }
-    )
+    Box(
+        modifier = Modifier.padding(
+            rememberInsetsPaddingValues(
+                insets = LocalWindowInsets.current.systemBars,
+                applyTop = true,
+                applyBottom = false,
+            )
+        ).align(Alignment.BottomCenter)
+    ) {
+        BottomBar(
+            optionsExpanded = expanded,
+            expandStateChanged = { expanded = it },
+            whichDialog = whichDialog,
+            onDialogChange = { whichDialog = it }
+        )
+    }
 }
 
 @Composable
@@ -164,6 +178,7 @@ private fun BoxScope.BottomBar(
                     insets = LocalWindowInsets.current.systemBars,
                     applyTop = false,
                     applyBottom = true,
+                    applyEnd = LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE,
                 )
             )
             .clickable(
@@ -234,7 +249,11 @@ private fun BoxScope.BottomBar(
                     enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopStart),
                     exit = fadeOut() + shrinkOut(clip = false, shrinkTowards = Alignment.TopStart)
                 ) {
-                    func()
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        func()
+                    }
                 }
             }
         }
