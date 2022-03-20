@@ -176,11 +176,11 @@ private fun BoxScope.BottomBar(
             .padding(
                 WindowInsets.systemBars
                     .only(
-                        WindowInsetsSides.Bottom + WindowInsetsSides.Start
+                        WindowInsetsSides.Bottom
                     )
                     .add(
                         if (LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE) WindowInsets.systemBars.only(
-                            WindowInsetsSides.End
+                            WindowInsetsSides.End + WindowInsetsSides.Start
                         ) else WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
                     )
                     .asPaddingValues()
