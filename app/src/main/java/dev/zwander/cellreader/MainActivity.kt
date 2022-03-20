@@ -59,7 +59,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @SuppressLint("MissingPermission")
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Content() {
     CellReaderTheme {
