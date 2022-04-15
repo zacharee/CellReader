@@ -14,6 +14,7 @@ import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import io.gsonfire.GsonFireBuilder
 import io.gsonfire.TypeSelector
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -24,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
+@Suppress("OPT_IN_IS_NOT_ENABLED")
+@OptIn(DelicateCoroutinesApi::class)
 class BetweenUtils private constructor(private val context: Context) {
     companion object {
         const val CELL_INFOS_PATH = "/cell_infos"
