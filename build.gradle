@@ -2,8 +2,8 @@ buildscript {
     ext {
         compose_version = '1.2.0-alpha07'
         glance_version = "1.0.0-alpha03"
-        version_code = 18
-        version_name = "0.8"
+        version_code = 19
+        version_name = "0.9"
     }
 }
 plugins {
