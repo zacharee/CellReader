@@ -3,6 +3,8 @@
     <string name="running_notification_title">Running</string>
     <string name="running_notification_desc">Long-press to hide this notification.</string>
 
+    <string name="send_data_to_wear">Send Data to Wear</string>
+
     <string name="signal_strength">Signal Strength</string>
     <string name="service_state">Service State</string>
     <string name="network_registrations">Network Registrations</string>
@@ -236,4 +238,6 @@
     <string name="eutran">EUTRAN</string>
     <string name="cdma_2000">CDMA2000</string>
     <string name="ngran">NGRAN</string>
+
+    <string name="settings">Settings</string>
 </resources>

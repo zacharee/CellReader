@@ -30,6 +30,7 @@ import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.util.populatePoints
 import dev.zwander.cellreader.ui.components.bardialogs.About
 import dev.zwander.cellreader.ui.components.bardialogs.Graph
+import dev.zwander.cellreader.ui.components.bardialogs.Settings
 import dev.zwander.cellreader.ui.components.bardialogs.Supporters
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -144,6 +145,11 @@ private fun BoxScope.BottomBar(
                     R.drawable.about,
                     R.string.about
                 ),
+                DialogButtonInfo(
+                    BottomDialogPage.SETTINGS,
+                    R.drawable.settings,
+                    R.string.settings
+                )
             )
         )
     }
@@ -240,7 +246,8 @@ private fun BoxScope.BottomBar(
             mapOf<BottomDialogPage, @Composable()() -> Unit>(
                 BottomDialogPage.SUPPORTERS to { Supporters() },
                 BottomDialogPage.ABOUT to { About() },
-                BottomDialogPage.GRAPH to { Graph(points) }
+                BottomDialogPage.GRAPH to { Graph(points) },
+                BottomDialogPage.SETTINGS to { Settings() }
             )
         }
 
