@@ -48,26 +48,26 @@ dependencies {
     api "androidx.compose.foundation:foundation:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
     api "androidx.activity:activity-compose:1.4.0"
-    api 'com.google.accompanist:accompanist-flowlayout:0.22.0-rc'
+    api 'com.google.accompanist:accompanist-flowlayout:0.24.6-alpha'
     api "androidx.glance:glance:$glance_version"
     api "androidx.glance:glance-appwidget:$glance_version"
     api "androidx.glance:glance-wear-tiles:$glance_version"
 
     api "androidx.compose.material:material:$compose_version"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api 'androidx.wear.compose:compose-material:1.0.0-alpha18'
-    api 'androidx.wear.compose:compose-foundation:1.0.0-alpha18'
+    api 'androidx.wear.compose:compose-material:1.0.0-alpha20'
+    api 'androidx.wear.compose:compose-foundation:1.0.0-alpha20'
 
     api 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 
     api 'io.gsonfire:gson-fire:1.8.5'
 
-    api 'com.github.madrapps:plot:0.1.1'
+    api 'com.github.madrapps:plot:0.1.2'
     api 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0")
+    api('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt')
+    api('org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1-native-mt')
+    api('org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.1-native-mt')
 
     api "dev.rikka.shizuku:api:12.1.0"
     api "dev.rikka.shizuku:provider:12.1.0"
