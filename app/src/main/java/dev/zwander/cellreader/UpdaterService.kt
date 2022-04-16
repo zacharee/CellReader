@@ -7,15 +7,11 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
-import androidx.glance.state.GlanceState
 import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.*
@@ -189,7 +185,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     @SuppressLint("MissingPermission")
     private fun init(subscriptions: List<Int>) {
         with (CellModel) {
-            primaryCell.value = SubscriptionManager.getDefaultSubscriptionId()
+            primaryCell.value = SubscriptionManager.getDefaultDataSubscriptionId()
+
             telephonies.putAll(
                 subscriptions.mapNotNull { subId ->
                     subInfos.update {
@@ -390,7 +387,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 val newIds = newList.map { it.subscriptionId }
                 val currentIds = currentList.map { it.subscriptionId }
 
-                val defaultId = SubscriptionManager.getDefaultSubscriptionId()
+                val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
 
                 if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
                     currentList.clear()
