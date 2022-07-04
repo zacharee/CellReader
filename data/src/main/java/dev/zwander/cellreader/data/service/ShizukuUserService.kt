@@ -127,14 +127,38 @@ class ShizukuUserService : IShizukuUserService.Stub {
                 listeners[subId] = PhoneStateListenerSimple(subId)
 
                 val listener = listeners[subId]
-                telephonyRegistryManager.registerTelephonyCallback(
-                    HandlerExecutor(Handler(Looper.getMainLooper())),
-                    subId,
-                    "com.android.shell",
-                    null,
-                    listener,
-                    true
-                )
+
+                if (Build.VERSION.SDK_INT < 32) {
+                    telephonyRegistryManager::class.java
+                        .getMethod(
+                            "registerTelephonyCallback",
+                            HandlerExecutor::class.java,
+                            Int::class.java,
+                            String::class.java,
+                            String::class.java,
+                            TelephonyCallback::class.java,
+                            Boolean::class.java
+                        )
+                        .invoke(
+                            telephonyRegistryManager,
+                            HandlerExecutor(Handler(Looper.getMainLooper())),
+                            subId,
+                            "com.android.shell",
+                            null,
+                            listener,
+                            true
+                        )
+                } else {
+                    telephonyRegistryManager.registerTelephonyCallback(
+                        false, false,
+                        HandlerExecutor(Handler(Looper.getMainLooper())),
+                        subId,
+                        "com.android.shell",
+                        null,
+                        listener,
+                        true
+                    )
+                }
             }
         }
     }
