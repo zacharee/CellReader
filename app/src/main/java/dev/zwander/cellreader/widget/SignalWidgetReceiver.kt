@@ -210,19 +210,23 @@ class SignalWidget : GlanceAppWidget() {
 
                 item {
                     Box(
-                        modifier = GlanceModifier.fillMaxWidth()
-                            .background(ImageProvider(R.drawable.open_app_widget_background))
-                            .cornerRadius(12.dp)
-                            .padding(bottom = 8.dp, top = 8.dp)
-                            .clickable(onClick = actionStartActivity<MainActivity>()),
-                        contentAlignment = Alignment.Center
+                        modifier = GlanceModifier.cornerRadius(12.dp)
                     ) {
-                        Text(
-                            text = context.resources.getString(R.string.open_app),
-                            style = TextStyle(
-                                color = ColorProvider(Color.White)
+                        Box(
+                            modifier = GlanceModifier.fillMaxWidth()
+                                .background(ImageProvider(R.drawable.open_app_widget_background))
+                                .cornerRadius(12.dp)
+                                .padding(bottom = 8.dp, top = 8.dp)
+                                .clickable(onClick = actionStartActivity<MainActivity>()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = context.resources.getString(R.string.open_app),
+                                style = TextStyle(
+                                    color = ColorProvider(Color.White)
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
