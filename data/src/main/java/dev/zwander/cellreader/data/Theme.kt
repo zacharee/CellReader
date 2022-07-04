@@ -1,9 +1,5 @@
 package dev.zwander.cellreader.data
 
-import android.os.Build
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.LocalOverScrollConfiguration
-import androidx.compose.foundation.gestures.OverScrollConfiguration
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
@@ -24,7 +20,6 @@ import dev.zwander.cellreader.data.util.rememberIsWear
 
 val LocalAnimationDuration = staticCompositionLocalOf { 0 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CellReaderTheme(content: @Composable() () -> Unit) {
     val context = LocalContext.current
@@ -73,9 +68,6 @@ fun CellReaderTheme(content: @Composable() () -> Unit) {
             ),
             content = {
                 CompositionLocalProvider(
-                    LocalOverScrollConfiguration provides OverScrollConfiguration(
-                        forceShowAlways = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                    ),
                     LocalAnimationDuration provides integerResource(id = android.R.integer.config_longAnimTime)
                 ) {
                     content()

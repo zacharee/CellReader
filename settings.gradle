@@ -13,6 +13,7 @@ dependencyResolutionManagement {
         maven {
             url 'https://jitpack.io'
         }
+        maven { url 'https://androidx.dev/snapshots/builds/8797114/artifacts/repository' }
     }
 }
 rootProject.name = "CellReader"
