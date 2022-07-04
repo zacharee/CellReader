@@ -1,10 +1,12 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.telephony.CellInfo
 import android.telephony.SubscriptionInfo
+import android.telephony.SubscriptionManager
 import dev.zwander.cellreader.data.allAccessRulesCompat
 import dev.zwander.cellreader.data.cardIdCompat
 import java.io.ByteArrayOutputStream
@@ -38,6 +40,7 @@ data class SubscriptionInfoWrapper(
     val subscriptionType: Int,
     val uiccApplicationsEnabled: Boolean
 ) {
+    @SuppressLint("MissingPermission", "InlinedApi")
     constructor(info: SubscriptionInfo, context: Context) : this(
         info.subscriptionId,
         info.iccId,
@@ -47,7 +50,11 @@ data class SubscriptionInfoWrapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.carrierId else CellInfo.UNAVAILABLE,
         info.nameSource,
         info.iconTint,
-        info.number,
+        if (Build.VERSION.SDK_INT >= 33) {
+            (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(info.subscriptionId)
+        } else {
+            info.number
+        },
         info.dataRoaming,
         ByteArrayOutputStream().use { output ->
             val bmp = info.createIconBitmap(context)

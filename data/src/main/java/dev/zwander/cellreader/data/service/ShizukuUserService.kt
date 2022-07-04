@@ -128,7 +128,7 @@ class ShizukuUserService : IShizukuUserService.Stub {
 
                 val listener = listeners[subId]
 
-                if (Build.VERSION.SDK_INT < 32) {
+                if (Build.VERSION.SDK_INT < 33) {
                     telephonyRegistryManager::class.java
                         .getMethod(
                             "registerTelephonyCallback",

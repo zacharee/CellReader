@@ -40,7 +40,7 @@ sealed class CellIdentityWrapper(
                 identity is CellIdentityWcdma -> CellIdentityWcdmaWrapper(identity)
                 identity is CellIdentityLte -> CellIdentityLteWrapper(identity)
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && identity is CellIdentityNr -> CellIdentityNrWrapper(identity)
-                else -> throw IllegalArgumentException("Unknown CellIdentity class ${identity?.javaClass.canonicalName}")
+                else -> throw IllegalArgumentException("Unknown CellIdentity class ${identity.javaClass.canonicalName}")
             }
         }
     }
