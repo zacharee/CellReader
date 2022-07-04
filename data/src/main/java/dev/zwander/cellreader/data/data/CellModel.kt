@@ -57,7 +57,7 @@ class TelephonyListener(
     private val listenerCallback: TelephonyListenerCallback
 ) : TelephonyCallback(),
     TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener,
-    TelephonyCallback.ServiceStateListener {
+    TelephonyCallback.ServiceStateListener, TelephonyCallback.DisplayInfoListener {
     @SuppressLint("MissingPermission")
     override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
         listenerCallback.updateCellInfo(subId, cellInfo ?: mutableListOf())
@@ -69,6 +69,10 @@ class TelephonyListener(
 
     override fun onServiceStateChanged(serviceState: ServiceState?) {
         listenerCallback.updateServiceState(subId, serviceState)
+    }
+
+    override fun onDisplayInfoChanged(telephonyDisplayInfo: TelephonyDisplayInfo?) {
+        listenerCallback.updateDisplayInfo(subId, telephonyDisplayInfo)
     }
 }
 
@@ -98,6 +102,11 @@ class StateListener(
     override fun onServiceStateChanged(serviceState: ServiceState?) {
         listenerCallback.updateServiceState(subId, serviceState)
     }
+
+    @SuppressLint("MissingPermission")
+    override fun onDisplayInfoChanged(telephonyDisplayInfo: TelephonyDisplayInfo?) {
+        listenerCallback.updateDisplayInfo(subId, telephonyDisplayInfo)
+    }
 }
 
 interface TelephonyListenerCallback {
@@ -105,4 +114,5 @@ interface TelephonyListenerCallback {
     fun updateSignal(subId: Int, strength: SignalStrength?)
     fun updateServiceState(subId: Int, serviceState: ServiceState?)
     fun updatePhysicalChannelConfigs(subId: Int, configs: List<PhysicalChannelConfig>)
+    fun updateDisplayInfo(subId: Int, telephonyDisplayInfo: TelephonyDisplayInfo?)
 }

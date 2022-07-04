@@ -34,6 +34,7 @@ fun MainContent() {
     val cellInfos by CellModel.cellInfos.observeAsState()
     val strengthInfos by CellModel.strengthInfos.observeAsState()
     val serviceStates by CellModel.serviceStates.observeAsState()
+    val displayInfos by CellModel.displayInfos.observeAsState()
 
     SelectionContainer {
         val state = rememberLazyGridState()
@@ -60,7 +61,9 @@ fun MainContent() {
                         modifier = Modifier
                             .animateItemPlacement()
                             .padding(bottom = 8.dp),
-                        signalStrength = signalStrengths!![t]
+                        signalStrengths = signalStrengths,
+                        strengthInfos = strengthInfos!!,
+                        displayInfos = displayInfos!!
                     )
                 }
 

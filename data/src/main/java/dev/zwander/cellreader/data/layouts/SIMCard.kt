@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.telephony.AccessNetworkConstants
 import android.telephony.NetworkRegistrationInfo
+import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import android.view.animation.AnticipateOvershootInterpolator
@@ -28,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,8 +40,7 @@ import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.util.*
-import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
-import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
+import dev.zwander.cellreader.data.wrappers.*
 import kotlin.math.absoluteValue
 
 @SuppressLint("MissingPermission, InlinedApi")
@@ -53,7 +54,9 @@ fun SIMCard(
     showingCells: Boolean,
     onShowingCells: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    signalStrength: SignalStrength? = null
+    strengthInfos: HashMap<Int, List<CellSignalStrengthWrapper>>,
+    displayInfos: Map<Int, TelephonyDisplayInfoWrapper?>,
+    signalStrengths: Map<Int, SignalStrength?>? = null,
 ) {
     val context = LocalContext.current
 
@@ -121,8 +124,21 @@ fun SIMCard(
                         ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subId]?.dataNetworkType ?: 0)
                     )
 
+                    val displayType = when {
+                        serviceStates[subId]?.dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN -> type
+                        strengthInfos[subId]?.run {
+                            any { it is CellSignalStrengthNrWrapper } &&
+                                    any { it is CellSignalStrengthLteWrapper }
+                        } == true -> stringResource(id = R.string.nr_nsa)
+                        strengthInfos[subId]?.run {
+                            any { it is CellSignalStrengthNrWrapper } &&
+                                    none { it is CellSignalStrengthLteWrapper }
+                        } == true -> stringResource(id = R.string.nr_sa)
+                        else -> type
+                    }
+
                     WearSafeText(
-                        text = "${subInfos[subId]?.carrierName} (${rplmn}) - $type",
+                        text = "${subInfos[subId]?.carrierName} (${rplmn}) - $displayType",
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -176,7 +192,7 @@ fun SIMCard(
                                 CellUtils.formatNrStateAndConnectionString(
                                     context,
                                     serviceStates[subId]?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE,
-                                    serviceStates[subId]?.nrFrequencyRange ?: android.telephony.ServiceState.FREQUENCY_RANGE_UNKNOWN
+                                    serviceStates[subId]?.nrFrequencyRange ?: ServiceState.FREQUENCY_RANGE_UNKNOWN
                                 )
                             )
                         }
@@ -234,10 +250,11 @@ fun SIMCard(
                             ) {
                                 AdvancedSubInfo(
                                     subId = subId,
-                                    signalStrength = signalStrength,
+                                    signalStrength = signalStrengths!![subId],
                                     serviceStates = serviceStates,
                                     subInfos = subInfos,
-                                    scrollState = listState
+                                    scrollState = listState,
+                                    displayInfos = displayInfos
                                 )
                             }
                         }

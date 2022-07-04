@@ -2,11 +2,9 @@ package dev.zwander.cellreader.data.data
 
 import androidx.lifecycle.MutableLiveData
 import dev.zwander.cellreader.data.SubsComparator
-import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
-import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
-import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
-import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
+import dev.zwander.cellreader.data.wrappers.*
 import java.util.*
+import kotlin.collections.HashMap
 
 interface ICellModel {
     val primaryCell: MutableLiveData<Int>
@@ -15,6 +13,7 @@ interface ICellModel {
     val strengthInfos: MutableLiveData<HashMap<Int, List<CellSignalStrengthWrapper>>>
     val subInfos: MutableLiveData<HashMap<Int, SubscriptionInfoWrapper?>>
     val serviceStates: MutableLiveData<HashMap<Int, ServiceStateWrapper?>>
+    val displayInfos: MutableLiveData<HashMap<Int, TelephonyDisplayInfoWrapper?>>
 
     fun clear()
 }
@@ -27,6 +26,7 @@ open class CellModelBase : ICellModel {
     override val strengthInfos = MutableLiveData<HashMap<Int, List<CellSignalStrengthWrapper>>>(hashMapOf())
     override val subInfos = MutableLiveData<HashMap<Int, SubscriptionInfoWrapper?>>(hashMapOf())
     override val serviceStates = MutableLiveData<HashMap<Int, ServiceStateWrapper?>>(hashMapOf())
+    override val displayInfos = MutableLiveData<HashMap<Int, TelephonyDisplayInfoWrapper?>>(hashMapOf())
 
     override fun clear() {
         primaryCell.value = 0

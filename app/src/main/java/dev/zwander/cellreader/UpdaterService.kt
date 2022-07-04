@@ -235,7 +235,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                     listener,
                                     PhoneStateListener.LISTEN_SERVICE_STATE or
                                             PhoneStateListener.LISTEN_CELL_INFO or
-                                            PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                                            PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or
+                                            PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED
                                 )
                             }
 
@@ -254,10 +255,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     @SuppressLint("MissingPermission")
     override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (CellModel) {
-//            if (infos.isEmpty()) {
-//                infos.addAll(telephonies[subId]?.allCellInfo ?: listOf())
-//            }
-
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
             val foundIDs = mutableListOf<String>()
@@ -346,6 +343,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         subId: Int,
         configs: List<PhysicalChannelConfig>
     ) {}
+
+    override fun updateDisplayInfo(subId: Int, telephonyDisplayInfo: TelephonyDisplayInfo?) {
+        launch(Dispatchers.Main) {
+            CellModel.displayInfos.update {
+                it!![subId] = telephonyDisplayInfo?.let { info -> TelephonyDisplayInfoWrapper(info) }
+                it
+            }
+        }
+    }
 
     private var lastUpdate = AtomicLong(0L)
 

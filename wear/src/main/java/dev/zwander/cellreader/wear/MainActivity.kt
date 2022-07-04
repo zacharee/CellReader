@@ -66,6 +66,7 @@ fun MainContent() {
     val cellInfos by CellModelWear.cellInfos.observeAsState()
     val strengthInfos by CellModelWear.strengthInfos.observeAsState()
     val serviceStates by CellModelWear.serviceStates.observeAsState()
+    val displayInfos by CellModelWear.displayInfos.observeAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -99,6 +100,8 @@ fun MainContent() {
                                     onShowingCells = { showingCells[t] = it },
                                     modifier = Modifier
                                         .padding(bottom = 8.dp),
+                                    strengthInfos = strengthInfos!!,
+                                    displayInfos = displayInfos!!
                                 )
                             }
 

@@ -10,6 +10,7 @@
     <string name="network_registrations">Network Registrations</string>
     <string name="subscription_info">Subscription Info</string>
     <string name="access_rules">Access Rules</string>
+    <string name="display_info">Display Info</string>
     <string name="gsm">GSM</string>
     <string name="cdma">CDMA</string>
     <string name="wcdma">WCDMA</string>
@@ -17,6 +18,7 @@
     <string name="evdo">EvDO</string>
     <string name="lte">LTE</string>
     <string name="nr">NR</string>
+    <string name="nr_nsa">NR NSA</string>
     <string name="unknown">Unknown</string>
     <string name="exit">Exit</string>
     <string name="supporters">Supporters</string>
@@ -28,6 +30,7 @@
     <string name="signal_graph">Signal Graph</string>
     <string name="maintain_scroll">Maintain Scroll</string>
     <string name="twitter">Twitter</string>
+    <string name="nr_nsa_mmwave">NR NSA mmW</string>
 
     <string name="level_format">Level</string>
     <string name="timestamp_format">Timestamp</string>
@@ -38,6 +41,7 @@
     <string name="state_format">State</string>
     <string name="emergency_only_format">Emergency Only</string>
     <string name="network_type_format">Type</string>
+    <string name="override_type_format">Override Type</string>
     <string name="bandwidths_format">Bandwidths</string>
     <string name="duplex_format">Duplex</string>
     <string name="channel_format">Channel</string>
@@ -219,6 +223,8 @@
     <string name="td_scdma">TD-SCDMA</string>
     <string name="lte_ca">LTE CA</string>
     <string name="nr_sa">NR SA</string>
+    <string name="lte_adv_pro">LTE Advanced Pro</string>
+    <string name="nr_adv">NR Advanced</string>
 
     <string name="home">Home</string>
     <string name="not_reg_searching">Searching Not Registered</string>
