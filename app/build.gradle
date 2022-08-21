@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -56,6 +58,9 @@ dependencies {
     implementation "com.google.android.gms:play-services-wearable:17.1.0"
 
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
+
+    implementation platform('com.google.firebase:firebase-bom:30.3.2')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.12'
 
     implementation project(":data")
 
