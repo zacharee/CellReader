@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.zwander.cellreader.data.CellReaderTheme
+import dev.zwander.cellreader.data.databinding.PermissionDialogLayoutBinding
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
 import dev.zwander.cellreader.utils.PermissionUtils
@@ -36,7 +38,23 @@ class MainActivity : ComponentActivity() {
 
         with(PermissionUtils.getMissingPermissions(this)) {
             if (isNotEmpty()) {
-                permReq.launch(this)
+                BottomSheetDialog(this@MainActivity).apply {
+                    val viewBinding = PermissionDialogLayoutBinding.inflate(layoutInflater)
+
+                    setCancelable(false)
+                    setTitle(dev.zwander.cellreader.data.R.string.required_permissions)
+                    setContentView(viewBinding.root)
+
+                    viewBinding.confirmButton.setOnClickListener {
+                        permReq.launch(this@with)
+                        dismiss()
+                    }
+                    viewBinding.cancelButton.setOnClickListener {
+                        finish()
+                        dismiss()
+                    }
+                    show()
+                }
             } else {
                 init()
             }

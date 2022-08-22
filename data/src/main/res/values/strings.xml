@@ -246,4 +246,14 @@
     <string name="ngran">NGRAN</string>
 
     <string name="settings">Settings</string>
+
+    <string name="required_permissions">Required Permissions</string>
+    <string name="required_permissions_desc">CellReader requires the following permissions to function. No data is collected using these permissions, they are used only to display information about your cellular connection to you.</string>
+
+    <string name="required_permission_fine_location">Precise Location</string>
+    <string name="required_permission_phone_state">Phone State</string>
+    <string name="required_permission_phone_numbers">Phone Number</string>
+
+    <string name="grant">Grant</string>
+    <string name="close_app">Close App</string>
 </resources>

@@ -6,10 +6,8 @@ import rikka.shizuku.Shizuku
 
 object PermissionUtils {
     private val permissions = arrayOf(
-        android.Manifest.permission.ACCESS_NETWORK_STATE,
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.READ_PHONE_STATE,
-        android.Manifest.permission.ACCESS_WIFI_STATE,
         android.Manifest.permission.READ_PHONE_NUMBERS
     )
 
