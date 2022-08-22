@@ -69,13 +69,13 @@ data class SubscriptionInfoWrapper(
         info.countryIso,
         info.isEmbedded,
         ArrayList(info.allAccessRulesCompat.map { UiccAccessRuleWrapper(it) }),
-        info.cardString,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.cardString else null,
         info.cardIdCompat,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isOpportunistic else false,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupUuid?.toString() else null,
-        info.groupOwner,
-        info.isGroupDisabled,
-        info.profileClass,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupOwner else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else false,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else -1,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.subscriptionType else CellInfo.UNAVAILABLE,
         info.areUiccApplicationsEnabled()
     )
