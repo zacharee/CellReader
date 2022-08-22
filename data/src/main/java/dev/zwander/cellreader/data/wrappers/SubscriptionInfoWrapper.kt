@@ -75,7 +75,7 @@ data class SubscriptionInfoWrapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupUuid?.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupOwner else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else false,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else -1,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.subscriptionType else CellInfo.UNAVAILABLE,
         info.areUiccApplicationsEnabled()
     )
