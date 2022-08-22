@@ -16,6 +16,7 @@ CellReader doesn't collect or store any data beyond what's needed to record cras
 The following permissions are needed for functionality:
 - Precise Location
   - Many modem APIs require this permission. Your location isn't recorded or uploaded anywhere.
+  - You can optionally allow background location access for more reliable information when using the widgets.
 - Phone State
   - This is another permission required by modem APIs. No information about your device is recorded or uploaded.
 - Phone Numbers

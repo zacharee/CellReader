@@ -250,9 +250,9 @@
     <string name="required_permissions">Required Permissions</string>
     <string name="required_permissions_desc">CellReader requires the following permissions to function. No data is collected using these permissions, they are used only to display information about your cellular connection to you.</string>
 
-    <string name="required_permission_fine_location">Precise Location</string>
-    <string name="required_permission_phone_state">Phone State</string>
-    <string name="required_permission_phone_numbers">Phone Number</string>
+    <string name="required_permission_fine_location"> - Precise Location is used for certain modem APIs. You can optionally grant CellReader background location access for more reliable information when using the widgets.</string>
+    <string name="required_permission_phone_state"> - Phone State is used for certain modem APIs.</string>
+    <string name="required_permission_phone_numbers"> - Phone Number is granted when Phone State is granted and allows displaying the phone number associated with each SIM.</string>
 
     <string name="grant">Grant</string>
     <string name="close_app">Close App</string>
