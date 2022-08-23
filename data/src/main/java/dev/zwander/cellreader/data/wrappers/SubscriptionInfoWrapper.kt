@@ -77,7 +77,7 @@ data class SubscriptionInfoWrapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else false,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.subscriptionType else CellInfo.UNAVAILABLE,
-        info.areUiccApplicationsEnabled()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.areUiccApplicationsEnabled() else false
     )
 
     override fun equals(other: Any?): Boolean {
