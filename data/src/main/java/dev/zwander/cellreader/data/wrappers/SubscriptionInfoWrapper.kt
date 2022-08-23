@@ -28,17 +28,17 @@ data class SubscriptionInfoWrapper(
     val ehplmns: ArrayList<String>?,
     val hplmns: ArrayList<String>?,
     val countryIso: String?,
-    val embedded: Boolean,
+    val embedded: Boolean?,
     val accessRules: ArrayList<UiccAccessRuleWrapper>?,
     val cardString: String?,
     val cardId: String?,
-    val opportunistic: Boolean,
+    val opportunistic: Boolean?,
     val groupUuid: String?,
     val groupOwner: String?,
-    val groupDisabled: Boolean,
+    val groupDisabled: Boolean?,
     val profileClass: Int,
     val subscriptionType: Int,
-    val uiccApplicationsEnabled: Boolean
+    val uiccApplicationsEnabled: Boolean?
 ) {
     @SuppressLint("MissingPermission", "InlinedApi")
     constructor(info: SubscriptionInfo, context: Context) : this(
@@ -53,6 +53,7 @@ data class SubscriptionInfoWrapper(
         if (Build.VERSION.SDK_INT >= 33) {
             (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(info.subscriptionId)
         } else {
+            @Suppress("DEPRECATION")
             info.number
         },
         info.dataRoaming,
@@ -62,7 +63,9 @@ data class SubscriptionInfoWrapper(
             bmp.recycle()
             output.toByteArray()
         },
+        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mccString else info.mcc.toString(),
+        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mncString else info.mnc.toString(),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ArrayList(info.ehplmns) else arrayListOf(),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ArrayList(info.hplmns) else arrayListOf(),
@@ -71,13 +74,13 @@ data class SubscriptionInfoWrapper(
         ArrayList(info.allAccessRulesCompat.map { UiccAccessRuleWrapper(it) }),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.cardString else null,
         info.cardIdCompat,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isOpportunistic else false,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isOpportunistic else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupUuid?.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupOwner else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else false,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.subscriptionType else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.areUiccApplicationsEnabled() else false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.areUiccApplicationsEnabled() else null
     )
 
     override fun equals(other: Any?): Boolean {
