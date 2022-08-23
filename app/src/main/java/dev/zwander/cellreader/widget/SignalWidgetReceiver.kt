@@ -3,7 +3,6 @@ package dev.zwander.cellreader.widget
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Icon
 import android.os.Build
 import android.telephony.AccessNetworkConstants
 import android.telephony.TelephonyManager
@@ -131,15 +130,9 @@ class SignalWidget : GlanceAppWidget() {
                                 Row(
                                     verticalAlignment = Alignment.Vertical.CenterVertically
                                 ) {
-                                    subInfo?.iconBitmap?.let { bmp ->
+                                    subInfo?.iconBitmapBmp?.let { bmp ->
                                         Image(
-                                            provider = ImageProvider(
-                                                Icon.createWithData(
-                                                    bmp,
-                                                    0,
-                                                    bmp.size
-                                                )
-                                            ),
+                                            provider = ImageProvider(bmp),
                                             contentDescription = null,
                                             modifier = GlanceModifier.size(16.dp)
                                         )

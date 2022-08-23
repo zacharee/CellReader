@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.telephony.AccessNetworkConstants
 import android.telephony.NetworkRegistrationInfo
@@ -101,10 +100,11 @@ fun SIMCard(
                 ) {
                     Spacer(Modifier.weight(1f))
 
-                    subInfos[subId]?.iconBitmap?.let { bitmap ->
-                        BitmapFactory.decodeByteArray(bitmap, 0, bitmap.size)?.asImageBitmap()?.let {
+                    subInfos[subId]?.iconBitmapBmp?.let { bitmap ->
+                        bitmap.asImageBitmap().let {
                             Image(
-                                bitmap = it, contentDescription = null,
+                                bitmap = it,
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size((16 * LocalDensity.current.fontScale).dp)
                                     .align(Alignment.CenterVertically)
@@ -221,13 +221,16 @@ fun SIMCard(
                     )
                 ) {
                     Column {
+                        val offset by remember { derivedStateOf { listState.firstVisibleItemScrollOffset } }
+                        val layoutInfo by remember { derivedStateOf { listState.layoutInfo } }
+
                         val topAlpha by animateFloatAsState(
-                            targetValue = if (listState.firstVisibleItemScrollOffset > 0 || listState.layoutInfo.run {
+                            targetValue = if (offset > 0 || layoutInfo.run {
                                     (visibleItemsInfo.firstOrNull()?.index ?: 0) > 0
                                 }) 1f else 0f
                         )
                         val bottomAlpha by animateFloatAsState(
-                            targetValue = if (listState.layoutInfo.run {
+                            targetValue = if (layoutInfo.run {
                                     (visibleItemsInfo.lastOrNull()?.run {
                                         index < totalItemsCount - 1 ||
                                                 offset.absoluteValue < (size - viewportSize.height)
