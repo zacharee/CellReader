@@ -29,12 +29,8 @@ fun MainContent() {
     }
 
     val subIds by CellModel.subIds.observeAsState()
-    val subInfos by CellModel.subInfos.observeAsState()
-    val signalStrengths by CellModel.signalStrengths.observeAsState()
     val cellInfos by CellModel.cellInfos.observeAsState()
     val strengthInfos by CellModel.strengthInfos.observeAsState()
-    val serviceStates by CellModel.serviceStates.observeAsState()
-    val displayInfos by CellModel.displayInfos.observeAsState()
 
     SelectionContainer {
         val state = rememberLazyGridState()
@@ -52,8 +48,6 @@ fun MainContent() {
                 item(t, span = { GridItemSpan(this.maxLineSpan) }) {
                     SIMCard(
                         subId = t,
-                        subInfos = subInfos!!,
-                        serviceStates = serviceStates!!,
                         expanded = expanded[t.toString()] ?: false,
                         onExpand = { expanded[t.toString()] = it },
                         showingCells = showingCells[t] ?: true,
@@ -61,9 +55,6 @@ fun MainContent() {
                         modifier = Modifier
                             .animateItemPlacement()
                             .padding(bottom = 8.dp),
-                        signalStrengths = signalStrengths,
-                        strengthInfos = strengthInfos!!,
-                        displayInfos = displayInfos!!
                     )
                 }
 

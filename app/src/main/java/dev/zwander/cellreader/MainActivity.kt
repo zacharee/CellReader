@@ -18,6 +18,7 @@ import androidx.core.view.isVisible
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.zwander.cellreader.data.CellReaderTheme
+import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.databinding.PermissionDialogLayoutBinding
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
@@ -82,14 +83,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Content() {
     CellReaderTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.background
-        ) {
-            Box {
-                MainContent()
+        CellModel.ProvideCellModel {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                Box {
+                    MainContent()
 
-                BottomBarScrimContainer()
+                    BottomBarScrimContainer()
+                }
             }
         }
     }

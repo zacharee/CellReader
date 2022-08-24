@@ -237,6 +237,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                             PhoneStateListener.LISTEN_CELL_INFO or
                                             PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or
                                             PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED
+                                            or PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
                                 )
                             }
 
@@ -345,6 +346,26 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             CellModel.displayInfos.update {
                 it!![subId] = telephonyDisplayInfo?.let { info -> TelephonyDisplayInfoWrapper(info) }
             }
+
+            launch(Dispatchers.IO) {
+                betweenUtils.queueDisplayInfos(CellModel.displayInfos.value!!)
+            }
+
+            updateWidgets()
+        }
+    }
+
+    override fun updateDataConnectionState(subId: Int, state: Int, networkType: Int) {
+        launch(Dispatchers.Main) {
+            CellModel.dataConnectionStates.update {
+                it!![subId] = DataConnectionState(subId, state, networkType)
+            }
+
+            launch(Dispatchers.IO) {
+                betweenUtils.queueDataConnectionStates(CellModel.dataConnectionStates.value!!)
+            }
+
+            updateWidgets()
         }
     }
 

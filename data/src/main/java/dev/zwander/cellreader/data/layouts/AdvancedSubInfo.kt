@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -17,6 +19,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.components.PaddedDivider
+import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 import dev.zwander.cellreader.data.wrappers.TelephonyDisplayInfoWrapper
@@ -27,11 +30,14 @@ fun AdvancedSubInfo(
     subId: Int,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
-    serviceStates: Map<Int, ServiceStateWrapper?>,
-    subInfos: Map<Int, SubscriptionInfoWrapper?>,
-    displayInfos: Map<Int, TelephonyDisplayInfoWrapper?>,
-    signalStrength: SignalStrength? = null,
 ) {
+    val subInfos by LocalCellModel.current.LocalSubInfos.current.observeAsState()
+    val displayInfos by LocalCellModel.current.LocalDisplayInfos.current.observeAsState()
+    val signalStrengths = LocalCellModel.current.LocalSignalStrengths.current?.observeAsState()
+    val serviceStates by LocalCellModel.current.LocalServiceStates.current.observeAsState()
+
+    val signalStrength = signalStrengths?.value?.get(subId)
+
     Box(
         modifier = modifier
     ) {
@@ -39,7 +45,7 @@ fun AdvancedSubInfo(
             LazyColumn(
                 state = scrollState
             ) {
-                displayInfos[subId]?.let {
+                displayInfos!![subId]?.let {
                     item {
                         FlowRow(
                             mainAxisSpacing = 16.dp,
@@ -79,7 +85,7 @@ fun AdvancedSubInfo(
                     )
                 }
 
-                serviceStates[subId]?.let {
+                serviceStates!![subId]?.let {
                     item {
                         FlowRow(
                             mainAxisSpacing = 16.dp,
@@ -91,7 +97,7 @@ fun AdvancedSubInfo(
                     }
                 }
 
-                subInfos[subId]?.let {
+                subInfos!![subId]?.let {
                     item {
                         FlowRow(
                             mainAxisSpacing = 16.dp,

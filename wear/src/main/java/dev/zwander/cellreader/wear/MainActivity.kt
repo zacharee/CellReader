@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import dev.zwander.cellreader.data.layouts.SignalCard
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
-    @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -34,7 +32,9 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         setContent {
             CellReaderTheme {
-                MainContent()
+                CellModelWear.ProvideCellModel {
+                    MainContent()
+                }
             }
         }
     }
@@ -62,11 +62,8 @@ fun MainContent() {
     }
 
     val subIds by CellModelWear.subIds.observeAsState()
-    val subInfos by CellModelWear.subInfos.observeAsState()
     val cellInfos by CellModelWear.cellInfos.observeAsState()
     val strengthInfos by CellModelWear.strengthInfos.observeAsState()
-    val serviceStates by CellModelWear.serviceStates.observeAsState()
-    val displayInfos by CellModelWear.displayInfos.observeAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -92,16 +89,12 @@ fun MainContent() {
                             item(t) {
                                 SIMCard(
                                     subId = t,
-                                    subInfos = subInfos!!,
-                                    serviceStates = serviceStates!!,
                                     expanded = expanded[t.toString()] ?: false,
                                     onExpand = { expanded[t.toString()] = it },
                                     showingCells = showingCells[t] ?: true,
                                     onShowingCells = { showingCells[t] = it },
                                     modifier = Modifier
                                         .padding(bottom = 8.dp),
-                                    strengthInfos = strengthInfos!!,
-                                    displayInfos = displayInfos!!
                                 )
                             }
 

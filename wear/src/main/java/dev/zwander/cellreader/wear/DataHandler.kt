@@ -9,11 +9,9 @@ import com.google.android.gms.wearable.Wearable
 import dev.zwander.cellreader.data.BetweenUtils
 import dev.zwander.cellreader.data.SubsComparator
 import dev.zwander.cellreader.data.data.CellModelWear
+import dev.zwander.cellreader.data.data.DataConnectionState
 import dev.zwander.cellreader.data.util.update
-import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
-import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
-import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
-import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
+import dev.zwander.cellreader.data.wrappers.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -28,6 +26,8 @@ class DataHandler private constructor(private val context: Context) {
         fun onNewSubInfos(infos: Map<Int, SubscriptionInfoWrapper?>)
         fun onNewSubIds(subIds: Collection<Int>)
         fun onNewPrimaryCell(primaryCell: Int)
+        fun onNewDataConnectionStates(states: Map<Int, DataConnectionState>)
+        fun onNewDisplayInfos(infos: Map<Int, TelephonyDisplayInfoWrapper?>)
         fun onClear()
     }
 
@@ -58,6 +58,8 @@ class DataHandler private constructor(private val context: Context) {
     private var loadSubInfoJob: Job? = null
     private var addSubIdJob: Job? = null
     private var updatePrimaryCellJob: Job? = null
+    private var updateDataConnectionStateJob: Job? = null
+    private var updateDisplayInfosJob: Job? = null
 
     private var listening = false
 
@@ -159,12 +161,18 @@ class DataHandler private constructor(private val context: Context) {
             BetweenUtils.PRIMARY_CELL_PATH -> {
                 updatePrimaryCell(frozen)
             }
+            BetweenUtils.DATA_CONNECTION_STATE_PATH -> {
+                updateDataConnectionStates(frozen)
+            }
+            BetweenUtils.DISPLAY_INFOS_PATH -> {
+                updateDisplayInfos(frozen)
+            }
         }
     }
 
     private fun updateHandlers(path: String) {
         val callback: ((IDataHandler) -> Unit) = {
-            when(path) {
+            when (path) {
                 BetweenUtils.CELL_INFOS_PATH -> {
                     it.onNewCellInfos(CellModelWear.cellInfos.value!!)
                 }
@@ -185,6 +193,12 @@ class DataHandler private constructor(private val context: Context) {
                 }
                 BetweenUtils.PRIMARY_CELL_PATH -> {
                     it.onNewPrimaryCell(CellModelWear.primaryCell.value!!)
+                }
+                BetweenUtils.DATA_CONNECTION_STATE_PATH -> {
+                    it.onNewDataConnectionStates(CellModelWear.dataConnectionStates.value!!)
+                }
+                BetweenUtils.DISPLAY_INFOS_PATH -> {
+                    it.onNewDisplayInfos(CellModelWear.displayInfos.value!!)
                 }
             }
         }
@@ -279,6 +293,32 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.primaryCell.value = primaryCell
+                updateHandlers(item.uri.path)
+                updateTiles()
+            }
+        }
+    }
+
+    private suspend fun updateDataConnectionStates(item: DataItem) = coroutineScope {
+        updateDataConnectionStateJob?.cancel()
+        updateDataConnectionStateJob = async(Dispatchers.IO) {
+            val dataConnectionStates = betweenUtils.retrieveDataConnectionStates(item)
+
+            withContext(Dispatchers.Main) {
+                CellModelWear.dataConnectionStates.value = dataConnectionStates
+                updateHandlers(item.uri.path)
+                updateTiles()
+            }
+        }
+    }
+
+    private suspend fun updateDisplayInfos(item: DataItem) = coroutineScope {
+        updateDisplayInfosJob?.cancel()
+        updateDisplayInfosJob = async(Dispatchers.IO) {
+            val displayInfos = betweenUtils.retrieveDisplayInfos(item)
+
+            withContext(Dispatchers.Main) {
+                CellModelWear.displayInfos.value = displayInfos
                 updateHandlers(item.uri.path)
                 updateTiles()
             }

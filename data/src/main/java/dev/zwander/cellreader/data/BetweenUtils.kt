@@ -9,6 +9,7 @@ import com.google.android.gms.common.api.GoogleApi
 import com.google.android.gms.wearable.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dev.zwander.cellreader.data.data.DataConnectionState
 import dev.zwander.cellreader.data.util.UpdatableTreeSet
 import dev.zwander.cellreader.data.util.preferences
 import dev.zwander.cellreader.data.wrappers.*
@@ -49,6 +50,12 @@ class BetweenUtils private constructor(private val context: Context) {
 
         const val PRIMARY_CELL_PATH = "/primary_cell"
         const val PRIMARY_CELL_KEY = "primary_cell"
+
+        const val DATA_CONNECTION_STATE_PATH = "/data_connection_state"
+        const val DATA_CONNECTION_STATE_KEY = "data_connection_state"
+
+        const val DISPLAY_INFOS_PATH = "/display_infos"
+        const val DISPLAY_INFOS_KEY = "display_infos"
 
         @SuppressLint("StaticFieldLeak")
         private var instance: BetweenUtils? = null
@@ -179,6 +186,8 @@ class BetweenUtils private constructor(private val context: Context) {
     private val subIdMutex = Mutex()
     private val clearMutex = Mutex()
     private val primaryMutex = Mutex()
+    private val dataConMutex = Mutex()
+    private val displayInfoMutex = Mutex()
 
     private val sendQueue = ConcurrentHashMap<Mutex, suspend () -> Unit>()
     private var lastSendTime = 0L
@@ -375,6 +384,58 @@ class BetweenUtils private constructor(private val context: Context) {
             PRIMARY_CELL_KEY,
             0,
             object : TypeToken<Int>() {}
+        )
+    }
+
+    suspend fun queueDataConnectionStates(states: Map<Int, DataConnectionState>) {
+        enqueue(dataConMutex) {
+            sendDataConnectionStates(states)
+        }
+    }
+
+    private suspend fun sendDataConnectionStates(states: Map<Int, DataConnectionState>) {
+        dataConMutex.sendInfo(
+            otherGson,
+            DATA_CONNECTION_STATE_PATH,
+            listOf(
+                DATA_CONNECTION_STATE_KEY to states
+            )
+        )
+    }
+
+    suspend fun retrieveDataConnectionStates(dataItem: DataItem): HashMap<Int, DataConnectionState> {
+        return retrieveInfo(
+            otherGson,
+            dataItem,
+            DATA_CONNECTION_STATE_KEY,
+            hashMapOf(),
+            object : TypeToken<HashMap<Int, DataConnectionState>>() {}
+        )
+    }
+
+    suspend fun queueDisplayInfos(infos: Map<Int, TelephonyDisplayInfoWrapper?>) {
+        enqueue(displayInfoMutex) {
+            sendDisplayInfos(infos)
+        }
+    }
+
+    private suspend fun sendDisplayInfos(infos: Map<Int, TelephonyDisplayInfoWrapper?>) {
+        displayInfoMutex.sendInfo(
+            otherGson,
+            DISPLAY_INFOS_PATH,
+            listOf(
+                DISPLAY_INFOS_KEY to infos
+            )
+        )
+    }
+
+    suspend fun retrieveDisplayInfos(dataItem: DataItem): HashMap<Int, TelephonyDisplayInfoWrapper?> {
+        return retrieveInfo(
+            otherGson,
+            dataItem,
+            DISPLAY_INFOS_KEY,
+            hashMapOf(),
+            object : TypeToken<HashMap<Int, TelephonyDisplayInfoWrapper?>>() {}
         )
     }
 

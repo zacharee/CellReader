@@ -5,7 +5,6 @@ import android.os.Build
 import android.telephony.AccessNetworkConstants
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
-import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import android.view.animation.AnticipateOvershootInterpolator
 import androidx.compose.animation.*
@@ -17,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,6 +38,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
+import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.*
 import kotlin.math.absoluteValue
@@ -46,18 +47,16 @@ import kotlin.math.absoluteValue
 @Composable
 fun SIMCard(
     subId: Int,
-    subInfos: Map<Int, SubscriptionInfoWrapper?>,
-    serviceStates: Map<Int, ServiceStateWrapper?>,
     expanded: Boolean,
     onExpand: (Boolean) -> Unit,
     showingCells: Boolean,
     onShowingCells: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    strengthInfos: HashMap<Int, List<CellSignalStrengthWrapper>>,
-    displayInfos: Map<Int, TelephonyDisplayInfoWrapper?>,
-    signalStrengths: Map<Int, SignalStrength?>? = null,
 ) {
     val context = LocalContext.current
+    val subInfos by LocalCellModel.current.LocalSubInfos.current.observeAsState()
+    val strengthInfos by LocalCellModel.current.LocalStrengthInfos.current.observeAsState()
+    val serviceStates by LocalCellModel.current.LocalServiceStates.current.observeAsState()
 
     Card(
         modifier = modifier,
@@ -83,12 +82,12 @@ fun SIMCard(
                     bottom = 0.dp
                 )
             ) {
-                var rplmn by remember(serviceStates[subId]) {
+                var rplmn by remember(serviceStates!![subId]) {
                     mutableStateOf("000-000")
                 }
 
-                LaunchedEffect(key1 = serviceStates[subId]) {
-                    rplmn = serviceStates[subId]?.getNetworkRegistrationInfoListForTransportType(
+                LaunchedEffect(key1 = serviceStates!![subId]) {
+                    rplmn = serviceStates!![subId]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                     )
                         ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
@@ -100,7 +99,7 @@ fun SIMCard(
                 ) {
                     Spacer(Modifier.weight(1f))
 
-                    subInfos[subId]?.iconBitmapBmp?.let { bitmap ->
+                    subInfos!![subId]?.iconBitmapBmp?.let { bitmap ->
                         bitmap.asImageBitmap().let {
                             Image(
                                 bitmap = it,
@@ -121,16 +120,16 @@ fun SIMCard(
 
                     val type = ServiceStateWrapper.rilRadioTechnologyToString(
                         context,
-                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subId]?.dataNetworkType ?: 0)
+                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates!![subId]?.dataNetworkType ?: 0)
                     )
 
                     val displayType = when {
-                        serviceStates[subId]?.dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN -> type
-                        strengthInfos[subId]?.run {
+                        serviceStates!![subId]?.dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN -> type
+                        strengthInfos!![subId]?.run {
                             any { it is CellSignalStrengthNrWrapper } &&
                                     any { it is CellSignalStrengthLteWrapper }
                         } == true -> stringResource(id = R.string.nr_nsa)
-                        strengthInfos[subId]?.run {
+                        strengthInfos!![subId]?.run {
                             any { it is CellSignalStrengthNrWrapper } &&
                                     none { it is CellSignalStrengthLteWrapper }
                         } == true -> stringResource(id = R.string.nr_sa)
@@ -138,7 +137,7 @@ fun SIMCard(
                     }
 
                     WearSafeText(
-                        text = "${subInfos[subId]?.carrierName} (${rplmn}) - $displayType",
+                        text = "${subInfos!![subId]?.carrierName} (${rplmn}) - $displayType",
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -178,9 +177,9 @@ fun SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[subId]?.isUsingCarrierAggregation}")
+                        FormatText(R.string.carrier_aggregation_format, "${serviceStates!![subId]?.isUsingCarrierAggregation}")
 
-                        serviceStates[subId]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
+                        serviceStates!![subId]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
                             if (bandwidths.isNotBlank()) {
                                 FormatText(R.string.bandwidths_format, bandwidths)
                             }
@@ -191,8 +190,8 @@ fun SIMCard(
                                 R.string.nr_state_format,
                                 CellUtils.formatNrStateAndConnectionString(
                                     context,
-                                    serviceStates[subId]?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE,
-                                    serviceStates[subId]?.nrFrequencyRange ?: ServiceState.FREQUENCY_RANGE_UNKNOWN
+                                    serviceStates!![subId]?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE,
+                                    serviceStates!![subId]?.nrFrequencyRange ?: ServiceState.FREQUENCY_RANGE_UNKNOWN
                                 )
                             )
                         }
@@ -253,11 +252,7 @@ fun SIMCard(
                             ) {
                                 AdvancedSubInfo(
                                     subId = subId,
-                                    signalStrength = signalStrengths!![subId],
-                                    serviceStates = serviceStates,
-                                    subInfos = subInfos,
                                     scrollState = listState,
-                                    displayInfos = displayInfos
                                 )
                             }
                         }
