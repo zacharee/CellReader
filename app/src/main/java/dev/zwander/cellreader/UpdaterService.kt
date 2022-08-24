@@ -57,7 +57,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         val n = NotificationCompat.Builder(this, "main")
             .setContentTitle(resources.getString(R.string.running_notification_title))
             .setContentText(resources.getString(R.string.running_notification_desc))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.cell_3)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(
                 PendingIntent.getActivity(
