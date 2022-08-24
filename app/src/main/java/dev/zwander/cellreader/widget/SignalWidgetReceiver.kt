@@ -30,11 +30,11 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
 import dev.zwander.cellreader.data.typeString
+import dev.zwander.cellreader.data.util.UpdatableTreeSet
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
 import java.io.File
-import java.util.*
 
 class SinglePreferenceGlanceStateDefinition(private val constantKey: String) : GlanceStateDefinition<Preferences> {
     companion object {
@@ -94,7 +94,7 @@ class SignalWidget : GlanceAppWidget() {
 //            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>(){}.type
 //        ) ?: hashMapOf()
 
-        val subIds = CellModel.subIds.value ?: TreeSet()
+        val subIds = CellModel.subIds.value ?: UpdatableTreeSet()
         val subInfos = CellModel.subInfos.value ?: hashMapOf()
         val serviceStates = CellModel.serviceStates.value ?: hashMapOf()
         val strengthInfos = CellModel.strengthInfos.value ?: hashMapOf()

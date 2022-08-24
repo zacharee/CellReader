@@ -13,7 +13,7 @@ import dev.zwander.cellreader.data.IPrivilegedListener
 import dev.zwander.cellreader.data.IShizukuUserService
 
 object CellModel : CellModelBase() {
-    val signalStrengths = MutableLiveData<MutableMap<Int, SignalStrength?>>(mutableMapOf())
+    val signalStrengths = MutableLiveData<HashMap<Int, SignalStrength?>>(hashMapOf())
     val telephonies = HashMap<Int, TelephonyManager>()
 
     var service: IShizukuUserService? = null

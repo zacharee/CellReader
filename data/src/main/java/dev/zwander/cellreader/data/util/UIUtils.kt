@@ -1,9 +1,6 @@
 package dev.zwander.cellreader.data.util
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
 import android.util.TypedValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,14 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.MutableLiveData
-import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
-import kotlin.reflect.javaType
 
 fun Modifier.angledGradient(colors: List<Pair<Float, Color>>, degrees: Float) = this.then(
     Modifier.drawBehind {
@@ -109,6 +103,18 @@ fun Color.toColorInt(): Int {
     return android.graphics.Color.argb(alpha, red, green, blue)
 }
 
-inline fun <reified T> MutableLiveData<T>.update(block: (T?) -> T) {
-    this.value = block(value)
+inline fun <reified T> MutableLiveData<T>.update(noinline clone: ((T?) -> T)? = null, noinline block: ((T?) -> Unit)? = null) {
+    val c = if (clone != null) {
+        clone(value)
+    } else {
+        T::class.java.constructors.find {
+            it.parameters.size == 1 &&
+                    (it.parameters[0].type.isAssignableFrom(T::class.java) ||
+                            T::class.java.isAssignableFrom(it.parameters[0].type) ||
+                            it.parameters[0].type == T::class.java)
+        }?.newInstance(value) as T
+    }
+    block?.invoke(c)
+
+    this.value = c
 }

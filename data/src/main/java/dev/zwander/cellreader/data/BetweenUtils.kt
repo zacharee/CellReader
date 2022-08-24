@@ -9,6 +9,7 @@ import com.google.android.gms.common.api.GoogleApi
 import com.google.android.gms.wearable.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dev.zwander.cellreader.data.util.UpdatableTreeSet
 import dev.zwander.cellreader.data.util.preferences
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
@@ -20,7 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -326,13 +326,13 @@ class BetweenUtils private constructor(private val context: Context) {
         )
     }
 
-    suspend fun retrieveNewSubId(dataItem: DataItem): TreeSet<Int> {
+    suspend fun retrieveNewSubId(dataItem: DataItem): UpdatableTreeSet<Int> {
         return retrieveInfo(
             otherGson,
             dataItem,
             SUB_ID_KEY,
-            TreeSet(),
-            object : TypeToken<TreeSet<Int>>() {}
+            UpdatableTreeSet(),
+            object : TypeToken<UpdatableTreeSet<Int>>() {}
         )
     }
 

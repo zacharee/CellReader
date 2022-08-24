@@ -18,9 +18,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
-import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class DataHandler private constructor(private val context: Context) {
     interface IDataHandler {
@@ -206,7 +204,6 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.cellInfos.update {
                     it!!.putAll(cellInfos)
-                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -222,7 +219,6 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.strengthInfos.update {
                     it!!.putAll(signalStrengths)
-                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -238,7 +234,6 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.serviceStates.update {
                     it!!.putAll(serviceState)
-                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -254,7 +249,6 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.subInfos.update {
                     it!!.putAll(subInfos)
-                    HashMap(it)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -269,7 +263,8 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.subIds.update {
-                    TreeSet(SubsComparator(CellModelWear.primaryCell.value!!)).also { s -> s.addAll(subIds) }
+                    it!!.addAll(subIds)
+                    it.updateComparator(SubsComparator(CellModelWear.primaryCell.value!!))
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()

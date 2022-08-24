@@ -20,9 +20,7 @@ import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.widget.SignalWidget
 import kotlinx.coroutines.*
-import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.collections.HashMap
 
 class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
     companion object {
@@ -190,23 +188,25 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             telephonies.putAll(
                 subscriptions.mapNotNull { subId ->
                     subInfos.update {
-                        it!![subId] = subs.getActiveSubscriptionInfo(subId)?.let { subInfo -> SubscriptionInfoWrapper(subInfo, this@UpdaterService) }
-                        HashMap(it)
+                        it!![subId] = subs.getActiveSubscriptionInfo(subId)?.let { subInfo ->
+                            SubscriptionInfoWrapper(
+                                subInfo,
+                                this@UpdaterService
+                            )
+                        }
                     }
 
                     if (subInfos.value!![subId] != null) {
                         cellInfos.update {
                             it!![subId] = listOf()
-                            HashMap(it)
                         }
                         strengthInfos.update {
                             it!![subId] = listOf()
-                            HashMap(it)
                         }
 
                         subIds.update {
                             it!!.add(subId)
-                            TreeSet(SubsComparator(primaryCell.value!!)).also { s-> s.addAll(it) }
+                            it.updateComparator(SubsComparator(primaryCell.value!!))
                         }
 
                         launch(Dispatchers.IO) {
@@ -263,7 +263,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             launch(Dispatchers.Main) {
                 cellInfos.update {
                     it!![subId] = newInfo
-                    HashMap(it)
                 }
 
                 launch(Dispatchers.IO) {
@@ -303,11 +302,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             with (CellModel) {
                 signalStrengths.update {
                     it!![subId] = strength
-                    HashMap(it)
                 }
                 strengthInfos.update {
                     it!![subId] = newInfo
-                    HashMap(it)
                 }
 
                 launch(Dispatchers.IO) {
@@ -326,7 +323,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             launch(Dispatchers.Main) {
                 serviceStates.update {
                     it!![subId] = wrapped
-                    HashMap(it)
                 }
 
                 launch(Dispatchers.IO) {
@@ -348,7 +344,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         launch(Dispatchers.Main) {
             CellModel.displayInfos.update {
                 it!![subId] = telephonyDisplayInfo?.let { info -> TelephonyDisplayInfoWrapper(info) }
-                it
             }
         }
     }
@@ -409,7 +404,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                         withContext(Dispatchers.Main) {
                             CellModel.subInfos.update {
                                 it!![subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
-                                HashMap(it)
                             }
 
                             withContext(Dispatchers.IO) {
@@ -424,7 +418,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 withContext(Dispatchers.Main) {
                     CellModel.primaryCell.value = defaultId
                     CellModel.subIds.update {
-                        TreeSet(SubsComparator(defaultId)).also { s -> s.addAll(it!!) }
+                        it!!.updateComparator(SubsComparator(defaultId))
                     }
                     updateWidgets()
                 }
