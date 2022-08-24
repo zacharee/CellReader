@@ -8,7 +8,8 @@ object PermissionUtils {
     private val permissions = arrayOf(
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.READ_PHONE_STATE,
-        android.Manifest.permission.READ_PHONE_NUMBERS
+        android.Manifest.permission.READ_PHONE_NUMBERS,
+        android.Manifest.permission.POST_NOTIFICATIONS
     )
 
     fun getMissingPermissions(context: Context): Array<String> {

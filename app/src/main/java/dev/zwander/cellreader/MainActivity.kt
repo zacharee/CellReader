@@ -2,6 +2,7 @@ package dev.zwander.cellreader
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
+import androidx.core.view.isVisible
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.zwander.cellreader.data.CellReaderTheme
@@ -44,6 +46,8 @@ class MainActivity : ComponentActivity() {
                     setCancelable(false)
                     setTitle(dev.zwander.cellreader.data.R.string.required_permissions)
                     setContentView(viewBinding.root)
+
+                    viewBinding.postNotifications.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
                     viewBinding.confirmButton.setOnClickListener {
                         permReq.launch(this@with)

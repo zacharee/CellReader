@@ -45,6 +45,14 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         />
 
+    <TextView
+        android:id="@+id/postNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/required_permission_notifications"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
