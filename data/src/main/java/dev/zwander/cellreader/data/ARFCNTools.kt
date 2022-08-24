@@ -771,7 +771,7 @@ object NRARFCNTable : TreeMap<Pair<IntRange, IntRange>, ARFCNContainer>(IntRange
                 (145600..149200 to 139600..143200) to ARFCNContainer(band = 85),
                 (-1..-1 to 342000..356000) to ARFCNContainer(band = 86),
                 (-1..-1 to 164800..169800) to ARFCNContainer(band = 89),
-                (499200..537999 to 499200..537999) to ARFCNContainer(band = 90),
+                (499200..538000 to 499200..538000) to ARFCNContainer(band = 90),
                 (285400..286400 to 166400..172400) to ARFCNContainer(band = 91),
                 (286400..303400 to 166400..172400) to ARFCNContainer(band = 92),
                 (285400..286400 to 176000..183000) to ARFCNContainer(band = 93),
