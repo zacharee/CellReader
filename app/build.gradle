@@ -54,7 +54,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
     implementation 'com.google.android.material:material:1.7.0-beta01'
 
-    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.26.1-alpha'
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.26.2-beta'
 
     implementation "com.google.android.gms:play-services-wearable:17.1.0"
 
