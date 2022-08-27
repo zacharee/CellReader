@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -182,13 +183,19 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     @SuppressLint("MissingPermission")
     private fun init(subscriptions: List<Int>) {
+        val isEmpty = subs.activeSubscriptionInfoList.isEmpty()
+
         with (CellModel) {
             primaryCell.value = SubscriptionManager.getDefaultDataSubscriptionId()
 
             telephonies.putAll(
                 subscriptions.mapNotNull { subId ->
                     subInfos.update {
-                        it!![subId] = subs.getActiveSubscriptionInfo(subId)?.let { subInfo ->
+                        it!![subId] = (if (isEmpty) {
+                            subs.allSubscriptionInfoList.find { info -> info.subscriptionId == subId }
+                        } else {
+                            subs.getActiveSubscriptionInfo(subId)
+                        })?.let { subInfo ->
                             SubscriptionInfoWrapper(
                                 subInfo,
                                 this@UpdaterService
@@ -196,7 +203,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                         }
                     }
 
-                    if (subInfos.value!![subId] != null) {
+                    if (subInfos.value!![subId] != null || isEmpty) {
                         cellInfos.update {
                             it!![subId] = listOf()
                         }

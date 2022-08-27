@@ -20,7 +20,7 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
             strengthPoints[subId] = GraphInfo(subId)
         }
         
-        val simSlot = CellModel.subInfos.value!![subId]!!.simSlotIndex + 1
+        val simSlot = CellModel.subInfos.value?.get(subId)?.simSlotIndex?.plus(1) ?: subId
 
         infos.forEach { info ->
             val typeString = info.typeString(context)
