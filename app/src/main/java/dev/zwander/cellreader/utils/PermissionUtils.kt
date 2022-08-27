@@ -2,15 +2,19 @@ package dev.zwander.cellreader.utils
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import rikka.shizuku.Shizuku
 
 object PermissionUtils {
     private val permissions = arrayOf(
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.READ_PHONE_STATE,
-        android.Manifest.permission.READ_PHONE_NUMBERS,
-        android.Manifest.permission.POST_NOTIFICATIONS
-    )
+        android.Manifest.permission.READ_PHONE_NUMBERS
+    ) + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        arrayOf()
+    }
 
     fun getMissingPermissions(context: Context): Array<String> {
         return permissions.filter { permission ->
