@@ -81,7 +81,7 @@ class CellIdentityGsmWrapper(
         identity.mncString,
         identity.operatorAlphaLong.toString(),
         identity.operatorAlphaShort.toString(),
-        identity.globalCellId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
         identity.channelNumber
     )
 

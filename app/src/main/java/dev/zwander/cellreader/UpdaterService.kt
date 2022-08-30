@@ -182,7 +182,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     @SuppressLint("MissingPermission")
     private fun init(subscriptions: List<Int>) {
-        val isEmpty = subs.activeSubscriptionInfoList.isEmpty()
+        val isEmpty = (subs.activeSubscriptionInfoList ?: listOf()).isEmpty()
 
         with (CellModel) {
             primaryCell.value = SubscriptionManager.getDefaultDataSubscriptionId()
