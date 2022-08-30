@@ -110,6 +110,14 @@ object CellUtils {
                 return 1
             }
 
+            if (o1.cellIdentity.plmn != null && o2.cellIdentity.plmn == null) {
+                return -1
+            }
+
+            if (o1.cellIdentity.plmn == null && o2.cellIdentity.plmn != null) {
+                return 1
+            }
+
             fun getTypeRanking(info: CellInfoWrapper): Int {
                 return when {
                     info is CellInfoGsmWrapper -> 0
