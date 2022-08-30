@@ -88,7 +88,7 @@ fun ServiceState(
         }
         FormatText(R.string.manual_format, "$manualNetworkSelection")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             FormatText(R.string.iwlan_preferred_format, "$iWlanPreferred")
         }
         FormatText(R.string.cssi_format, "$cssIndicator")

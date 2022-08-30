@@ -83,6 +83,21 @@ fun CellIdentityWrapper.typeString(context: Context): String {
     })
 }
 
+val CellSignalStrength.isValidCompat: Boolean?
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) isValid else null
+
+val ServiceState.isIwlanPreferredCompat: Boolean?
+    @SuppressLint("BlockedPrivateApi")
+    get() = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> isIwlanPreferred
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+            ServiceState::class.java.getDeclaredField("mIsIwlanPreferred")
+                .apply { isAccessible = true }
+                .getBoolean(this)
+        }
+        else -> null
+    }
+
 class SubsComparator(private val primarySub: Int) : Comparator<Int> {
     override fun compare(o1: Int, o2: Int): Int {
         if (o1 == primarySub) {

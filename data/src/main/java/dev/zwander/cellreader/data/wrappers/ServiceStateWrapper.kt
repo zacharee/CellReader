@@ -3,13 +3,11 @@ package dev.zwander.cellreader.data.wrappers
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.telephony.AccessNetworkConstants
+import android.telephony.*
 import android.telephony.Annotation.NetworkType
-import android.telephony.NetworkRegistrationInfo
-import android.telephony.ServiceState
 import android.telephony.ServiceState.RoamingType
-import android.telephony.TelephonyManager
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.isIwlanPreferredCompat
 import dev.zwander.cellreader.data.util.AccessNetworkUtils
 
 data class ServiceStateWrapper(
@@ -33,7 +31,7 @@ data class ServiceStateWrapper(
     val operatorAlphaLongRaw: String?,
     val operatorAlphaShortRaw: String?,
     val dataRoamingFromRegistration: Boolean,
-    val iWlanPreferred: Boolean,
+    val iWlanPreferred: Boolean?,
     val dataRegState: Int,
     val voiceRegState: Int
 ) {
@@ -163,7 +161,7 @@ data class ServiceStateWrapper(
                 return wwanRegInfo?.accessNetworkTechnology ?: TelephonyManager.NETWORK_TYPE_UNKNOWN
             }
 
-            return if (!wwanRegInfo!!.isInService || iWlanPreferred) {
+            return if (!wwanRegInfo!!.isInService || iWlanPreferred == true) {
                 iwlanRegInfo.accessNetworkTechnology
             } else wwanRegInfo.accessNetworkTechnology
         }
@@ -242,6 +240,7 @@ data class ServiceStateWrapper(
         } ?: listOf()
     }
 
+    @SuppressLint("MissingPermission")
     constructor(state: ServiceState) : this(
         state.operatorAlphaLong,
         state.operatorAlphaShort,
@@ -255,7 +254,7 @@ data class ServiceStateWrapper(
         state.cdmaDefaultRoamingIndicator,
         state.cdmaEriIconIndex,
         state.cdmaEriIconMode,
-        state.nrFrequencyRange,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.nrFrequencyRange else CellInfo.UNAVAILABLE,
         state.channelNumber,
         ArrayList(state.cellBandwidths.toList()),
         try {
@@ -268,10 +267,10 @@ data class ServiceStateWrapper(
         } else {
             null
         },
-        state.operatorAlphaLongRaw,
-        state.operatorAlphaShortRaw,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaLongRaw else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaShortRaw else null,
         state.dataRoamingFromRegistration,
-        state.isIwlanPreferred,
+        state.isIwlanPreferredCompat,
         state.dataRegState,
         state.voiceRegState
     )

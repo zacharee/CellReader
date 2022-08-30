@@ -4,6 +4,7 @@ import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.bitErrorRateCompat
+import dev.zwander.cellreader.data.isValidCompat
 import java.util.*
 
 sealed class CellSignalStrengthWrapper {
@@ -23,7 +24,7 @@ sealed class CellSignalStrengthWrapper {
 
     abstract val level: Int
     abstract val dbm: Int
-    abstract val valid: Boolean
+    abstract val valid: Boolean?
     abstract val asuLevel: Int
 
     abstract override fun hashCode(): Int
@@ -36,7 +37,7 @@ class CellSignalStrengthGsmWrapper(
     val timingAdvance: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean,
+    override val valid: Boolean?,
     override val asuLevel: Int,
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthGsm) : this(
@@ -45,7 +46,7 @@ class CellSignalStrengthGsmWrapper(
         strength.timingAdvance,
         strength.level,
         strength.dbm,
-        strength.isValid,
+        strength.isValidCompat,
         strength.asuLevel,
     )
 
@@ -74,7 +75,7 @@ class CellSignalStrengthCdmaWrapper(
     val evdoSnr: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean,
+    override val valid: Boolean?,
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     val evdoAsuLevel: Int
@@ -99,7 +100,7 @@ class CellSignalStrengthCdmaWrapper(
         strength.evdoSnr,
         strength.level,
         strength.dbm,
-        strength.isValid,
+        strength.isValidCompat,
         strength.asuLevel
     )
 
@@ -131,7 +132,7 @@ class CellSignalStrengthTdscdmaWrapper(
     val rscp: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean,
+    override val valid: Boolean?,
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -141,7 +142,7 @@ class CellSignalStrengthTdscdmaWrapper(
         strength.rscp,
         strength.level,
         strength.dbm,
-        strength.isValid,
+        strength.isValidCompat,
         strength.asuLevel
     )
 
@@ -170,7 +171,7 @@ class CellSignalStrengthWcdmaWrapper(
     val ecNo: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean,
+    override val valid: Boolean?,
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthWcdma) : this(
@@ -180,7 +181,7 @@ class CellSignalStrengthWcdmaWrapper(
         strength.ecNo,
         strength.level,
         strength.dbm,
-        strength.isValid,
+        strength.isValidCompat,
         strength.asuLevel
     )
 
@@ -213,7 +214,7 @@ class CellSignalStrengthLteWrapper(
     val timingAdvance: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean,
+    override val valid: Boolean?,
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthLte) : this(
@@ -226,7 +227,7 @@ class CellSignalStrengthLteWrapper(
         strength.timingAdvance,
         strength.level,
         strength.dbm,
-        strength.isValid,
+        strength.isValidCompat,
         strength.asuLevel
     )
 
@@ -267,7 +268,7 @@ class CellSignalStrengthNrWrapper(
     val ssSinr: Int,
     override val level: Int,
     override val dbm: Int,
-    override val valid: Boolean,
+    override val valid: Boolean?,
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -282,7 +283,7 @@ class CellSignalStrengthNrWrapper(
         strength.ssSinr,
         strength.level,
         strength.dbm,
-        strength.isValid,
+        strength.isValidCompat,
         strength.asuLevel
     )
 
