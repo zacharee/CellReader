@@ -63,7 +63,7 @@ fun SignalCard(
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 onCast<CellInfoLteWrapper> {
-                    FormatText(R.string.endc_available_format, "${cellConfig.endcAvailable}")
+                    FormatText(R.string.endc_available_format, "${cellConfig?.endcAvailable}")
                 }
             }
 

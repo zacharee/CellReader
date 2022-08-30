@@ -126,7 +126,7 @@ class CellInfoLteWrapper(
     connectionStatus: Int,
     override val cellIdentity: CellIdentityLteWrapper,
     override val cellSignalStrength: CellSignalStrengthLteWrapper,
-    val cellConfig: CellConfigLteWrapper
+    val cellConfig: CellConfigLteWrapper?
 ) : CellInfoWrapper(
     isRegistered, timeStamp, connectionStatus
 ) {
@@ -136,7 +136,7 @@ class CellInfoLteWrapper(
         info.cellConnectionStatus,
         CellIdentityLteWrapper(info.cellIdentity),
         CellSignalStrengthLteWrapper(info.cellSignalStrength),
-        CellConfigLteWrapper(info.cellConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null
     )
 
     override fun hashCode(): Int {
