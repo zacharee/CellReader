@@ -133,7 +133,7 @@ class CellIdentityCdmaWrapper(
         identity.latitude,
         identity.operatorAlphaLong.toString(),
         identity.operatorAlphaShort.toString(),
-        identity.globalCellId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
         identity.channelNumber
     )
 
@@ -202,7 +202,7 @@ class CellIdentityTdscdmaWrapper(
         identity.mncString,
         identity.operatorAlphaLong.toString(),
         identity.operatorAlphaShort.toString(),
-        identity.globalCellId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
         identity.channelNumber
     )
 
@@ -274,7 +274,7 @@ class CellIdentityWcdmaWrapper(
         identity.mncString,
         identity.operatorAlphaLong.toString(),
         identity.operatorAlphaShort.toString(),
-        identity.globalCellId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
         identity.channelNumber
     )
 
@@ -358,7 +358,7 @@ class CellIdentityLteWrapper(
         identity.mncString,
         identity.operatorAlphaLong.toString(),
         identity.operatorAlphaShort.toString(),
-        identity.globalCellId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
         identity.channelNumber
     )
 
@@ -438,7 +438,7 @@ class CellIdentityNrWrapper(
         identity.mncString,
         identity.operatorAlphaLong.toString(),
         identity.operatorAlphaShort.toString(),
-        identity.globalCellId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
         identity.channelNumber
     )
 
