@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -53,6 +54,7 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
     implementation 'com.google.android.material:material:1.7.0-beta01'
+    implementation "androidx.activity:activity-compose:1.6.0-rc01"
 
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.26.2-beta'
 

@@ -14,25 +14,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import androidx.core.view.isVisible
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModel
-import dev.zwander.cellreader.data.databinding.PermissionDialogLayoutBinding
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
+import dev.zwander.cellreader.ui.view.PermissionRationaleBottomSheetDialog
 import dev.zwander.cellreader.utils.PermissionUtils
 
 class MainActivity : ComponentActivity() {
     private val permReq =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            if (results.values.any { !it }) {
-                finish()
-            } else {
-                init()
-            }
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            handlePermissions(PermissionUtils.getMissingPermissions(this).toList())
         }
+
+    private val locationDialog by lazy {
+        PermissionRationaleBottomSheetDialog(
+            this,
+            PermissionRationaleBottomSheetDialog.PermissionInfo(
+                dev.zwander.cellreader.data.R.string.required_permission_fine_location
+            )
+        )
+    }
+
+    private val otherDialog by lazy {
+        PermissionRationaleBottomSheetDialog(
+            this,
+            PermissionRationaleBottomSheetDialog.PermissionInfo(
+                dev.zwander.cellreader.data.R.string.required_permission_notifications,
+                Build.VERSION_CODES.TIRAMISU
+            ),
+            PermissionRationaleBottomSheetDialog.PermissionInfo(
+                dev.zwander.cellreader.data.R.string.required_permission_phone_state
+            ),
+            PermissionRationaleBottomSheetDialog.PermissionInfo(
+                dev.zwander.cellreader.data.R.string.required_permission_phone_numbers
+            )
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,28 +59,36 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         with(PermissionUtils.getMissingPermissions(this)) {
-            if (isNotEmpty()) {
-                BottomSheetDialog(this@MainActivity).apply {
-                    val viewBinding = PermissionDialogLayoutBinding.inflate(layoutInflater)
+            handlePermissions(this.toList())
+        }
+    }
 
-                    setCancelable(false)
-                    setTitle(dev.zwander.cellreader.data.R.string.required_permissions)
-                    setContentView(viewBinding.root)
-
-                    viewBinding.postNotifications.isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-
-                    viewBinding.confirmButton.setOnClickListener {
-                        permReq.launch(this@with)
-                        dismiss()
-                    }
-                    viewBinding.cancelButton.setOnClickListener {
-                        finish()
-                        dismiss()
-                    }
-                    show()
+    private fun handlePermissions(permissions: List<String>) {
+        with (permissions) {
+            when {
+                isEmpty() -> init()
+                contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                    locationDialog.show(
+                        positiveListener = {
+                            permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
+                            locationDialog.dismiss()
+                        },
+                        negativeListener = {
+                            finish()
+                        }
+                    )
                 }
-            } else {
-                init()
+                else -> {
+                    otherDialog.show(
+                        positiveListener = {
+                            permReq.launch(permissions.toTypedArray())
+                            otherDialog.dismiss()
+                        },
+                        negativeListener = {
+                            finish()
+                        }
+                    )
+                }
             }
         }
     }
