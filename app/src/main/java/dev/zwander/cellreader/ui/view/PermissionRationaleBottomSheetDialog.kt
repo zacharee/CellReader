@@ -87,7 +87,7 @@ class PermissionRationaleBottomSheetDialog(context: Context, private vararg val 
                     ) {
                         TextButton(
                             onClick = {
-                                context.launchUrl("https://github.com/zacharee/CellReader/blob/33ffd385bbd97cbeee7d0d4a3281d916e9c87921/README.md")
+                                context.launchUrl("https://github.com/zacharee/CellReader/blob/master/privacy.md")
                             }
                         ) {
                             Text(text = stringResource(id = R.string.privacy_policy))
