@@ -171,7 +171,10 @@ fun Graph(points: Map<Int, GraphInfo>) {
                                 disabledSubIds.add(subId)
                             }
                         },
-                        text = stringResource(id = R.string.chart_sim_format, CellModel.subInfos.value!![subId]!!.simSlotIndex + 1),
+                        text = stringResource(
+                            id = R.string.chart_sim_format,
+                            CellModel.subInfos.value?.get(subId)?.simSlotIndex?.plus(1) ?: subId
+                        ),
                         modifier = Modifier.weight(1f),
                         enabled = disabledSubIds.contains(subId) || disabledSubIds.size < points.keys.size - 1
                     )
