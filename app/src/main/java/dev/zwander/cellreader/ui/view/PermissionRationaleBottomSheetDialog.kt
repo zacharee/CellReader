@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.os.Parcelable
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -87,7 +86,7 @@ class PermissionRationaleBottomSheetDialog(context: Context, private vararg val 
                     ) {
                         TextButton(
                             onClick = {
-                                context.launchUrl("https://github.com/zacharee/CellReader/blob/master/privacy.md")
+                                context.launchUrl("https://zacharee.github.io/CellReader/privacy.html")
                             }
                         ) {
                             Text(text = stringResource(id = R.string.privacy_policy))
