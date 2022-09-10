@@ -113,42 +113,48 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
             }
 
             info.onCast<CellSignalStrengthWcdmaWrapper> {
-                addToLine(
-                    line.lines,
-                    subId,
-                    context.resources.getString(
-                        R.string.legend_rssi,
-                        simSlot,
-                        typeString
-                    ),
-                    maxX,
-                    rssi.toFloat()
-                )
+                rssi.onAvail {
+                    addToLine(
+                        line.lines,
+                        subId,
+                        context.resources.getString(
+                            R.string.legend_rssi,
+                            simSlot,
+                            typeString
+                        ),
+                        maxX,
+                        rssi.toFloat()
+                    )
+                }
 
-                addToLine(
-                    line.lines,
-                    subId,
-                    context.resources.getString(
-                        R.string.legend_ecno,
-                        simSlot,
-                        typeString
-                    ),
-                    maxX,
-                    ecNo.toFloat(),
-                    YAxis.AxisDependency.RIGHT
-                )
+                ecNo.onAvail {
+                    addToLine(
+                        line.lines,
+                        subId,
+                        context.resources.getString(
+                            R.string.legend_ecno,
+                            simSlot,
+                            typeString
+                        ),
+                        maxX,
+                        ecNo.toFloat(),
+                        YAxis.AxisDependency.RIGHT
+                    )
+                }
 
-                addToLine(
-                    line.lines,
-                    subId,
-                    context.resources.getString(
-                        R.string.legend_rscp,
-                        simSlot,
-                        typeString
-                    ),
-                    maxX,
-                    rscp.toFloat()
-                )
+                rscp.onAvail {
+                    addToLine(
+                        line.lines,
+                        subId,
+                        context.resources.getString(
+                            R.string.legend_rscp,
+                            simSlot,
+                            typeString
+                        ),
+                        maxX,
+                        rscp.toFloat()
+                    )
+                }
             }
 
             info.onCast<CellSignalStrengthTdscdmaWrapper> {

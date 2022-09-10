@@ -175,10 +175,10 @@ class CellSignalStrengthWcdmaWrapper(
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
     constructor(strength: CellSignalStrengthWcdma) : this(
-        strength.rssi,
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.rssi else CellInfo.UNAVAILABLE,
         strength.bitErrorRateCompat,
-        strength.rscp,
-        strength.ecNo,
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.rscp else CellInfo.UNAVAILABLE,
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.ecNo else CellInfo.UNAVAILABLE,
         strength.level,
         strength.dbm,
         strength.isValidCompat,
