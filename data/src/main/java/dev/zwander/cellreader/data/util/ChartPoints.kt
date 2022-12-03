@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.data.util
 
 import android.content.Context
-import androidx.core.graphics.toColorInt
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.utils.Utils
@@ -10,17 +9,24 @@ import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.GraphLineInfo
 import dev.zwander.cellreader.data.typeString
-import dev.zwander.cellreader.data.wrappers.*
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthCdmaWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthGsmWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthLteWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthNrWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthTdscdmaWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWcdmaWrapper
+import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.TreeMap
 
 fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
     Utils.init(context)
     
-    CellModel.strengthInfos.value!!.forEach { (subId, infos) ->
+    CellModel.strengthInfos.value.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)
         }
         
-        val simSlot = CellModel.subInfos.value?.get(subId)?.simSlotIndex?.plus(1) ?: subId
+        val simSlot = CellModel.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
 
         infos.forEach { info ->
             val typeString = info.typeString(context)
@@ -276,10 +282,12 @@ fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context,
     }
 }
 
-private fun addToLine(lines: MutableMap<String, GraphLineInfo>, subId: Int, label: String, maxX: Int, value: Float, axis: YAxis.AxisDependency = YAxis.AxisDependency.LEFT) {
-    createLineIfNotExists(lines, subId, label, axis)
+private fun addToLine(lines: MutableStateFlow<MutableMap<String, GraphLineInfo>>, subId: Int, label: String, maxX: Int, value: Float, axis: YAxis.AxisDependency = YAxis.AxisDependency.LEFT) {
+    val linesValue = TreeMap(lines.value)
 
-    lines[label]!!.apply {
+    createLineIfNotExists(linesValue, subId, label, axis)
+
+    linesValue[label]!!.apply {
         line.add(
             Entry(
                 maxX.toFloat(),
@@ -287,6 +295,8 @@ private fun addToLine(lines: MutableMap<String, GraphLineInfo>, subId: Int, labe
             )
         )
     }
+
+    lines.value = linesValue
 }
 
 private fun createLineIfNotExists(lines: MutableMap<String, GraphLineInfo>, subId: Int, label: String, axis: YAxis.AxisDependency = YAxis.AxisDependency.LEFT) {

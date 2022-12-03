@@ -1,10 +1,24 @@
 package dev.zwander.cellreader.ui.components.bardialogs
 
-import android.graphics.Color
 import android.view.MotionEvent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -15,7 +29,6 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
@@ -27,8 +40,14 @@ import dev.zwander.cellreader.data.components.CardCheckbox
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.SelectableLineDataSet
+import dev.zwander.cellreader.data.util.instantCombine
 import dev.zwander.cellreader.data.util.toColorInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.flatMapMerge
 
+@OptIn(FlowPreview::class)
 @Composable
 fun Graph(points: Map<Int, GraphInfo>) {
     var followData by remember {
@@ -45,6 +64,28 @@ fun Graph(points: Map<Int, GraphInfo>) {
         points.toSortedMap(SubsComparator(CellModel.primaryCell.value))
     }
 
+    val l = remember(sortedPoints, disabledSubIds.size) {
+        instantCombine(
+            sortedPoints.filterNot { disabledSubIds.contains(it.key) }.map { (_, graphInfo) ->
+                instantCombine(
+                    graphInfo.lines.flatMapMerge { l ->
+                        instantCombine(l.map { it.value.dataSet })
+                    }
+                )
+            }
+        )
+    }
+
+    val dataSets by l.collectAsState(initial = listOf())
+
+    val flatDataSets by remember {
+        derivedStateOf {
+            dataSets.flatMap { it!!.flatMap { i -> i!! } }
+        }
+    }
+
+    val scope = rememberCoroutineScope()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -60,6 +101,17 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                     legend.isWordWrapEnabled = true
                     legend.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
+
+                    setVisibleXRangeMinimum(10f)
+                    setVisibleXRangeMaximum(50f)
+                    setVisibleYRangeMinimum(3f, YAxis.AxisDependency.LEFT)
+                    setVisibleYRangeMinimum(3f, YAxis.AxisDependency.RIGHT)
+
+                    isDoubleTapToZoomEnabled = false
+                    maxHighlightDistance = 20f
+                    xAxis.granularity = 1f
+                    axisLeft.granularity = 1f
+                    axisRight.granularity = 1f
 
                     setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                         override fun onNothingSelected() {
@@ -112,41 +164,16 @@ fun Graph(points: Map<Int, GraphInfo>) {
                 Utils.init(it.context)
 
                 it.data = LineData(
-                    sortedPoints.flatMap { (subId, graphInfo) ->
-                        if (disabledSubIds.contains(subId)) {
-                            return@flatMap listOf()
-                        }
-
-                        graphInfo.sortedLines.map { (_, line) ->
-                            SelectableLineDataSet(line.lineWindow, line.label, line).apply {
-                                this.mode = LineDataSet.Mode.LINEAR
-                                this.setDrawCircles(false)
-                                this.axisDependency = line.axis
-                                this.highLightColor = Color.WHITE
-
-                                this.fillColor = if (line.isSelected.value) Color.WHITE else line.color
-                                this.circleColors = listOf(fillColor)
-                                this.colors = listOf(fillColor)
-                            }
-                        }
-                    }
+                    flatDataSets
                 ).apply {
-                    this.setDrawValues(false)
+                    setDrawValues(false)
                 }
 
-                it.setVisibleXRangeMinimum(10f)
-                it.setVisibleXRangeMaximum(50f)
-                it.setVisibleYRangeMinimum(3f, YAxis.AxisDependency.LEFT)
-                it.setVisibleYRangeMinimum(3f, YAxis.AxisDependency.RIGHT)
-
-                it.isDoubleTapToZoomEnabled = false
-                it.maxHighlightDistance = 20f
-                it.xAxis.granularity = 1f
-                it.axisLeft.granularity = 1f
-                it.axisRight.granularity = 1f
-
                 if (followData) {
-                    it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
+                    @Suppress("DeferredResultUnused")
+                    scope.async(Dispatchers.Main) {
+                        it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
+                    }
                 } else {
                     it.invalidate()
                 }
@@ -165,7 +192,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
                 sortedPoints.forEach { (subId, line) ->
-                    if (line.lines.any { (_, v) -> v.line.isEmpty() }) {
+                    if (line.lines.value.any { (_, v) -> v.line.isEmpty() }) {
                         return@forEach
                     }
 

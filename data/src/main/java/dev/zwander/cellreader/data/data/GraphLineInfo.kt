@@ -5,6 +5,7 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 data class GraphLineInfo(
@@ -20,8 +21,19 @@ data class GraphLineInfo(
     val isSelected = MutableStateFlow(false)
 
     private val _lineWindow = MutableStateFlow<MutableList<Entry>>(mutableListOf())
-    val lineWindow: List<Entry>
-        get() = _lineWindow.value
+
+    val dataSet = _lineWindow.combine(isSelected) { window, selected ->
+        SelectableLineDataSet(window, label, this).apply {
+            this.mode = LineDataSet.Mode.LINEAR
+            this.setDrawCircles(false)
+            this.axisDependency = axis
+            this.highLightColor = Color.WHITE
+
+            this.fillColor = if (selected) Color.WHITE else this@GraphLineInfo.color
+            this.circleColors = listOf(fillColor)
+            this.colors = listOf(fillColor)
+        }
+    }
 
     val line: MutableList<Entry> = object : ArrayList<Entry>() {
         override fun add(element: Entry): Boolean {
