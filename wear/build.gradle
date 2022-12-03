@@ -12,7 +12,6 @@ android {
         targetSdk 33
         versionCode version_code
         versionName version_name
-
     }
 
     buildTypes {
@@ -28,6 +27,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion compose_compiler_version
     }
+    namespace 'dev.zwander.cellreader.wear'
 }
 
 dependencies {
