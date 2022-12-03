@@ -1,7 +1,7 @@
 package dev.zwander.cellreader.data.util
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier

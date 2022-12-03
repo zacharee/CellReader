@@ -22,8 +22,8 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -725,7 +725,7 @@ object CarouselDefaults {
 
     @Composable
     fun colors(
-        thumbColor: Color = MaterialTheme.colors.secondary,
+        thumbColor: Color = MaterialTheme.colorScheme.secondary,
         scrollingThumbColor: Color = thumbColor,
         backgroundColor: Color = contentColorFor(thumbColor).copy(alpha = BgAlpha),
         scrollingBackgroundColor: Color = backgroundColor,

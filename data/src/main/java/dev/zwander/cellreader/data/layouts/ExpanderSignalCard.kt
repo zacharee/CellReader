@@ -3,7 +3,8 @@ package dev.zwander.cellreader.data.layouts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -137,8 +138,8 @@ fun ExpanderSignalCard(
             }
 
             Card(
-                backgroundColor = Color.Transparent,
-                elevation = 8.dp
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                elevation = CardDefaults.elevatedCardElevation()
             ) {
                 contents()
             }

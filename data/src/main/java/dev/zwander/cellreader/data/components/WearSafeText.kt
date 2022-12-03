@@ -1,6 +1,6 @@
 package dev.zwander.cellreader.data.components
 
-import androidx.compose.material.LocalTextStyle
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,7 +59,7 @@ fun WearSafeText(
             style
         )
     } else {
-        androidx.compose.material.Text(
+        androidx.compose.material3.Text(
             text,
             modifier,
             color,

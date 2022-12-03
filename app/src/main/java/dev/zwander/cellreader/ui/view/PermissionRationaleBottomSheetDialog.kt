@@ -7,7 +7,8 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +50,10 @@ class PermissionRationaleBottomSheetDialog(context: Context, private vararg val 
     private fun Content(permissions: Array<out PermissionInfo>, positiveListener: () -> Unit, negativeListener: () -> Unit) {
         CellReaderTheme {
             Surface(
-                color = Color.Transparent
+                shape = RoundedCornerShape(
+                    topStart = 12.dp,
+                    topEnd = 12.dp
+                )
             ) {
                 Column(
                     modifier = Modifier

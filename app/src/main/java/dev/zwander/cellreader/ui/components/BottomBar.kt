@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -173,7 +173,7 @@ private fun BoxScope.BottomBar(
     Column(
         modifier = Modifier
             .background(
-                MaterialTheme.colors.primarySurface,
+                MaterialTheme.colorScheme.surface,
                 MaterialTheme.shapes.large.copy(
                     bottomStart = CornerSize(0.dp),
                     bottomEnd = CornerSize(0.dp)
@@ -211,8 +211,8 @@ private fun BoxScope.BottomBar(
 
         AnimatedVisibility(visible = optionsExpanded) {
             BottomAppBar(
-                backgroundColor = Color.Transparent,
-                elevation = 0.dp,
+                containerColor = Color.Transparent,
+                tonalElevation = 0.dp,
             ) {
                 Spacer(Modifier.size(16.dp))
 

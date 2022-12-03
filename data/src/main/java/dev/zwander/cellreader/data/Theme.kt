@@ -1,7 +1,13 @@
 package dev.zwander.cellreader.data
 
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.darkColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -41,18 +47,38 @@ fun CellReaderTheme(content: @Composable() () -> Unit) {
         background = colorResource(id = R.color.background)
     )
 
-    androidx.compose.material.MaterialTheme(
-        colors = darkColors(
-            primary = colors.primary,
-            primaryVariant = colors.primaryVariant,
-            secondary = colors.secondary,
-            surface = colors.surface,
-            background = colors.background
+    val dark = isSystemInDarkTheme()
+
+    val md3Colors = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (dark) {
+                dynamicDarkColorScheme(context)
+            } else {
+                dynamicLightColorScheme(context)
+            }
+        }
+        dark -> {
+            darkColorScheme(
+                primary = colors.primary,
+                secondary = colors.secondary,
+                tertiary = colors.primaryVariant,
+            )
+        }
+        else -> {
+            lightColorScheme(
+                primary = colors.primary,
+                secondary = colors.secondary,
+                tertiary = colors.primaryVariant
+            )
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = md3Colors,
+        typography = androidx.compose.material3.Typography(
+            bodySmall = typography.body1
         ),
-        typography = androidx.compose.material.Typography(
-            body1 = typography.body1
-        ),
-        shapes = androidx.compose.material.Shapes(
+        shapes = androidx.compose.material3.Shapes(
             small = RoundedCornerShape(12.dp),
             medium = RoundedCornerShape(12.dp),
             large = RoundedCornerShape(12.dp)

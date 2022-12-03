@@ -3,7 +3,7 @@ package dev.zwander.cellreader.ui.components.bardialogs
 import android.graphics.Color
 import android.view.MotionEvent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +39,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
         mutableStateListOf<Int>()
     }
 
-    val textColor = MaterialTheme.colors.onSurface.toColorInt()
+    val textColor = MaterialTheme.colorScheme.onSurface.toColorInt()
 
     val sortedPoints = remember(points) {
         points.toSortedMap(SubsComparator(CellModel.primaryCell.value))

@@ -3,8 +3,9 @@ package dev.zwander.cellreader.data.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.*
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -13,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.ContentAlpha
 import dev.zwander.cellreader.data.util.rememberIsWear
 
 @Composable
@@ -33,7 +33,7 @@ fun WearSafeIconButton(
         )
     } else {
         IconButton(
-            onClick, modifier, enabled, interactionSource, content
+            onClick, modifier, enabled, IconButtonDefaults.iconButtonColors(), interactionSource, content
         )
     }
 }
