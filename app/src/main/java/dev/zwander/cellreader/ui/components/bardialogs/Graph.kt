@@ -15,6 +15,7 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
@@ -40,8 +41,8 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
     val textColor = MaterialTheme.colors.onSurface.toColorInt()
 
-    val sortedPoints by derivedStateOf {
-        points.toSortedMap(SubsComparator(CellModel.primaryCell.value!!))
+    val sortedPoints = remember(points) {
+        points.toSortedMap(SubsComparator(CellModel.primaryCell.value))
     }
 
     Column(
@@ -63,14 +64,14 @@ fun Graph(points: Map<Int, GraphInfo>) {
                     setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                         override fun onNothingSelected() {
                             data.dataSets.forEach { set ->
-                                (set as SelectableLineDataSet).isSelected = false
+                                (set as SelectableLineDataSet).isSelected.value = false
                             }
                             notifyDataSetChanged()
                         }
 
                         override fun onValueSelected(e: Entry, h: Highlight) {
                             data.dataSets.forEachIndexed { index, set ->
-                                (set as SelectableLineDataSet).isSelected = index == h.dataSetIndex
+                                (set as SelectableLineDataSet).isSelected.value = index == h.dataSetIndex
                             }
                             notifyDataSetChanged()
                         }
@@ -109,6 +110,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
             },
             update = {
                 Utils.init(it.context)
+
                 it.data = LineData(
                     sortedPoints.flatMap { (subId, graphInfo) ->
                         if (disabledSubIds.contains(subId)) {
@@ -116,8 +118,13 @@ fun Graph(points: Map<Int, GraphInfo>) {
                         }
 
                         graphInfo.sortedLines.map { (_, line) ->
-                            line.dataSet!!.apply {
-                                this.fillColor = if (line.isSelected) Color.WHITE else line.color
+                            SelectableLineDataSet(line.lineWindow, line.label, line).apply {
+                                this.mode = LineDataSet.Mode.LINEAR
+                                this.setDrawCircles(false)
+                                this.axisDependency = line.axis
+                                this.highLightColor = Color.WHITE
+
+                                this.fillColor = if (line.isSelected.value) Color.WHITE else line.color
                                 this.circleColors = listOf(fillColor)
                                 this.colors = listOf(fillColor)
                             }
@@ -173,7 +180,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
                         },
                         text = stringResource(
                             id = R.string.chart_sim_format,
-                            CellModel.subInfos.value?.get(subId)?.simSlotIndex?.plus(1) ?: subId
+                            CellModel.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
                         ),
                         modifier = Modifier.weight(1f),
                         enabled = disabledSubIds.contains(subId) || disabledSubIds.size < points.keys.size - 1

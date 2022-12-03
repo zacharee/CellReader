@@ -5,7 +5,6 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.AvailabilityException
-import com.google.android.gms.common.api.GoogleApi
 import com.google.android.gms.wearable.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -26,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(DelicateCoroutinesApi::class)
 class BetweenUtils private constructor(private val context: Context) {
     companion object {
@@ -195,12 +193,7 @@ class BetweenUtils private constructor(private val context: Context) {
     private suspend fun getDataClient(): DataClient? {
         val avail = try {
             GoogleApiAvailability.getInstance().checkApiAvailability(
-                GoogleApi(
-                    context,
-                    Wearable.API,
-                    Wearable.WearableOptions.Builder().build(),
-                    GoogleApi.Settings.DEFAULT_SETTINGS
-                )
+                Wearable.getDataClient(context)
             ).await()
 
             true

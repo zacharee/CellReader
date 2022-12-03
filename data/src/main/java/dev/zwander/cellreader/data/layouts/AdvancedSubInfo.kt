@@ -1,7 +1,6 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.annotation.SuppressLint
-import android.telephony.SignalStrength
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,8 +9,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -20,9 +19,6 @@ import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.components.PaddedDivider
 import dev.zwander.cellreader.data.data.LocalCellModel
-import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
-import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
-import dev.zwander.cellreader.data.wrappers.TelephonyDisplayInfoWrapper
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -31,10 +27,10 @@ fun AdvancedSubInfo(
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
-    val subInfos by LocalCellModel.current.LocalSubInfos.current.observeAsState()
-    val displayInfos by LocalCellModel.current.LocalDisplayInfos.current.observeAsState()
-    val signalStrengths = LocalCellModel.current.LocalSignalStrengths.current?.observeAsState()
-    val serviceStates by LocalCellModel.current.LocalServiceStates.current.observeAsState()
+    val subInfos by LocalCellModel.current.subInfos.collectAsState()
+    val displayInfos by LocalCellModel.current.displayInfos.collectAsState()
+    val signalStrengths = LocalCellModel.current.signalStrengths?.collectAsState()
+    val serviceStates by LocalCellModel.current.serviceStates.collectAsState()
 
     val signalStrength = signalStrengths?.value?.get(subId)
 
@@ -45,7 +41,7 @@ fun AdvancedSubInfo(
             LazyColumn(
                 state = scrollState
             ) {
-                displayInfos!![subId]?.let {
+                displayInfos[subId]?.let {
                     item {
                         FlowRow(
                             mainAxisSpacing = 16.dp,
@@ -85,7 +81,7 @@ fun AdvancedSubInfo(
                     )
                 }
 
-                serviceStates!![subId]?.let {
+                serviceStates[subId]?.let {
                     item {
                         FlowRow(
                             mainAxisSpacing = 16.dp,
@@ -97,7 +93,7 @@ fun AdvancedSubInfo(
                     }
                 }
 
-                subInfos!![subId]?.let {
+                subInfos[subId]?.let {
                     item {
                         FlowRow(
                             mainAxisSpacing = 16.dp,

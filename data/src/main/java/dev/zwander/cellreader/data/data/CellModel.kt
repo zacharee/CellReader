@@ -4,13 +4,12 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.compositionLocalOf
-import androidx.lifecycle.MutableLiveData
 import dev.zwander.cellreader.data.IPrivilegedListener
 import dev.zwander.cellreader.data.IShizukuUserService
+import kotlinx.coroutines.flow.MutableStateFlow
 
 object CellModel : CellModelBase() {
-    val signalStrengths = MutableLiveData<HashMap<Int, SignalStrength?>>(hashMapOf())
+    override val signalStrengths = MutableStateFlow<HashMap<Int, SignalStrength?>>(hashMapOf())
     val telephonies = HashMap<Int, TelephonyManager>()
 
     var service: IShizukuUserService? = null
@@ -20,8 +19,6 @@ object CellModel : CellModelBase() {
 
     @Suppress("DEPRECATION")
     val telephonyListeners = HashMap<Int, PhoneStateListener>()
-
-    override val LocalSignalStrengths = compositionLocalOf<MutableLiveData<HashMap<Int, SignalStrength?>>?> { signalStrengths }
 
     fun destroy() {
         telephonies.forEach { (subId, telephony) ->

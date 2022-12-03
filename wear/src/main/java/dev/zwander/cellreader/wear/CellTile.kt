@@ -53,9 +53,9 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
             DpSize((px.x / this.density).dp, (px.y / this.density).dp)
         } }
 
-        val subIds = CellModelWear.subIds.value!!
-        val cellInfos = CellModelWear.cellInfos.value!!
-        val strengthInfos = CellModelWear.strengthInfos.value!!
+        val subIds = CellModelWear.subIds.value
+        val cellInfos = CellModelWear.cellInfos.value
+        val strengthInfos = CellModelWear.strengthInfos.value
 
         val items = subIds.map { subId ->
             val cellInfo = cellInfos[subId]

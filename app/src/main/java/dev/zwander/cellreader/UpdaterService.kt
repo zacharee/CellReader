@@ -202,7 +202,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                         }
                     }
 
-                    if (subInfos.value!![subId] != null || isEmpty) {
+                    if (subInfos.value[subId] != null || isEmpty) {
                         cellInfos.update {
                             it!![subId] = listOf()
                         }
@@ -212,12 +212,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
                         subIds.update {
                             it!!.add(subId)
-                            it.updateComparator(SubsComparator(primaryCell.value!!))
+                            it.updateComparator(SubsComparator(primaryCell.value))
                         }
 
                         launch(Dispatchers.IO) {
-                            betweenUtils.queueSubscriptionInfo(subInfos.value!!)
-                                betweenUtils.queueNewSubId(subIds.value!!)
+                            betweenUtils.queueSubscriptionInfo(subInfos.value)
+                                betweenUtils.queueNewSubId(subIds.value)
                         }
 
                         subId to telephony.createForSubscriptionId(subId).also { telephony ->
@@ -267,15 +267,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val foundIDs = mutableListOf<String>()
             val newInfo = sorted.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
 
-            launch(Dispatchers.Main) {
-                cellInfos.update {
-                    it!![subId] = newInfo
-                }
+            cellInfos.update {
+                it!![subId] = newInfo
+            }
 
-                launch(Dispatchers.IO) {
-                    betweenUtils.queueCellInfos(cellInfos.value!!)
-                }
+            launch(Dispatchers.IO) {
+                betweenUtils.queueCellInfos(cellInfos.value)
+            }
 
+            launch {
                 updateWidgets()
             }
         }
@@ -305,19 +305,19 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
         }
 
-        launch(Dispatchers.Main) {
-            with (CellModel) {
-                signalStrengths.update {
-                    it!![subId] = strength
-                }
-                strengthInfos.update {
-                    it!![subId] = newInfo
-                }
+        with (CellModel) {
+            signalStrengths.update {
+                it!![subId] = strength
+            }
+            strengthInfos.update {
+                it!![subId] = newInfo
+            }
 
-                launch(Dispatchers.IO) {
-                    betweenUtils.queueSignalStrengths(strengthInfos.value!!)
-                }
+            launch(Dispatchers.IO) {
+                betweenUtils.queueSignalStrengths(strengthInfos.value)
+            }
 
+            launch {
                 updateWidgets()
             }
         }
@@ -327,15 +327,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         with (CellModel) {
             val wrapped = serviceState?.run { ServiceStateWrapper(this) }
 
-            launch(Dispatchers.Main) {
-                serviceStates.update {
-                    it!![subId] = wrapped
-                }
+            serviceStates.update {
+                it!![subId] = wrapped
+            }
 
-                launch(Dispatchers.IO) {
-                    betweenUtils.queueServiceState(serviceStates.value!!)
-                }
+            launch(Dispatchers.IO) {
+                betweenUtils.queueServiceState(serviceStates.value)
+            }
 
+            launch {
                 updateWidgets()
             }
         }
@@ -348,29 +348,29 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     ) {}
 
     override fun updateDisplayInfo(subId: Int, telephonyDisplayInfo: TelephonyDisplayInfo?) {
-        launch(Dispatchers.Main) {
-            CellModel.displayInfos.update {
-                it!![subId] = telephonyDisplayInfo?.let { info -> TelephonyDisplayInfoWrapper(info) }
-            }
+        CellModel.displayInfos.update {
+            it!![subId] = telephonyDisplayInfo?.let { info -> TelephonyDisplayInfoWrapper(info) }
+        }
 
-            launch(Dispatchers.IO) {
-                betweenUtils.queueDisplayInfos(CellModel.displayInfos.value!!)
-            }
+        launch(Dispatchers.IO) {
+            betweenUtils.queueDisplayInfos(CellModel.displayInfos.value)
+        }
 
+        launch {
             updateWidgets()
         }
     }
 
     override fun updateDataConnectionState(subId: Int, state: Int, networkType: Int) {
-        launch(Dispatchers.Main) {
-            CellModel.dataConnectionStates.update {
-                it!![subId] = DataConnectionState(subId, state, networkType)
-            }
+        CellModel.dataConnectionStates.update {
+            it!![subId] = DataConnectionState(subId, state, networkType)
+        }
 
-            launch(Dispatchers.IO) {
-                betweenUtils.queueDataConnectionStates(CellModel.dataConnectionStates.value!!)
-            }
+        launch(Dispatchers.IO) {
+            betweenUtils.queueDataConnectionStates(CellModel.dataConnectionStates.value)
+        }
 
+        launch {
             updateWidgets()
         }
     }
@@ -428,27 +428,23 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     }
                 } else {
                     newList.forEach { subInfo ->
-                        withContext(Dispatchers.Main) {
-                            CellModel.subInfos.update {
-                                it!![subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
-                            }
-
-                            withContext(Dispatchers.IO) {
-                                betweenUtils.queueSubscriptionInfo(CellModel.subInfos.value!!)
-                            }
-
-                            updateWidgets()
+                        CellModel.subInfos.update {
+                            it!![subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
                         }
+
+                        withContext(Dispatchers.IO) {
+                            betweenUtils.queueSubscriptionInfo(CellModel.subInfos.value)
+                        }
+
+                        updateWidgets()
                     }
                 }
 
-                withContext(Dispatchers.Main) {
-                    CellModel.primaryCell.value = defaultId
-                    CellModel.subIds.update {
-                        it!!.updateComparator(SubsComparator(defaultId))
-                    }
-                    updateWidgets()
+                CellModel.primaryCell.value = defaultId
+                CellModel.subIds.update {
+                    it!!.updateComparator(SubsComparator(defaultId))
                 }
+                updateWidgets()
 
                 withContext(Dispatchers.IO) {
                     betweenUtils.queuePrimaryCell(defaultId)

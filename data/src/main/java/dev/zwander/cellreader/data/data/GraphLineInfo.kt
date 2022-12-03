@@ -1,11 +1,11 @@
 package dev.zwander.cellreader.data.data
 
 import android.graphics.Color
-import androidx.compose.runtime.*
-import androidx.lifecycle.MutableLiveData
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 data class GraphLineInfo(
     val subId: Int,
@@ -17,42 +17,37 @@ data class GraphLineInfo(
         const val WINDOW_SIZE = 150
     }
 
-    var isSelected by mutableStateOf(false)
+    val isSelected = MutableStateFlow(false)
 
-    var dataSet by mutableStateOf<SelectableLineDataSet?>(null)
-
-    private val _lineWindow = MutableLiveData<MutableList<Entry>>(mutableListOf()).apply {
-        observeForever {
-            dataSet = SelectableLineDataSet(it, label, this@GraphLineInfo).apply {
-                this.mode = LineDataSet.Mode.LINEAR
-                this.setDrawCircles(false)
-                this.axisDependency = axis
-                this.highLightColor = Color.WHITE
-            }
-        }
-    }
+    private val _lineWindow = MutableStateFlow<MutableList<Entry>>(mutableListOf())
+    val lineWindow: List<Entry>
+        get() = _lineWindow.value
 
     val line: MutableList<Entry> = object : ArrayList<Entry>() {
         override fun add(element: Entry): Boolean {
-            _lineWindow.value?.add(element)
+            val value = ArrayList(_lineWindow.value)
 
-            if ((_lineWindow.value?.size ?: 0) > WINDOW_SIZE) {
-                _lineWindow.value?.removeAt(0)
+            value.add(element)
+
+            if (value.size > WINDOW_SIZE) {
+                value.removeAt(0)
             }
 
-            _lineWindow.postValue(_lineWindow.value)
+            _lineWindow.value = value
 
             return super.add(element)
         }
 
         override fun add(index: Int, element: Entry) {
-            _lineWindow.value?.add(element)
+            val value = ArrayList(_lineWindow.value)
 
-            if ((_lineWindow.value?.size ?: 0) > WINDOW_SIZE) {
-                _lineWindow.value?.removeAt(0)
+            value.add(element)
+
+            if (value.size > WINDOW_SIZE) {
+                value.removeAt(0)
             }
 
-            _lineWindow.postValue(_lineWindow.value)
+            _lineWindow.value = value
 
             super.add(index, element)
         }
@@ -66,13 +61,22 @@ data class GraphLineInfo(
         }
 
         override fun removeAll(elements: Collection<Entry>): Boolean {
-            _lineWindow.value?.removeAll(elements)
+            val value = ArrayList(_lineWindow.value)
+            val elementsSet = elements.toSet()
 
-            return super.removeAll(elements.toSet())
+            value.removeAll(elementsSet)
+
+            _lineWindow.value = value
+
+            return super.removeAll(elementsSet)
         }
 
         override fun remove(element: Entry): Boolean {
-            _lineWindow.value?.remove(element)
+            val value = ArrayList(_lineWindow.value)
+
+            value.remove(element)
+
+            _lineWindow.value = value
 
             return super.remove(element)
         }

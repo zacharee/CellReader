@@ -174,31 +174,31 @@ class DataHandler private constructor(private val context: Context) {
         val callback: ((IDataHandler) -> Unit) = {
             when (path) {
                 BetweenUtils.CELL_INFOS_PATH -> {
-                    it.onNewCellInfos(CellModelWear.cellInfos.value!!)
+                    it.onNewCellInfos(CellModelWear.cellInfos.value)
                 }
                 BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH -> {
-                    it.onNewSignalStrengths(CellModelWear.strengthInfos.value!!)
+                    it.onNewSignalStrengths(CellModelWear.strengthInfos.value)
                 }
                 BetweenUtils.SERVICE_STATE_PATH -> {
-                    it.onNewServiceStates(CellModelWear.serviceStates.value!!)
+                    it.onNewServiceStates(CellModelWear.serviceStates.value)
                 }
                 BetweenUtils.SUB_INFO_PATH -> {
-                    it.onNewSubInfos(CellModelWear.subInfos.value!!)
+                    it.onNewSubInfos(CellModelWear.subInfos.value)
                 }
                 BetweenUtils.SUB_ID_PATH -> {
-                    it.onNewSubIds(CellModelWear.subIds.value!!)
+                    it.onNewSubIds(CellModelWear.subIds.value)
                 }
                 BetweenUtils.CLEAR_PATH -> {
                     it.onClear()
                 }
                 BetweenUtils.PRIMARY_CELL_PATH -> {
-                    it.onNewPrimaryCell(CellModelWear.primaryCell.value!!)
+                    it.onNewPrimaryCell(CellModelWear.primaryCell.value)
                 }
                 BetweenUtils.DATA_CONNECTION_STATE_PATH -> {
-                    it.onNewDataConnectionStates(CellModelWear.dataConnectionStates.value!!)
+                    it.onNewDataConnectionStates(CellModelWear.dataConnectionStates.value)
                 }
                 BetweenUtils.DISPLAY_INFOS_PATH -> {
-                    it.onNewDisplayInfos(CellModelWear.displayInfos.value!!)
+                    it.onNewDisplayInfos(CellModelWear.displayInfos.value)
                 }
             }
         }
@@ -278,7 +278,7 @@ class DataHandler private constructor(private val context: Context) {
             withContext(Dispatchers.Main) {
                 CellModelWear.subIds.update {
                     it!!.addAll(subIds)
-                    it.updateComparator(SubsComparator(CellModelWear.primaryCell.value!!))
+                    it.updateComparator(SubsComparator(CellModelWear.primaryCell.value))
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()

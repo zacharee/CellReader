@@ -32,6 +32,7 @@ fun WearSafeText(
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
@@ -40,13 +41,42 @@ fun WearSafeText(
 
     if (isWear) {
         androidx.wear.compose.material.Text(
-            text, modifier, color, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing, textDecoration, textAlign,
-            lineHeight, overflow, softWrap, maxLines, onTextLayout, style
+            text,
+            modifier,
+            color,
+            fontSize,
+            fontStyle,
+            fontWeight,
+            fontFamily,
+            letterSpacing,
+            textDecoration,
+            textAlign,
+            lineHeight,
+            overflow,
+            softWrap,
+            maxLines,
+            onTextLayout,
+            style
         )
     } else {
         androidx.compose.material.Text(
-            text, modifier, color, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing, textDecoration, textAlign,
-            lineHeight, overflow, softWrap, maxLines, onTextLayout, style
+            text,
+            modifier,
+            color,
+            fontSize,
+            fontStyle,
+            fontWeight,
+            fontFamily,
+            letterSpacing,
+            textDecoration,
+            textAlign,
+            lineHeight,
+            overflow,
+            softWrap,
+            maxLines,
+            minLines,
+            onTextLayout,
+            style
         )
     }
 }

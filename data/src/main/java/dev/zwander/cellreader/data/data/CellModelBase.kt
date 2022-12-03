@@ -4,49 +4,45 @@ import android.telephony.SignalStrength
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.lifecycle.MutableLiveData
 import dev.zwander.cellreader.data.SubsComparator
 import dev.zwander.cellreader.data.util.UpdatableTreeSet
-import dev.zwander.cellreader.data.wrappers.*
-import kotlin.collections.HashMap
+import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
+import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
+import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
+import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
+import dev.zwander.cellreader.data.wrappers.TelephonyDisplayInfoWrapper
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface ICellModel {
-    val primaryCell: MutableLiveData<Int>
-    val subIds: MutableLiveData<UpdatableTreeSet<Int>>
-    val cellInfos: MutableLiveData<HashMap<Int, List<CellInfoWrapper>>>
-    val strengthInfos: MutableLiveData<HashMap<Int, List<CellSignalStrengthWrapper>>>
-    val subInfos: MutableLiveData<HashMap<Int, SubscriptionInfoWrapper?>>
-    val serviceStates: MutableLiveData<HashMap<Int, ServiceStateWrapper?>>
-    val displayInfos: MutableLiveData<HashMap<Int, TelephonyDisplayInfoWrapper?>>
-    val dataConnectionStates: MutableLiveData<HashMap<Int, DataConnectionState>>
+    val primaryCell: MutableStateFlow<Int>
+    val subIds: MutableStateFlow<UpdatableTreeSet<Int>>
+    val cellInfos: MutableStateFlow<HashMap<Int, List<CellInfoWrapper>>>
+    val strengthInfos: MutableStateFlow<HashMap<Int, List<CellSignalStrengthWrapper>>>
+    val subInfos: MutableStateFlow<HashMap<Int, SubscriptionInfoWrapper?>>
+    val serviceStates: MutableStateFlow<HashMap<Int, ServiceStateWrapper?>>
+    val displayInfos: MutableStateFlow<HashMap<Int, TelephonyDisplayInfoWrapper?>>
+    val dataConnectionStates: MutableStateFlow<HashMap<Int, DataConnectionState>>
 
     fun clear()
 }
 
 abstract class CellModelBase : ICellModel {
-    override val primaryCell = MutableLiveData(0)
+    override val primaryCell = MutableStateFlow(0)
 
-    override val subIds by lazy { MutableLiveData(UpdatableTreeSet(SubsComparator(primaryCell.value!!))) }
-    override val cellInfos = MutableLiveData<HashMap<Int, List<CellInfoWrapper>>>(hashMapOf())
-    override val strengthInfos = MutableLiveData<HashMap<Int, List<CellSignalStrengthWrapper>>>(hashMapOf())
-    override val subInfos = MutableLiveData<HashMap<Int, SubscriptionInfoWrapper?>>(hashMapOf())
-    override val serviceStates = MutableLiveData<HashMap<Int, ServiceStateWrapper?>>(hashMapOf())
-    override val displayInfos = MutableLiveData<HashMap<Int, TelephonyDisplayInfoWrapper?>>(hashMapOf())
-    override val dataConnectionStates = MutableLiveData<HashMap<Int, DataConnectionState>>(hashMapOf())
+    override val subIds by lazy { MutableStateFlow(UpdatableTreeSet(SubsComparator(primaryCell.value))) }
+    override val cellInfos = MutableStateFlow<HashMap<Int, List<CellInfoWrapper>>>(hashMapOf())
+    override val strengthInfos = MutableStateFlow<HashMap<Int, List<CellSignalStrengthWrapper>>>(hashMapOf())
+    override val subInfos = MutableStateFlow<HashMap<Int, SubscriptionInfoWrapper?>>(hashMapOf())
+    override val serviceStates = MutableStateFlow<HashMap<Int, ServiceStateWrapper?>>(hashMapOf())
+    override val displayInfos = MutableStateFlow<HashMap<Int, TelephonyDisplayInfoWrapper?>>(hashMapOf())
+    override val dataConnectionStates = MutableStateFlow<HashMap<Int, DataConnectionState>>(hashMapOf())
 
-    val LocalSubIds = compositionLocalOf { subIds }
-    val LocalCellInfos = compositionLocalOf { cellInfos }
-    val LocalStrengthInfos = compositionLocalOf { strengthInfos }
-    val LocalSubInfos = compositionLocalOf { subInfos }
-    val LocalServiceStates = compositionLocalOf { serviceStates }
-    val LocalDisplayInfos = compositionLocalOf { displayInfos }
-    val LocalDataConnectionStates = compositionLocalOf { dataConnectionStates }
-    open val LocalSignalStrengths = compositionLocalOf<MutableLiveData<HashMap<Int, SignalStrength?>>?> { null }
+    open val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>? = null
 
     override fun clear() {
         primaryCell.value = 0
 
-        subIds.value = UpdatableTreeSet(SubsComparator(primaryCell.value!!))
+        subIds.value = UpdatableTreeSet(SubsComparator(primaryCell.value))
         cellInfos.value = hashMapOf()
         strengthInfos.value = hashMapOf()
         subInfos.value = hashMapOf()

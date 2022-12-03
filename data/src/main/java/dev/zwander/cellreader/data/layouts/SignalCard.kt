@@ -1,17 +1,17 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.os.Build
-import android.telephony.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
+import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.layouts.cellIdentity.CellIdentity
 import dev.zwander.cellreader.data.layouts.cellsignalstrength.CellSignalStrength
-import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.typeString
-import dev.zwander.cellreader.data.util.*
+import dev.zwander.cellreader.data.util.CellUtils
+import dev.zwander.cellreader.data.util.FormatText
+import dev.zwander.cellreader.data.util.onCast
 import dev.zwander.cellreader.data.wrappers.CellInfoLteWrapper
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 

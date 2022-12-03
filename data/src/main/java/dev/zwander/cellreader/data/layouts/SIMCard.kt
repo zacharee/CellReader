@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -54,9 +53,9 @@ fun SIMCard(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val subInfos by LocalCellModel.current.LocalSubInfos.current.observeAsState()
-    val strengthInfos by LocalCellModel.current.LocalStrengthInfos.current.observeAsState()
-    val serviceStates by LocalCellModel.current.LocalServiceStates.current.observeAsState()
+    val subInfos by LocalCellModel.current.subInfos.collectAsState()
+    val strengthInfos by LocalCellModel.current.strengthInfos.collectAsState()
+    val serviceStates by LocalCellModel.current.serviceStates.collectAsState()
 
     Card(
         modifier = modifier,
@@ -82,12 +81,12 @@ fun SIMCard(
                     bottom = 0.dp
                 )
             ) {
-                var rplmn by remember(serviceStates!![subId]) {
+                var rplmn by remember(serviceStates[subId]) {
                     mutableStateOf("000-000")
                 }
 
-                LaunchedEffect(key1 = serviceStates!![subId]) {
-                    rplmn = serviceStates!![subId]?.getNetworkRegistrationInfoListForTransportType(
+                LaunchedEffect(key1 = serviceStates[subId]) {
+                    rplmn = serviceStates[subId]?.getNetworkRegistrationInfoListForTransportType(
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN
                     )
                         ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
@@ -99,7 +98,7 @@ fun SIMCard(
                 ) {
                     Spacer(Modifier.weight(1f))
 
-                    subInfos!![subId]?.iconBitmapBmp?.let { bitmap ->
+                    subInfos[subId]?.iconBitmapBmp?.let { bitmap ->
                         bitmap.asImageBitmap().let {
                             Image(
                                 bitmap = it,
@@ -120,16 +119,16 @@ fun SIMCard(
 
                     val type = ServiceStateWrapper.rilRadioTechnologyToString(
                         context,
-                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates!![subId]?.dataNetworkType ?: 0)
+                        ServiceStateWrapper.networkTypeToRilRadioTechnology(serviceStates[subId]?.dataNetworkType ?: 0)
                     )
 
                     val displayType = when {
-                        serviceStates!![subId]?.dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN -> type
-                        strengthInfos!![subId]?.run {
+                        serviceStates[subId]?.dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN -> type
+                        strengthInfos[subId]?.run {
                             any { it is CellSignalStrengthNrWrapper } &&
                                     any { it is CellSignalStrengthLteWrapper }
                         } == true -> stringResource(id = R.string.nr_nsa)
-                        strengthInfos!![subId]?.run {
+                        strengthInfos[subId]?.run {
                             any { it is CellSignalStrengthNrWrapper } &&
                                     none { it is CellSignalStrengthLteWrapper }
                         } == true -> stringResource(id = R.string.nr_sa)
@@ -137,7 +136,7 @@ fun SIMCard(
                     }
 
                     WearSafeText(
-                        text = "${subInfos!![subId]?.carrierName} (${rplmn}) - $displayType",
+                        text = "${subInfos[subId]?.carrierName} (${rplmn}) - $displayType",
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -177,9 +176,9 @@ fun SIMCard(
                         mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FormatText(R.string.carrier_aggregation_format, "${serviceStates!![subId]?.isUsingCarrierAggregation}")
+                        FormatText(R.string.carrier_aggregation_format, "${serviceStates[subId]?.isUsingCarrierAggregation}")
 
-                        serviceStates!![subId]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
+                        serviceStates[subId]?.cellBandwidths?.filterNot { it == Int.MAX_VALUE }?.joinToString(", ")?.let { bandwidths ->
                             if (bandwidths.isNotBlank()) {
                                 FormatText(R.string.bandwidths_format, bandwidths)
                             }
@@ -190,8 +189,8 @@ fun SIMCard(
                                 R.string.nr_state_format,
                                 CellUtils.formatNrStateAndConnectionString(
                                     context,
-                                    serviceStates!![subId]?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE,
-                                    serviceStates!![subId]?.nrFrequencyRange ?: ServiceState.FREQUENCY_RANGE_UNKNOWN
+                                    serviceStates[subId]?.nrState ?: NetworkRegistrationInfo.NR_STATE_NONE,
+                                    serviceStates[subId]?.nrFrequencyRange ?: ServiceState.FREQUENCY_RANGE_UNKNOWN
                                 )
                             )
                         }

@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -103,7 +103,7 @@ fun Color.toColorInt(): Int {
     return android.graphics.Color.argb(alpha, red, green, blue)
 }
 
-inline fun <reified T> MutableLiveData<T>.update(noinline clone: ((T?) -> T)? = null, noinline block: ((T?) -> Unit)? = null) {
+inline fun <reified T> MutableStateFlow<T>.update(noinline clone: ((T?) -> T)? = null, noinline block: ((T?) -> Unit)? = null) {
     val c = if (clone != null) {
         clone(value)
     } else {

@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,9 +28,9 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
-    val subIds by CellModel.subIds.observeAsState()
-    val cellInfos by CellModel.cellInfos.observeAsState()
-    val strengthInfos by CellModel.strengthInfos.observeAsState()
+    val subIds by CellModel.subIds.collectAsState()
+    val cellInfos by CellModel.cellInfos.collectAsState()
+    val strengthInfos by CellModel.strengthInfos.collectAsState()
 
     SelectionContainer {
         val state = rememberLazyGridState()
@@ -44,7 +44,7 @@ fun MainContent() {
             columns = GridCells.Adaptive(minSize = 300.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            subIds!!.forEachIndexed { subIndex, t ->
+            subIds.forEachIndexed { subIndex, t ->
                 item(t, span = { GridItemSpan(this.maxLineSpan) }) {
                     SIMCard(
                         subId = t,
@@ -58,18 +58,18 @@ fun MainContent() {
                     )
                 }
 
-                val lastCellIndex = cellInfos!![t]?.lastIndex ?: 0
-                val lastStrengthIndex = strengthInfos!![t]?.lastIndex ?: 0
-                val cellInfosEmpty = cellInfos!![t]?.isEmpty() ?: true
+                val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
+                val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
+                val cellInfosEmpty = cellInfos[t]?.isEmpty() ?: true
 
-                itemsIndexed(strengthInfos!![t]!!, { index, _ -> "$t:$index" }) { index, item ->
+                itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
                     val isFinal = index == lastStrengthIndex && cellInfosEmpty
 
                     AnimatedVisibility(
                         visible = showingCells[t] != false,
                         modifier = Modifier
                             .animateItemPlacement()
-                            .padding(bottom = if (!isFinal || subIndex != subIds!!.size - 1) 8.dp else 0.dp),
+                            .padding(bottom = if (!isFinal || subIndex != subIds.size - 1) 8.dp else 0.dp),
                         enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                         exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                     ) {
@@ -82,7 +82,7 @@ fun MainContent() {
                     }
                 }
 
-                itemsIndexed(cellInfos!![t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
+                itemsIndexed(cellInfos[t]!!, { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
                     val isFinal = index == lastCellIndex
 
                     val key = remember(item.cellIdentity) {
@@ -93,7 +93,7 @@ fun MainContent() {
                         visible = showingCells[t] != false,
                         modifier = Modifier
                             .animateItemPlacement()
-                            .padding(bottom = if (!isFinal || subIndex != subIds!!.size - 1) 8.dp else 0.dp),
+                            .padding(bottom = if (!isFinal || subIndex != subIds.size - 1) 8.dp else 0.dp),
                         enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopEnd),
                         exit = shrinkOut(clip = false, shrinkTowards = Alignment.TopEnd) + fadeOut()
                     ) {

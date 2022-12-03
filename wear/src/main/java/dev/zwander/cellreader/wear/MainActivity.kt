@@ -3,24 +3,42 @@ package dev.zwander.cellreader.wear
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.*
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.ScalingLazyColumn
+import androidx.wear.compose.material.Vignette
+import androidx.wear.compose.material.VignettePosition
+import androidx.wear.compose.material.itemsIndexed
+import androidx.wear.compose.material.rememberScalingLazyListState
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,9 +79,9 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
-    val subIds by CellModelWear.subIds.observeAsState()
-    val cellInfos by CellModelWear.cellInfos.observeAsState()
-    val strengthInfos by CellModelWear.strengthInfos.observeAsState()
+    val subIds by CellModelWear.subIds.collectAsState()
+    val cellInfos by CellModelWear.cellInfos.collectAsState()
+    val strengthInfos by CellModelWear.strengthInfos.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +89,7 @@ fun MainContent() {
             Vignette(vignettePosition = VignettePosition.TopAndBottom)
         },
     ) {
-        Crossfade(targetState = subIds!!.isEmpty()) {
+        Crossfade(targetState = subIds.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -85,7 +103,7 @@ fun MainContent() {
                         modifier = Modifier.fillMaxHeight(),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
-                        subIds!!.forEachIndexed { subIndex, t ->
+                        subIds.forEachIndexed { subIndex, t ->
                             item(t) {
                                 SIMCard(
                                     subId = t,
@@ -98,18 +116,18 @@ fun MainContent() {
                                 )
                             }
 
-                            val lastCellIndex = cellInfos!![t]?.lastIndex ?: 0
-                            val lastStrengthIndex = strengthInfos!![t]?.lastIndex ?: 0
-                            val cellInfosEmpty = cellInfos!![t]?.isEmpty() ?: true
+                            val lastCellIndex = cellInfos[t]?.lastIndex ?: 0
+                            val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
+                            val cellInfosEmpty = cellInfos[t]?.isEmpty() ?: true
 
-                            strengthInfos!![t]?.let { strengthInfo ->
+                            strengthInfos[t]?.let { strengthInfo ->
                                 itemsIndexed(strengthInfo, { index, _ -> "$t:$index" }) { index, item ->
                                     val isFinal = index == lastStrengthIndex && cellInfosEmpty
 
                                     AnimatedVisibility(
                                         visible = showingCells[t] != false,
                                         modifier = Modifier
-                                            .padding(bottom = if (!isFinal || subIndex != subIds!!.size - 1) 8.dp else 0.dp),
+                                            .padding(bottom = if (!isFinal || subIndex != subIds.size - 1) 8.dp else 0.dp),
                                         enter = fadeIn() + expandIn(
                                             clip = false,
                                             expandFrom = Alignment.TopEnd
@@ -129,7 +147,7 @@ fun MainContent() {
                                 }
                             }
 
-                            cellInfos!![t]?.let { cellInfo ->
+                            cellInfos[t]?.let { cellInfo ->
                                 itemsIndexed(
                                     cellInfo,
                                     { _, item -> "$t:${item.cellIdentity}" }) { index, item ->
@@ -138,7 +156,7 @@ fun MainContent() {
                                     AnimatedVisibility(
                                         visible = showingCells[t] != false,
                                         modifier = Modifier
-                                            .padding(bottom = if (!isFinal || subIndex != subIds!!.size - 1) 8.dp else 0.dp),
+                                            .padding(bottom = if (!isFinal || subIndex != subIds.size - 1) 8.dp else 0.dp),
                                         enter = fadeIn() + expandIn(
                                             clip = false,
                                             expandFrom = Alignment.TopEnd
