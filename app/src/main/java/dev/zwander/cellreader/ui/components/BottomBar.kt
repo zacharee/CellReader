@@ -48,8 +48,10 @@ fun BoxScope.BottomBarScrimContainer() {
         mutableStateOf<BottomDialogPage?>(null)
     }
 
-    val showFullSize by derivedStateOf {
-        scrimFullSize || expanded
+    val showFullSize by remember(scrimFullSize, expanded) {
+        derivedStateOf {
+            scrimFullSize || expanded
+        }
     }
 
     val bg by animateColorAsState(
@@ -173,7 +175,7 @@ private fun BoxScope.BottomBar(
     Column(
         modifier = Modifier
             .background(
-                MaterialTheme.colorScheme.surface,
+                MaterialTheme.colorScheme.surfaceVariant,
                 MaterialTheme.shapes.large.copy(
                     bottomStart = CornerSize(0.dp),
                     bottomEnd = CornerSize(0.dp)
@@ -228,7 +230,13 @@ private fun BoxScope.BottomBar(
                             WearSafeIcon(
                                 painter = painterResource(id = buttonInfo.iconRes),
                                 contentDescription = stringResource(id = buttonInfo.descRes),
-                                tint = if (whichDialog == buttonInfo.whichDialog) Color.White else null
+                                tint = if (whichDialog == buttonInfo.whichDialog) {
+                                    null
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                        alpha = 0.7f
+                                    )
+                                }
                             )
                         }
                     }
@@ -243,7 +251,7 @@ private fun BoxScope.BottomBar(
         }
 
         val dialogs = remember {
-            mapOf<BottomDialogPage, @Composable()() -> Unit>(
+            mapOf<BottomDialogPage, @Composable () -> Unit>(
                 BottomDialogPage.SUPPORTERS to { Supporters() },
                 BottomDialogPage.ABOUT to { About() },
                 BottomDialogPage.GRAPH to { Graph(points) },
@@ -270,4 +278,3 @@ private fun BoxScope.BottomBar(
         }
     }
 }
-

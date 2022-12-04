@@ -27,6 +27,15 @@ import dev.zwander.cellreader.data.util.rememberIsWear
 val LocalAnimationDuration = staticCompositionLocalOf { 0 }
 
 @Composable
+fun getColors() = Colors(
+    primary = colorResource(id = R.color.purple_500),
+    primaryVariant = colorResource(id = R.color.purple_200),
+    secondary = colorResource(id = R.color.teal_200),
+    surface = colorResource(id = R.color.surface),
+    background = colorResource(id = R.color.background)
+)
+
+@Composable
 fun CellReaderTheme(content: @Composable() () -> Unit) {
     val context = LocalContext.current
     val isWear = context.rememberIsWear()
@@ -39,15 +48,8 @@ fun CellReaderTheme(content: @Composable() () -> Unit) {
         )
     )
 
-    val colors = Colors(
-        primary = colorResource(id = R.color.purple_500),
-        primaryVariant = colorResource(id = R.color.purple_200),
-        secondary = colorResource(id = R.color.teal_200),
-        surface = colorResource(id = R.color.surface),
-        background = colorResource(id = R.color.background)
-    )
-
     val dark = isSystemInDarkTheme()
+    val colors = getColors()
 
     val md3Colors = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

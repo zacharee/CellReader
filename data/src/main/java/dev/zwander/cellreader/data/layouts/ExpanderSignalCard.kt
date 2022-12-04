@@ -1,11 +1,24 @@
 package dev.zwander.cellreader.data.layouts
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,7 +30,12 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import dev.zwander.cellreader.data.LocalAnimationDuration
-import dev.zwander.cellreader.data.components.*
+import dev.zwander.cellreader.data.components.Expander
+import dev.zwander.cellreader.data.components.HybridFlowRow
+import dev.zwander.cellreader.data.components.IndenticatorArrow
+import dev.zwander.cellreader.data.components.IndenticatorLine
+import dev.zwander.cellreader.data.components.LevelIndicator
+import dev.zwander.cellreader.data.components.PaddedDivider
 import dev.zwander.cellreader.data.util.angledGradient
 import dev.zwander.cellreader.data.util.anticipateDecelerateInterpolator
 
@@ -137,7 +155,7 @@ fun ExpanderSignalCard(
                 }
             }
 
-            Card(
+            ForceLightContentCard(
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                 elevation = CardDefaults.elevatedCardElevation()
             ) {

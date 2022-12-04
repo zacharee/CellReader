@@ -2,12 +2,16 @@ package dev.zwander.cellreader.data.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
@@ -32,6 +36,8 @@ fun IndenticatorLine(
     val lineWidth = if (isWear) 2 else 3
     val finalFactor = if (isWear) 5.5f else 7.5f
 
+    val color = MaterialTheme.colorScheme.onBackground
+
     Canvas(
         modifier = Modifier
             .padding(start = (lineWidth / 2f).dp)
@@ -39,7 +45,7 @@ fun IndenticatorLine(
             .height((size.height / density.density).dp),
     ) {
         drawLine(
-            brush = SolidColor(Color.White),
+            brush = SolidColor(color),
             cap = StrokeCap.Round,
             start = Offset.Zero,
             end = Offset(
@@ -56,8 +62,11 @@ fun IndenticatorArrow() {
     val context = LocalContext.current
     val isWear = context.rememberIsWear()
 
+    val color = MaterialTheme.colorScheme.onBackground
+
     Image(
         painter = painterResource(id = R.drawable.indent_arrow),
+        colorFilter = ColorFilter.tint(color),
         contentDescription = null,
         modifier = Modifier
             .padding(start = 0.dp, end = 4.dp)

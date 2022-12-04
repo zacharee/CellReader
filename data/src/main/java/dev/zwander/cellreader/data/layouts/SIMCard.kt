@@ -14,7 +14,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,7 +57,7 @@ fun SIMCard(
     val strengthInfos by LocalCellModel.current.strengthInfos.collectAsState()
     val serviceStates by LocalCellModel.current.serviceStates.collectAsState()
 
-    Card(
+    ForceLightContentCard(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
