@@ -85,7 +85,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         startForeground(100, n)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            subs.addOnSubscriptionsChangedListener(Dispatchers.IO.asExecutor(), subsListener)
+            subs.addOnSubscriptionsChangedListener(mainExecutor, subsListener)
         } else {
             @Suppress("DEPRECATION")
             subs.addOnSubscriptionsChangedListener(subsListener)
@@ -217,7 +217,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
                         launch(Dispatchers.IO) {
                             betweenUtils.queueSubscriptionInfo(subInfos.value)
-                                betweenUtils.queueNewSubId(subIds.value)
+                            betweenUtils.queueNewSubId(subIds.value)
                         }
 
                         subId to telephony.createForSubscriptionId(subId).also { telephony ->
@@ -229,7 +229,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                     privilegedCallbacks[subId] = this
                                 }
 
-                                telephony.registerTelephonyCallback(Dispatchers.IO.asExecutor(), callback)
+                                telephony.registerTelephonyCallback(mainExecutor, callback)
                                 service?.registerPrivilegedListener(subId, privileged)
                             } else {
                                 val listener = telephonyListeners[subId] ?: StateListener(subId, this@UpdaterService).apply {

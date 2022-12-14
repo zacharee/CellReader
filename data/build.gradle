@@ -58,10 +58,10 @@ dependencies {
     api "androidx.glance:glance-wear-tiles:$glance_version"
 
     api "androidx.compose.material:material:$compose_version"
-    api "androidx.compose.material3:material3:1.1.0-alpha02"
+    api "androidx.compose.material3:material3:1.1.0-alpha03"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api 'androidx.wear.compose:compose-material:1.1.0-rc01'
-    api 'androidx.wear.compose:compose-foundation:1.1.0-rc01'
+    api 'androidx.wear.compose:compose-material:1.2.0-alpha01'
+    api 'androidx.wear.compose:compose-foundation:1.2.0-alpha01'
 
     api 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 
