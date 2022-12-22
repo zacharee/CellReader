@@ -20,6 +20,7 @@ data class TelephonyDisplayInfoWrapper(
 
     companion object {
         fun overrideNetworkTypeToString(context: Context, @OverrideNetworkType type: Int): String {
+            @Suppress("DEPRECATION")
             return context.resources.getString(
                 when (type) {
                     TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE -> R.string.none

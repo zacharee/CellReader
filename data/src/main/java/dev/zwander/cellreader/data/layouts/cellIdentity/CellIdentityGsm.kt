@@ -2,7 +2,6 @@ package dev.zwander.cellreader.data.layouts.cellIdentity
 
 import android.os.Build
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.data.R
@@ -14,7 +13,6 @@ import dev.zwander.cellreader.data.wrappers.CellIdentityGsmWrapper
 @Composable
 fun CellIdentityGsmWrapper.CellIdentityGsm(
     arfcnInfo: List<ARFCNInfo>,
-    simple: Boolean,
     advanced: Boolean
 ) {
     if (advanced) {

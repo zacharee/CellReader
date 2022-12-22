@@ -35,7 +35,7 @@ class DataHandler private constructor(private val context: Context) {
         @SuppressLint("StaticFieldLeak")
         private var instance: DataHandler? = null
 
-        fun getInstance(context: Context): DataHandler {
+        private fun getInstance(context: Context): DataHandler {
             val ctx = context.applicationContext ?: context
 
             return instance ?: DataHandler(ctx).apply {
@@ -71,6 +71,7 @@ class DataHandler private constructor(private val context: Context) {
 
     private val listenerScope = CoroutineScope(Dispatchers.IO)
 
+    @SuppressLint("VisibleForTests")
     private val listener = DataClient.OnDataChangedListener {
         it.firstOrNull { event ->
             event.dataItem.uri.path == BetweenUtils.CLEAR_PATH
@@ -120,6 +121,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun retrieveInitialData() {
         val item = dataClient.dataItems.await()
 
@@ -138,6 +140,7 @@ class DataHandler private constructor(private val context: Context) {
         item.release()
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun handleDataItem(frozen: DataItem) {
         when (frozen.uri.path) {
             BetweenUtils.CELL_INFOS_PATH -> {
@@ -210,6 +213,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updateCellInfos(item: DataItem) = coroutineScope {
         loadCellInfosJob?.cancel()
         loadCellInfosJob = async(Dispatchers.IO) {
@@ -217,7 +221,7 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.cellInfos.update {
-                    it!!.putAll(cellInfos)
+                    it.putAll(cellInfos)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -225,6 +229,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updateSignalStrengths(item: DataItem) = coroutineScope {
         loadCellSignalStrengthsJob?.cancel()
         loadCellSignalStrengthsJob = async(Dispatchers.IO) {
@@ -232,7 +237,7 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.strengthInfos.update {
-                    it!!.putAll(signalStrengths)
+                    it.putAll(signalStrengths)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -240,6 +245,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updateServiceState(item: DataItem) = coroutineScope {
         loadServiceStateJob?.cancel()
         loadServiceStateJob = async(Dispatchers.IO) {
@@ -247,7 +253,7 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.serviceStates.update {
-                    it!!.putAll(serviceState)
+                    it.putAll(serviceState)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -255,6 +261,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updateSubInfo(item: DataItem) = coroutineScope {
         loadSubInfoJob?.cancel()
         loadSubInfoJob = async(Dispatchers.IO) {
@@ -262,7 +269,7 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.subInfos.update {
-                    it!!.putAll(subInfos)
+                    it.putAll(subInfos)
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -270,6 +277,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun addSubId(item: DataItem) = coroutineScope {
         addSubIdJob?.cancel()
         addSubIdJob = async(Dispatchers.IO) {
@@ -277,7 +285,7 @@ class DataHandler private constructor(private val context: Context) {
 
             withContext(Dispatchers.Main) {
                 CellModelWear.subIds.update {
-                    it!!.addAll(subIds)
+                    it.addAll(subIds)
                     it.updateComparator(SubsComparator(CellModelWear.primaryCell.value))
                 }
                 updateHandlers(item.uri.path)
@@ -286,6 +294,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updatePrimaryCell(item: DataItem) = coroutineScope {
         updatePrimaryCellJob?.cancel()
         updatePrimaryCellJob = async(Dispatchers.IO) {
@@ -299,6 +308,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updateDataConnectionStates(item: DataItem) = coroutineScope {
         updateDataConnectionStateJob?.cancel()
         updateDataConnectionStateJob = async(Dispatchers.IO) {
@@ -312,6 +322,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     private suspend fun updateDisplayInfos(item: DataItem) = coroutineScope {
         updateDisplayInfosJob?.cancel()
         updateDisplayInfosJob = async(Dispatchers.IO) {
@@ -331,7 +342,7 @@ class DataHandler private constructor(private val context: Context) {
         updateTiles()
     }
 
-    fun updateTiles() {
+    private fun updateTiles() {
         TileService.getUpdater(context)
             .requestUpdate(CellTile::class.java)
     }

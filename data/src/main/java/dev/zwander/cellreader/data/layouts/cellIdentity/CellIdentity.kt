@@ -43,7 +43,7 @@ fun CellIdentity(
         }
 
         onCast<CellIdentityGsmWrapper> {
-            CellIdentityGsm(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
+            CellIdentityGsm(arfcnInfo = arfcnInfo, advanced = advanced)
         }
 
         onCast<CellIdentityCdmaWrapper> {
@@ -51,11 +51,11 @@ fun CellIdentity(
         }
 
         onCast<CellIdentityWcdmaWrapper> {
-            CellIdentityWcdma(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
+            CellIdentityWcdma(arfcnInfo = arfcnInfo, advanced = advanced)
         }
 
         onCast<CellIdentityTdscdmaWrapper> {
-            CellIdentityTdscdma(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
+            CellIdentityTdscdma(arfcnInfo = arfcnInfo, advanced = advanced)
         }
 
         onCast<CellIdentityLteWrapper> {
@@ -64,7 +64,7 @@ fun CellIdentity(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             onCast<CellIdentityNrWrapper> {
-                CellIdentityNr(arfcnInfo = arfcnInfo, simple = simple, advanced = advanced)
+                CellIdentityNr(arfcnInfo = arfcnInfo, advanced = advanced)
             }
         }
 

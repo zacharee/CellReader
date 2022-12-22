@@ -7,9 +7,9 @@ import dev.zwander.cellreader.data.timeStampMillisCompat
 import java.util.*
 
 sealed class CellInfoWrapper(
-    var isRegistered: Boolean,
-    var timeStamp: Long,
-    var connectionStatus: Int
+    open var isRegistered: Boolean,
+    open var timeStamp: Long,
+    open var connectionStatus: Int
 ) {
     companion object {
         fun newInstance(info: CellInfo): CellInfoWrapper {
@@ -45,10 +45,10 @@ sealed class CellInfoWrapper(
     }
 }
 
-class CellInfoGsmWrapper(
-    isRegistered: Boolean,
-    timeStamp: Long,
-    connectionStatus: Int,
+data class CellInfoGsmWrapper(
+    override var isRegistered: Boolean,
+    override var timeStamp: Long,
+    override var connectionStatus: Int,
     override val cellIdentity: CellIdentityGsmWrapper,
     override val cellSignalStrength: CellSignalStrengthGsmWrapper
 ) : CellInfoWrapper(
@@ -65,10 +65,10 @@ class CellInfoGsmWrapper(
     )
 }
 
-class CellInfoCdmaWrapper(
-    isRegistered: Boolean,
-    timeStamp: Long,
-    connectionStatus: Int,
+data class CellInfoCdmaWrapper(
+    override var isRegistered: Boolean,
+    override var timeStamp: Long,
+    override var connectionStatus: Int,
     override val cellIdentity: CellIdentityCdmaWrapper,
     override val cellSignalStrength: CellSignalStrengthCdmaWrapper
 ) : CellInfoWrapper(
@@ -83,10 +83,10 @@ class CellInfoCdmaWrapper(
     )
 }
 
-class CellInfoTdscdmaWrapper(
-    isRegistered: Boolean,
-    timeStamp: Long,
-    connectionStatus: Int,
+data class CellInfoTdscdmaWrapper(
+    override var isRegistered: Boolean,
+    override var timeStamp: Long,
+    override var connectionStatus: Int,
     override val cellIdentity: CellIdentityTdscdmaWrapper,
     override val cellSignalStrength: CellSignalStrengthTdscdmaWrapper
 ) : CellInfoWrapper(
@@ -102,10 +102,10 @@ class CellInfoTdscdmaWrapper(
     )
 }
 
-class CellInfoWcdmaWrapper(
-    isRegistered: Boolean,
-    timeStamp: Long,
-    connectionStatus: Int,
+data class CellInfoWcdmaWrapper(
+    override var isRegistered: Boolean,
+    override var timeStamp: Long,
+    override var connectionStatus: Int,
     override val cellIdentity: CellIdentityWcdmaWrapper,
     override val cellSignalStrength: CellSignalStrengthWcdmaWrapper
 ) : CellInfoWrapper(
@@ -120,10 +120,10 @@ class CellInfoWcdmaWrapper(
     )
 }
 
-class CellInfoLteWrapper(
-    isRegistered: Boolean,
-    timeStamp: Long,
-    connectionStatus: Int,
+data class CellInfoLteWrapper(
+    override var isRegistered: Boolean,
+    override var timeStamp: Long,
+    override var connectionStatus: Int,
     override val cellIdentity: CellIdentityLteWrapper,
     override val cellSignalStrength: CellSignalStrengthLteWrapper,
     val cellConfig: CellConfigLteWrapper?
@@ -150,10 +150,10 @@ class CellInfoLteWrapper(
     }
 }
 
-class CellInfoNrWrapper(
-    isRegistered: Boolean,
-    timeStamp: Long,
-    connectionStatus: Int,
+data class CellInfoNrWrapper(
+    override var isRegistered: Boolean,
+    override var timeStamp: Long,
+    override var connectionStatus: Int,
     override val cellIdentity: CellIdentityNrWrapper,
     override val cellSignalStrength: CellSignalStrengthNrWrapper
 ) : CellInfoWrapper(

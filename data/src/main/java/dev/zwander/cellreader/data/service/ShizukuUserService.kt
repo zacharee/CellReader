@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlin.system.exitProcess
 
+@Suppress("unused", "ConvertSecondaryConstructorToPrimary")
 @SuppressLint("WrongConstant")
 class ShizukuUserService : IShizukuUserService.Stub {
     constructor() {
@@ -36,6 +37,7 @@ class ShizukuUserService : IShizukuUserService.Stub {
         Log.e("CellReader", "init")
     }
 
+    @Suppress("INACCESSIBLE_TYPE")
     private val context = (ActivityThread.systemMain().systemContext as Context)
     private val listeners = mutableMapOf<Int, PhoneStateListenerSimple>()
     private val privilegedListeners = mutableMapOf<Int, MutableList<IPrivilegedListener>>()

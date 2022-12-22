@@ -9,13 +9,13 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 sealed class CellIdentityWrapper(
-    val type: Int,
-    val mcc: String?,
-    val mnc: String?,
-    val alphaLong: String?,
-    val alphaShort: String?,
-    val globalCellId: String?,
-    val channelNumber: Int,
+    open val type: Int,
+    open val mcc: String?,
+    open val mnc: String?,
+    open val alphaLong: String?,
+    open val alphaShort: String?,
+    open val globalCellId: String?,
+    open val channelNumber: Int,
 ) {
     val plmn: String?
         get() = if (mcc.isNullOrBlank()) null else (mcc + mnc)
@@ -49,18 +49,18 @@ sealed class CellIdentityWrapper(
     abstract override fun equals(other: Any?): Boolean
 }
 
-class CellIdentityGsmWrapper(
+data class CellIdentityGsmWrapper(
     val lac: Int,
     val cid: Int,
     val arfcn: Int,
     val bsic: Int,
     val additionalPlmns: ArrayList<String>?,
-    mcc: String?,
-    mnc: String?,
-    alphaLong: String?,
-    alphaShort: String?,
-    globalCellId: String?,
-    channelNumber: Int
+    override val mcc: String?,
+    override val mnc: String?,
+    override val alphaLong: String?,
+    override val alphaShort: String?,
+    override val globalCellId: String?,
+    override val channelNumber: Int
 ) : CellIdentityWrapper(
     CellInfo.TYPE_GSM, mcc, mnc, alphaLong,
     alphaShort, globalCellId, channelNumber
@@ -109,16 +109,16 @@ class CellIdentityGsmWrapper(
     }
 }
 
-class CellIdentityCdmaWrapper(
+data class CellIdentityCdmaWrapper(
     val networkId: Int,
     val systemId: Int,
     val basestationId: Int,
     val longitude: Int,
     val latitude: Int,
-    alphaLong: String?,
-    alphaShort: String?,
-    globalCellId: String?,
-    channelNumber: Int
+    override val alphaLong: String?,
+    override val alphaShort: String?,
+    override val globalCellId: String?,
+    override val channelNumber: Int
 ) : CellIdentityWrapper(
     CellInfo.TYPE_CDMA, null, null,
     alphaLong, alphaShort, globalCellId, channelNumber
@@ -160,19 +160,19 @@ class CellIdentityCdmaWrapper(
     }
 }
 
-class CellIdentityTdscdmaWrapper(
+data class CellIdentityTdscdmaWrapper(
     val lac: Int,
     val cid: Int,
     val cpid: Int,
     val uarfcn: Int,
     val additionalPlmns: ArrayList<String>?,
     val csgInfo: ClosedSubscriberGroupInfoWrapper?,
-    mcc: String?,
-    mnc: String?,
-    alphaLong: String?,
-    alphaShort: String?,
-    globalCellId: String?,
-    channelNumber: Int
+    override val mcc: String?,
+    override val mnc: String?,
+    override val alphaLong: String?,
+    override val alphaShort: String?,
+    override val globalCellId: String?,
+    override val channelNumber: Int
 ) : CellIdentityWrapper(
     CellInfo.TYPE_TDSCDMA, mcc, mnc, alphaLong,
     alphaShort, globalCellId, channelNumber
@@ -236,19 +236,19 @@ class CellIdentityTdscdmaWrapper(
     }
 }
 
-class CellIdentityWcdmaWrapper(
+data class CellIdentityWcdmaWrapper(
     val lac: Int,
     val cid: Int,
     val psc: Int,
     val uarfcn: Int,
     val additionalPlmns: ArrayList<String>?,
     val csgInfo: ClosedSubscriberGroupInfoWrapper?,
-    mcc: String?,
-    mnc: String?,
-    alphaLong: String?,
-    alphaShort: String?,
-    globalCellId: String?,
-    channelNumber: Int
+    override val mcc: String?,
+    override val mnc: String?,
+    override val alphaLong: String?,
+    override val alphaShort: String?,
+    override val globalCellId: String?,
+    override val channelNumber: Int
 ) : CellIdentityWrapper(
     CellInfo.TYPE_WCDMA, mcc, mnc, alphaLong,
     alphaShort, globalCellId, channelNumber
@@ -308,7 +308,7 @@ class CellIdentityWcdmaWrapper(
     }
 }
 
-class CellIdentityLteWrapper(
+data class CellIdentityLteWrapper(
     val ci: Int,
     val pci: Int,
     val tac: Int,
@@ -317,12 +317,12 @@ class CellIdentityLteWrapper(
     private val _bands: ArrayList<Int>?,
     val additionalPlmns: ArrayList<String>?,
     val csgInfo: ClosedSubscriberGroupInfoWrapper?,
-    mcc: String?,
-    mnc: String?,
-    alphaLong: String?,
-    alphaShort: String?,
-    globalCellId: String?,
-    channelNumber: Int
+    override val mcc: String?,
+    override val mnc: String?,
+    override val alphaLong: String?,
+    override val alphaShort: String?,
+    override val globalCellId: String?,
+    override val channelNumber: Int
 ) : CellIdentityWrapper(
     CellInfo.TYPE_LTE, mcc, mnc, alphaLong,
     alphaShort, globalCellId, channelNumber
@@ -396,19 +396,19 @@ class CellIdentityLteWrapper(
     }
 }
 
-class CellIdentityNrWrapper(
+data class CellIdentityNrWrapper(
     val nrArfcn: Int,
     val pci: Int,
     val tac: Int,
     val nci: Long,
     private val _bands: ArrayList<Int>?,
     val additionalPlmns: ArrayList<String>?,
-    mcc: String?,
-    mnc: String?,
-    alphaLong: String?,
-    alphaShort: String?,
-    globalCellId: String?,
-    channelNumber: Int
+    override val mcc: String?,
+    override val mnc: String?,
+    override val alphaLong: String?,
+    override val alphaShort: String?,
+    override val globalCellId: String?,
+    override val channelNumber: Int
 ) : CellIdentityWrapper(
     CellInfo.TYPE_NR, mcc, mnc, alphaLong,
     alphaShort, globalCellId, channelNumber
