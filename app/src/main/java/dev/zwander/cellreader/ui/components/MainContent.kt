@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
@@ -28,9 +28,9 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
-    val subIds by CellModel.subIds.collectAsState()
-    val cellInfos by CellModel.cellInfos.collectAsState()
-    val strengthInfos by CellModel.strengthInfos.collectAsState()
+    val subIds by LocalCellModel.current.subIds.collectAsState()
+    val cellInfos by LocalCellModel.current.cellInfos.collectAsState()
+    val strengthInfos by LocalCellModel.current.strengthInfos.collectAsState()
 
     SelectionContainer {
         val state = rememberLazyGridState()

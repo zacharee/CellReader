@@ -32,6 +32,7 @@ import androidx.wear.compose.material.itemsIndexed
 import androidx.wear.compose.material.rememberScalingLazyListState
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModelWear
+import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
@@ -79,9 +80,9 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
-    val subIds by CellModelWear.subIds.collectAsState()
-    val cellInfos by CellModelWear.cellInfos.collectAsState()
-    val strengthInfos by CellModelWear.strengthInfos.collectAsState()
+    val subIds by LocalCellModel.current.subIds.collectAsState()
+    val cellInfos by LocalCellModel.current.cellInfos.collectAsState()
+    val strengthInfos by LocalCellModel.current.strengthInfos.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

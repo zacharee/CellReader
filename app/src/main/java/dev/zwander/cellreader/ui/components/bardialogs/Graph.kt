@@ -37,8 +37,8 @@ import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.SubsComparator
 import dev.zwander.cellreader.data.components.CardCheckbox
-import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.GraphInfo
+import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.instantCombine
 import dev.zwander.cellreader.data.util.toColorInt
@@ -50,6 +50,8 @@ import kotlinx.coroutines.flow.flatMapMerge
 @OptIn(FlowPreview::class)
 @Composable
 fun Graph(points: Map<Int, GraphInfo>) {
+    val cellModel = LocalCellModel.current
+
     var followData by remember {
         mutableStateOf(true)
     }
@@ -61,7 +63,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
     val textColor = MaterialTheme.colorScheme.onSurface.toColorInt()
 
     val sortedPoints = remember(points) {
-        points.toSortedMap(SubsComparator(CellModel.primaryCell.value))
+        points.toSortedMap(SubsComparator(cellModel.primaryCell.value))
     }
 
     val l = remember(sortedPoints, disabledSubIds.size) {
@@ -207,7 +209,7 @@ fun Graph(points: Map<Int, GraphInfo>) {
                         },
                         text = stringResource(
                             id = R.string.chart_sim_format,
-                            CellModel.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
+                            cellModel.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
                         ),
                         modifier = Modifier.weight(1f),
                         enabled = disabledSubIds.contains(subId) || disabledSubIds.size < points.keys.size - 1

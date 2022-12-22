@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.wear
 
+import android.annotation.SuppressLint
 import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.WindowManager
@@ -44,6 +45,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
         }
     }
 
+    @SuppressLint("StateFlowValueCalledInComposition")
     @Composable
     override fun Content() {
         val sizePx = Point().apply { wm.defaultDisplay.getSize(this) }
