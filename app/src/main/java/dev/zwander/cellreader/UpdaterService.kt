@@ -3,6 +3,7 @@ package dev.zwander.cellreader
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -25,6 +26,14 @@ import java.util.concurrent.atomic.AtomicLong
 class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
     companion object {
         const val ACTION_EXIT = "${BuildConfig.APPLICATION_ID}.EXIT"
+        const val ACTION_REFRESH = "${BuildConfig.APPLICATION_ID}.REFRESH"
+
+        fun refresh(context: Context) {
+            val intent = Intent(context, UpdaterService::class.java)
+            intent.action = ACTION_REFRESH
+
+            context.startForegroundService(intent)
+        }
     }
 
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
@@ -39,7 +48,37 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             return START_NOT_STICKY
         }
 
+        if (intent?.action == ACTION_REFRESH) {
+            refresh()
+        }
+
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun refresh(newIds: List<Int> = emptyList()) {
+        subs.removeOnSubscriptionsChangedListener(subsListener)
+        subsListener.clear()
+
+        launch {
+            betweenUtils.queueClear()
+            CellModel.destroy()
+
+            if (newIds.isEmpty()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    subs.addOnSubscriptionsChangedListener(mainExecutor, subsListener)
+                } else {
+                    @Suppress("DEPRECATION")
+                    subs.addOnSubscriptionsChangedListener(subsListener)
+                }
+
+                if (subs.allSubscriptionInfoList.isEmpty()) {
+                    init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
+                }
+            } else {
+                init(newIds)
+            }
+        }
     }
 
     @SuppressLint("InlinedApi")
@@ -84,16 +123,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
         startForeground(100, n)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            subs.addOnSubscriptionsChangedListener(mainExecutor, subsListener)
-        } else {
-            @Suppress("DEPRECATION")
-            subs.addOnSubscriptionsChangedListener(subsListener)
-        }
-
-        if (subs.allSubscriptionInfoList.isEmpty()) {
-            init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
-        }
+        refresh()
 
 //        PermissionUtils.checkShizukuPermission {
 //            if (it == PackageManager.PERMISSION_GRANTED) {
@@ -409,6 +439,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     }
 
     private inner class SubscriptionListener(private val currentList: MutableList<SubscriptionInfo>) : SubscriptionManager.OnSubscriptionsChangedListener() {
+        fun clear() {
+            currentList.clear()
+        }
+
         override fun onSubscriptionsChanged() {
             launch {
                 val newList = subs.allSubscriptionInfoList
@@ -418,14 +452,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
 
                 if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
-                    currentList.clear()
+                    clear()
                     currentList.addAll(newList)
 
-                    withContext(Dispatchers.Main) {
-                        betweenUtils.queueClear()
-                        CellModel.destroy()
-                        init(newIds)
-                    }
+                    refresh(newIds)
                 } else {
                     newList.forEach { subInfo ->
                         CellModel.subInfos.update {
