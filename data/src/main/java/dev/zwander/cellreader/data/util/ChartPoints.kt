@@ -5,7 +5,7 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.utils.Utils
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.CellModelBase
 import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.GraphLineInfo
 import dev.zwander.cellreader.data.typeString
@@ -18,15 +18,15 @@ import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWcdmaWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.TreeMap
 
-fun populatePoints(strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
+fun populatePoints(model: CellModelBase, strengthPoints: MutableMap<Int, GraphInfo>, context: Context, maxX: Int) {
     Utils.init(context)
     
-    CellModel.strengthInfos.value.forEach { (subId, infos) ->
+    model.strengthInfos.value.forEach { (subId, infos) ->
         if (!strengthPoints.containsKey(subId)) {
             strengthPoints[subId] = GraphInfo(subId)
         }
         
-        val simSlot = CellModel.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
+        val simSlot = model.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
 
         infos.forEach { info ->
             val typeString = info.typeString(context)

@@ -8,7 +8,15 @@ import dev.zwander.cellreader.data.IPrivilegedListener
 import dev.zwander.cellreader.data.IShizukuUserService
 import kotlinx.coroutines.flow.MutableStateFlow
 
-object CellModel : CellModelBase() {
+class CellModel : CellModelBase() {
+    companion object {
+        private var instance: CellModel? = null
+
+        fun getInstance(): CellModel {
+            return instance ?: CellModel().apply { instance = this }
+        }
+    }
+
     override val signalStrengths = MutableStateFlow<HashMap<Int, SignalStrength?>>(hashMapOf())
     val telephonies = HashMap<Int, TelephonyManager>()
 

@@ -62,6 +62,7 @@ dependencies {
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api 'androidx.wear.compose:compose-material:1.2.0-alpha01'
     api 'androidx.wear.compose:compose-foundation:1.2.0-alpha01'
+    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
 
     api 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 

@@ -23,13 +23,15 @@ interface ICellModel {
     val displayInfos: MutableStateFlow<HashMap<Int, TelephonyDisplayInfoWrapper?>>
     val dataConnectionStates: MutableStateFlow<HashMap<Int, DataConnectionState>>
 
+    val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>?
+
     fun clear()
 }
 
 abstract class CellModelBase : ICellModel {
-    override val primaryCell = MutableStateFlow(0)
+    final override val primaryCell = MutableStateFlow(0)
 
-    override val subIds by lazy { MutableStateFlow(UpdatableTreeSet(SubsComparator(primaryCell.value))) }
+    override val subIds = MutableStateFlow(UpdatableTreeSet(SubsComparator(primaryCell.value)))
     override val cellInfos = MutableStateFlow<HashMap<Int, List<CellInfoWrapper>>>(hashMapOf())
     override val strengthInfos = MutableStateFlow<HashMap<Int, List<CellSignalStrengthWrapper>>>(hashMapOf())
     override val subInfos = MutableStateFlow<HashMap<Int, SubscriptionInfoWrapper?>>(hashMapOf())
@@ -37,7 +39,7 @@ abstract class CellModelBase : ICellModel {
     override val displayInfos = MutableStateFlow<HashMap<Int, TelephonyDisplayInfoWrapper?>>(hashMapOf())
     override val dataConnectionStates = MutableStateFlow<HashMap<Int, DataConnectionState>>(hashMapOf())
 
-    open val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>? = null
+    override val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>? = null
 
     override fun clear() {
         primaryCell.value = 0
@@ -49,14 +51,14 @@ abstract class CellModelBase : ICellModel {
         serviceStates.value = hashMapOf()
         dataConnectionStates.value = hashMapOf()
     }
+}
 
-    @Composable
-    fun ProvideCellModel(content: @Composable () -> Unit) {
-        CompositionLocalProvider(
-            LocalCellModel provides this
-        ) {
-            content()
-        }
+@Composable
+fun ProvideCellModel(model: CellModelBase, content: @Composable () -> Unit) {
+    CompositionLocalProvider(
+        LocalCellModel provides model
+    ) {
+        content()
     }
 }
 

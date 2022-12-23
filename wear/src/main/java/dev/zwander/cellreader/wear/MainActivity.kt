@@ -33,6 +33,7 @@ import androidx.wear.compose.material.rememberScalingLazyListState
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.data.LocalCellModel
+import dev.zwander.cellreader.data.data.ProvideCellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         setContent {
             CellReaderTheme {
-                CellModelWear.ProvideCellModel {
+                ProvideCellModel(CellModelWear.getInstance()) {
                     MainContent()
                 }
             }

@@ -17,6 +17,7 @@ import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.ProvideCellModel
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
 import dev.zwander.cellreader.ui.view.PermissionRationaleBottomSheetDialog
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Content() {
     CellReaderTheme {
-        CellModel.ProvideCellModel {
+        ProvideCellModel(CellModel.getInstance()) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background

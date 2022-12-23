@@ -177,31 +177,31 @@ class DataHandler private constructor(private val context: Context) {
         val callback: ((IDataHandler) -> Unit) = {
             when (path) {
                 BetweenUtils.CELL_INFOS_PATH -> {
-                    it.onNewCellInfos(CellModelWear.cellInfos.value)
+                    it.onNewCellInfos(CellModelWear.getInstance().cellInfos.value)
                 }
                 BetweenUtils.CELL_SIGNAL_STRENGTHS_PATH -> {
-                    it.onNewSignalStrengths(CellModelWear.strengthInfos.value)
+                    it.onNewSignalStrengths(CellModelWear.getInstance().strengthInfos.value)
                 }
                 BetweenUtils.SERVICE_STATE_PATH -> {
-                    it.onNewServiceStates(CellModelWear.serviceStates.value)
+                    it.onNewServiceStates(CellModelWear.getInstance().serviceStates.value)
                 }
                 BetweenUtils.SUB_INFO_PATH -> {
-                    it.onNewSubInfos(CellModelWear.subInfos.value)
+                    it.onNewSubInfos(CellModelWear.getInstance().subInfos.value)
                 }
                 BetweenUtils.SUB_ID_PATH -> {
-                    it.onNewSubIds(CellModelWear.subIds.value)
+                    it.onNewSubIds(CellModelWear.getInstance().subIds.value)
                 }
                 BetweenUtils.CLEAR_PATH -> {
                     it.onClear()
                 }
                 BetweenUtils.PRIMARY_CELL_PATH -> {
-                    it.onNewPrimaryCell(CellModelWear.primaryCell.value)
+                    it.onNewPrimaryCell(CellModelWear.getInstance().primaryCell.value)
                 }
                 BetweenUtils.DATA_CONNECTION_STATE_PATH -> {
-                    it.onNewDataConnectionStates(CellModelWear.dataConnectionStates.value)
+                    it.onNewDataConnectionStates(CellModelWear.getInstance().dataConnectionStates.value)
                 }
                 BetweenUtils.DISPLAY_INFOS_PATH -> {
-                    it.onNewDisplayInfos(CellModelWear.displayInfos.value)
+                    it.onNewDisplayInfos(CellModelWear.getInstance().displayInfos.value)
                 }
             }
         }
@@ -220,7 +220,7 @@ class DataHandler private constructor(private val context: Context) {
             val cellInfos = betweenUtils.retrieveCellInfos(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.cellInfos.update {
+                CellModelWear.getInstance().cellInfos.update {
                     it.putAll(cellInfos)
                 }
                 updateHandlers(item.uri.path)
@@ -236,7 +236,7 @@ class DataHandler private constructor(private val context: Context) {
             val signalStrengths = betweenUtils.retrieveSignalStrengths(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.strengthInfos.update {
+                CellModelWear.getInstance().strengthInfos.update {
                     it.putAll(signalStrengths)
                 }
                 updateHandlers(item.uri.path)
@@ -252,7 +252,7 @@ class DataHandler private constructor(private val context: Context) {
             val serviceState = betweenUtils.retrieveServiceState(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.serviceStates.update {
+                CellModelWear.getInstance().serviceStates.update {
                     it.putAll(serviceState)
                 }
                 updateHandlers(item.uri.path)
@@ -268,7 +268,7 @@ class DataHandler private constructor(private val context: Context) {
             val subInfos = betweenUtils.retrieveSubscriptionInfo(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.subInfos.update {
+                CellModelWear.getInstance().subInfos.update {
                     it.putAll(subInfos)
                 }
                 updateHandlers(item.uri.path)
@@ -284,9 +284,9 @@ class DataHandler private constructor(private val context: Context) {
             val subIds = betweenUtils.retrieveNewSubId(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.subIds.update {
+                CellModelWear.getInstance().subIds.update {
                     it.addAll(subIds)
-                    it.updateComparator(SubsComparator(CellModelWear.primaryCell.value))
+                    it.updateComparator(SubsComparator(CellModelWear.getInstance().primaryCell.value))
                 }
                 updateHandlers(item.uri.path)
                 updateTiles()
@@ -301,7 +301,7 @@ class DataHandler private constructor(private val context: Context) {
             val primaryCell = betweenUtils.retrievePrimaryCell(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.primaryCell.value = primaryCell
+                CellModelWear.getInstance().primaryCell.value = primaryCell
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -315,7 +315,7 @@ class DataHandler private constructor(private val context: Context) {
             val dataConnectionStates = betweenUtils.retrieveDataConnectionStates(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.dataConnectionStates.value = dataConnectionStates
+                CellModelWear.getInstance().dataConnectionStates.value = dataConnectionStates
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -329,7 +329,7 @@ class DataHandler private constructor(private val context: Context) {
             val displayInfos = betweenUtils.retrieveDisplayInfos(item)
 
             withContext(Dispatchers.Main) {
-                CellModelWear.displayInfos.value = displayInfos
+                CellModelWear.getInstance().displayInfos.value = displayInfos
                 updateHandlers(item.uri.path)
                 updateTiles()
             }
@@ -337,7 +337,7 @@ class DataHandler private constructor(private val context: Context) {
     }
 
     private fun clear() {
-        CellModelWear.clear()
+        CellModelWear.getInstance().clear()
         updateHandlers(BetweenUtils.CLEAR_PATH)
         updateTiles()
     }

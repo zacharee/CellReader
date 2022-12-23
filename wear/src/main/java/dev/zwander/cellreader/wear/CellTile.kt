@@ -48,16 +48,21 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
     @SuppressLint("StateFlowValueCalledInComposition")
     @Composable
     override fun Content() {
-        val sizePx = Point().apply { wm.defaultDisplay.getSize(this) }
+        val sizePx = Point().apply {
+            @Suppress("DEPRECATION")
+            wm.defaultDisplay.getSize(this)
+        }
         val sizeDp = sizePx.let { px -> DisplayMetrics().run {
+            @Suppress("DEPRECATION")
             wm.defaultDisplay.getMetrics(this)
 
             DpSize((px.x / this.density).dp, (px.y / this.density).dp)
         } }
 
-        val subIds = CellModelWear.subIds.value
-        val cellInfos = CellModelWear.cellInfos.value
-        val strengthInfos = CellModelWear.strengthInfos.value
+        val cellModel = CellModelWear.getInstance()
+        val subIds = cellModel.subIds.value
+        val cellInfos = cellModel.cellInfos.value
+        val strengthInfos = cellModel.strengthInfos.value
 
         val items = subIds.map { subId ->
             val cellInfo = cellInfos[subId]

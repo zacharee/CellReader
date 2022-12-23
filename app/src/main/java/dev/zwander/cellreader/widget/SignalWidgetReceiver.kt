@@ -93,11 +93,12 @@ class SignalWidget : GlanceAppWidget() {
 //            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>(){}.type
 //        ) ?: hashMapOf()
 
-        val subIds = CellModel.subIds.value
-        val subInfos = CellModel.subInfos.value
-        val serviceStates = CellModel.serviceStates.value
-        val strengthInfos = CellModel.strengthInfos.value
-        val cellInfos = CellModel.cellInfos.value
+        val cellModel = CellModel.getInstance()
+        val subIds = cellModel.subIds.value
+        val subInfos = cellModel.subInfos.value
+        val serviceStates = cellModel.serviceStates.value
+        val strengthInfos = cellModel.strengthInfos.value
+        val cellInfos = cellModel.cellInfos.value
 
         Box(
             modifier = GlanceModifier.cornerRadius(8.dp)

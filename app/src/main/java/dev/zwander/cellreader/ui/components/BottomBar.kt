@@ -27,6 +27,7 @@ import dev.zwander.cellreader.data.components.*
 import dev.zwander.cellreader.data.data.BottomDialogPage
 import dev.zwander.cellreader.data.data.DialogButtonInfo
 import dev.zwander.cellreader.data.data.GraphInfo
+import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.util.populatePoints
 import dev.zwander.cellreader.ui.components.bardialogs.About
 import dev.zwander.cellreader.ui.components.bardialogs.Graph
@@ -161,12 +162,13 @@ private fun BoxScope.BottomBar(
     }
 
     val context = LocalContext.current
+    val model = LocalCellModel.current
 
     LaunchedEffect(key1 = Unit) {
         var currentX = 0
 
         while (isActive) {
-            populatePoints(points, context, currentX)
+            populatePoints(model, points, context, currentX)
             currentX++
             delay(1000)
         }
