@@ -8,7 +8,7 @@ import dev.zwander.cellreader.data.IPrivilegedListener
 import dev.zwander.cellreader.data.IShizukuUserService
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class CellModel : CellModelBase() {
+class CellModel private constructor() : CellModelBase() {
     companion object {
         private var instance: CellModel? = null
 

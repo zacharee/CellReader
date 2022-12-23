@@ -416,25 +416,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             if (currentTime - lastUpdate.get() >= 1000) {
                 lastUpdate.set(currentTime)
 
-//                val subIds = CellModel.subIds.value!!.map(Any::toString).toSet()
-//                val cellInfos = betweenUtils.cellInfoGson.toJson(CellModel.cellInfos.value)
-//                val subInfos = betweenUtils.otherGson.toJson(CellModel.subInfos.value)
-//                val serviceStates = betweenUtils.serviceStateGson.toJson(CellModel.serviceStates.value)
-//                val strengthInfos = betweenUtils.cellSignalStrengthGson.toJson(CellModel.strengthInfos.value)
-//
-//                GlanceState.updateValue(
-//                    this@UpdaterService,
-//                    SignalWidget().stateDefinition,
-//                    "WIDGET_OPTIONS"
-//                ) {
-//                    it.toMutablePreferences().also {
-//                        it[SignalWidget.SUB_IDS_KEY] = subIds
-//                        it[SignalWidget.CELL_INFOS_KEY] = cellInfos
-//                        it[SignalWidget.SUB_INFOS_KEY] = subInfos
-//                        it[SignalWidget.SERVICE_STATES_KEY] = serviceStates
-//                        it[SignalWidget.STRENGTH_INFOS_KEY] = strengthInfos
-//                    }
-//                }
                 SignalWidget().updateAll(this@UpdaterService)
             }
         }

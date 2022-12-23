@@ -53,16 +53,6 @@ class SinglePreferenceGlanceStateDefinition(private val constantKey: String) : G
 }
 
 class SignalWidget : GlanceAppWidget() {
-//    companion object {
-//        val PRIMARY_CELL_KEY = intPreferencesKey("PRIMARY_CELL")
-//        val SUB_IDS_KEY = stringSetPreferencesKey("SUB_IDS")
-//        val CELL_INFOS_KEY = stringPreferencesKey("CELL_INFOS")
-//        val STRENGTH_INFOS_KEY = stringPreferencesKey("STRENGTH_INFOS")
-//        val SUB_INFOS_KEY = stringPreferencesKey("SUB_INFOS")
-//        val SERVICE_STATES_KEY = stringPreferencesKey("SERVICE_STATES")
-//        val SIGNAL_STRENGTHS_KEY = stringPreferencesKey("SIGNAL_STRENGTHS")
-//    }
-
     override val sizeMode: SizeMode = SizeMode.Exact
 
     override val stateDefinition = SinglePreferenceGlanceStateDefinition("WIDGET_OPTIONS")
@@ -72,26 +62,6 @@ class SignalWidget : GlanceAppWidget() {
     override fun Content() {
         val context = LocalContext.current
         val size = LocalSize.current
-
-//        val betweenUtils = BetweenUtils.getInstance(context)
-//
-//        val subIds = currentState(SUB_IDS_KEY)?.map { it.toInt() } ?: listOf()
-//        val subInfos = betweenUtils.otherGson.fromJson<HashMap<Int, SubscriptionInfoWrapper?>>(
-//            currentState(SUB_INFOS_KEY) ?: "",
-//            object : TypeToken<HashMap<Int, SubscriptionInfoWrapper?>>(){}.type
-//        ) ?: hashMapOf()
-//        val serviceStates = betweenUtils.serviceStateGson.fromJson<HashMap<Int, ServiceStateWrapper?>>(
-//            currentState(SERVICE_STATES_KEY) ?: "",
-//            object : TypeToken<HashMap<Int, ServiceStateWrapper?>>(){}.type
-//        ) ?: hashMapOf()
-//        val strengthInfos = betweenUtils.cellSignalStrengthGson.fromJson<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(
-//            currentState(STRENGTH_INFOS_KEY) ?: "",
-//            object : TypeToken<HashMap<Int, ArrayList<CellSignalStrengthWrapper>>>(){}.type
-//        ) ?: hashMapOf()
-//        val cellInfos = betweenUtils.cellInfoGson.fromJson<HashMap<Int, ArrayList<CellInfoWrapper>>>(
-//            currentState(CELL_INFOS_KEY) ?: "",
-//            object : TypeToken<HashMap<Int, ArrayList<CellInfoWrapper>>>(){}.type
-//        ) ?: hashMapOf()
 
         val cellModel = CellModel.getInstance()
         val subIds = cellModel.subIds.value
