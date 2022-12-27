@@ -25,6 +25,8 @@ interface ICellModel {
 
     val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>?
 
+    val isRefreshing: MutableStateFlow<Boolean>
+
     fun clear()
 }
 
@@ -40,6 +42,8 @@ abstract class CellModelBase : ICellModel {
     override val dataConnectionStates = MutableStateFlow<HashMap<Int, DataConnectionState>>(hashMapOf())
 
     override val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>? = null
+
+    override val isRefreshing = MutableStateFlow(false)
 
     override fun clear() {
         primaryCell.value = 0

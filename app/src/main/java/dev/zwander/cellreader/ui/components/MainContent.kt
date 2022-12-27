@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 fun MainContent() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val model = LocalCellModel.current
 
     val showingCells = remember {
         mutableStateMapOf<Int, Boolean>()
@@ -47,30 +48,19 @@ fun MainContent() {
         mutableStateMapOf<String, Boolean>()
     }
 
-    var refreshing by remember {
-        mutableStateOf(false)
-    }
-
-    val subIds by LocalCellModel.current.subIds.collectAsState()
-    val cellInfos by LocalCellModel.current.cellInfos.collectAsState()
-    val strengthInfos by LocalCellModel.current.strengthInfos.collectAsState()
+    val refreshing by model.isRefreshing.collectAsState()
+    val subIds by model.subIds.collectAsState()
+    val cellInfos by model.cellInfos.collectAsState()
+    val strengthInfos by model.strengthInfos.collectAsState()
 
     val refreshState = rememberPullRefreshState(
         refreshing = refreshing,
         onRefresh = {
-            refreshing = true
             scope.launch(Dispatchers.IO) {
-                delay(500)
                 UpdaterService.refresh(context)
             }
         }
     )
-
-    LaunchedEffect(key1 = subIds.toList()) {
-        if (subIds.size > 0 && refreshing) {
-            refreshing = false
-        }
-    }
 
     Box(
         modifier = Modifier.pullRefresh(

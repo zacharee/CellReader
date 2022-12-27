@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init() {
-        startForegroundService(Intent(this, UpdaterService::class.java))
+        UpdaterService.refresh(this)
 
         setContent {
             val sysUiController = rememberSystemUiController()

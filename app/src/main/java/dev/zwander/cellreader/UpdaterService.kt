@@ -36,6 +36,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
     }
 
+    private var isStarted = false
+
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
@@ -50,37 +52,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             return START_NOT_STICKY
         }
 
-        if (intent?.action == ACTION_REFRESH) {
+        if (intent?.action == ACTION_REFRESH && isStarted) {
             refresh()
         }
 
         return super.onStartCommand(intent, flags, startId)
-    }
-
-    @SuppressLint("InlinedApi")
-    private fun refresh(newIds: List<Int> = emptyList()) {
-        subs.removeOnSubscriptionsChangedListener(subsListener)
-        subsListener.clear()
-
-        launch {
-            betweenUtils.queueClear()
-            cellModel.destroy()
-
-            if (newIds.isEmpty()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    subs.addOnSubscriptionsChangedListener(mainExecutor, subsListener)
-                } else {
-                    @Suppress("DEPRECATION")
-                    subs.addOnSubscriptionsChangedListener(subsListener)
-                }
-
-                if (subs.allSubscriptionInfoList.isEmpty()) {
-                    init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
-                }
-            } else {
-                init(newIds)
-            }
-        }
     }
 
     @SuppressLint("InlinedApi")
@@ -126,6 +102,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         startForeground(100, n)
 
         refresh()
+
+        isStarted = true
 
 //        PermissionUtils.checkShizukuPermission {
 //            if (it == PackageManager.PERMISSION_GRANTED) {
@@ -204,12 +182,43 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun onDestroy() {
         super.onDestroy()
 
+        isStarted = false
+
         runBlocking {
             betweenUtils.queueClear()
         }
         cancel()
         cellModel.destroy()
         subs.removeOnSubscriptionsChangedListener(subsListener)
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun refresh(newIds: List<Int> = emptyList()) {
+        cellModel.isRefreshing.value = true
+        subs.removeOnSubscriptionsChangedListener(subsListener)
+        subsListener.clear()
+
+        launch {
+            betweenUtils.queueClear()
+            cellModel.destroy()
+
+            if (newIds.isEmpty()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    subs.addOnSubscriptionsChangedListener(mainExecutor, subsListener)
+                } else {
+                    @Suppress("DEPRECATION")
+                    subs.addOnSubscriptionsChangedListener(subsListener)
+                }
+
+                if (subs.allSubscriptionInfoList.isEmpty()) {
+                    init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
+                }
+            } else {
+                init(newIds)
+            }
+
+            cellModel.isRefreshing.value = false
+        }
     }
 
     @SuppressLint("MissingPermission", "InlinedApi")
