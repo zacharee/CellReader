@@ -1,7 +1,6 @@
 package dev.zwander.cellreader
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,9 +23,11 @@ import dev.zwander.cellreader.ui.view.PermissionRationaleBottomSheetDialog
 import dev.zwander.cellreader.utils.PermissionUtils
 
 class MainActivity : ComponentActivity() {
+    private var initialized = false
+
     private val permReq =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            handlePermissions(PermissionUtils.getMissingPermissions(this).toList())
+            handlePermissions(PermissionUtils.getMissingPermissions(this).toList(), false)
         }
 
     private val locationDialog by lazy {
@@ -60,14 +61,22 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         with(PermissionUtils.getMissingPermissions(this)) {
-            handlePermissions(this.toList())
+            handlePermissions(this.toList(), true)
         }
     }
 
-    private fun handlePermissions(permissions: List<String>) {
+    override fun onResume() {
+        super.onResume()
+
+        if (initialized) {
+            refresh()
+        }
+    }
+
+    private fun handlePermissions(permissions: List<String>, initialCheck: Boolean) {
         with (permissions) {
             when {
-                isEmpty() -> init()
+                isEmpty() -> init(initialCheck)
                 contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
                     locationDialog.show(
                         positiveListener = {
@@ -94,8 +103,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun init() {
-        UpdaterService.refresh(this)
+    override fun onDestroy() {
+        initialized = false
+
+        super.onDestroy()
+    }
+
+    private fun init(initialCheck: Boolean) {
+        if (!initialCheck) {
+            refresh()
+        }
 
         setContent {
             val sysUiController = rememberSystemUiController()
@@ -104,6 +121,12 @@ class MainActivity : ComponentActivity() {
 
             Content()
         }
+
+        initialized = true
+    }
+
+    private fun refresh() {
+        UpdaterService.refresh(this)
     }
 }
 

@@ -43,7 +43,7 @@ abstract class CellModelBase : ICellModel {
 
     override val signalStrengths: MutableStateFlow<HashMap<Int, SignalStrength?>>? = null
 
-    override val isRefreshing = MutableStateFlow(false)
+    override val isRefreshing = MutableStateFlow(true)
 
     override fun clear() {
         primaryCell.value = 0
