@@ -31,9 +31,7 @@ import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
-import dev.zwander.cellreader.data.util.UpdatableTreeSet
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -102,7 +100,7 @@ fun MainContent() {
         ) {
             val state = rememberLazyGridState()
 
-            Crossfade(targetState = actualSubIdsState.isNotEmpty()) { hasSubIds ->
+            Crossfade(targetState = actualSubIdsState.isNotEmpty() && !refreshing) { hasSubIds ->
                 if (hasSubIds) {
                     LazyVerticalGrid(
                         contentPadding = WindowInsets.systemBars
