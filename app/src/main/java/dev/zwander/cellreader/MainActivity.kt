@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
     private val permReq =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            handlePermissions(PermissionUtils.getMissingPermissions(this).toList(), false)
+            handlePermissions(PermissionUtils.getMissingPermissions(this).toList())
         }
 
     private val locationDialog by lazy {
@@ -61,22 +61,14 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         with(PermissionUtils.getMissingPermissions(this)) {
-            handlePermissions(this.toList(), true)
+            handlePermissions(this.toList())
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        if (initialized) {
-            refresh()
-        }
-    }
-
-    private fun handlePermissions(permissions: List<String>, initialCheck: Boolean) {
+    private fun handlePermissions(permissions: List<String>) {
         with (permissions) {
             when {
-                isEmpty() -> init(initialCheck)
+                isEmpty() -> init()
                 contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
                     locationDialog.show(
                         positiveListener = {
@@ -109,10 +101,8 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
-    private fun init(initialCheck: Boolean) {
-        if (!initialCheck) {
-            refresh()
-        }
+    private fun init() {
+        startService()
 
         setContent {
             val sysUiController = rememberSystemUiController()
@@ -125,8 +115,8 @@ class MainActivity : ComponentActivity() {
         initialized = true
     }
 
-    private fun refresh() {
-        UpdaterService.refresh(this)
+    private fun startService() {
+        UpdaterService.start(this, false)
     }
 }
 

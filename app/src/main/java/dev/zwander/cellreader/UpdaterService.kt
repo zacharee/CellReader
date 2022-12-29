@@ -17,6 +17,7 @@ import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.*
 import dev.zwander.cellreader.data.util.CellUtils
+import dev.zwander.cellreader.data.util.asExecutor
 import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.widget.SignalWidget
@@ -29,8 +30,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         const val ACTION_REFRESH = "${BuildConfig.APPLICATION_ID}.REFRESH"
 
         fun refresh(context: Context) {
+            start(context, true)
+        }
+
+        fun start(context: Context, refresh: Boolean) {
             val intent = Intent(context, UpdaterService::class.java)
-            intent.action = ACTION_REFRESH
+            if (refresh) intent.action = ACTION_REFRESH
 
             context.startForegroundService(intent)
         }
@@ -44,6 +49,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
     private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
 
+    private val callbackExecutor = coroutineContext.asExecutor()
     private val cellModel = CellModel.getInstance()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -210,7 +216,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
             if (newIds.isEmpty()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    subs.addOnSubscriptionsChangedListener(mainExecutor, subsListener)
+                    subs.addOnSubscriptionsChangedListener(callbackExecutor, subsListener)
                 } else {
                     @Suppress("DEPRECATION")
                     subs.addOnSubscriptionsChangedListener(subsListener)
@@ -276,7 +282,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                     privilegedCallbacks[subId] = this
                                 }
 
-                                telephony.registerTelephonyCallback(mainExecutor, callback)
+                                telephony.registerTelephonyCallback(callbackExecutor, callback)
                                 service?.registerPrivilegedListener(subId, privileged)
                             } else {
                                 val listener = telephonyListeners[subId] ?: StateListener(subId, this@UpdaterService).apply {
