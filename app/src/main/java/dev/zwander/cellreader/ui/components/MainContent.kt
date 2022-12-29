@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -30,6 +31,7 @@ import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
+import dev.zwander.cellreader.data.util.UpdatableTreeSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,9 +51,25 @@ fun MainContent() {
     }
 
     val refreshing by model.isRefreshing.collectAsState()
-    val subIds by model.subIds.collectAsState()
-    val cellInfos by model.cellInfos.collectAsState()
-    val strengthInfos by model.strengthInfos.collectAsState()
+
+    val actualSubIdsState by model.subIds.collectAsState()
+    val actualCellInfosState by model.cellInfos.collectAsState()
+    val actualStrengthInfosState by model.strengthInfos.collectAsState()
+
+    @SuppressLint("MutableCollectionMutableState")
+    var subIds by remember {
+        mutableStateOf(actualSubIdsState)
+    }
+
+    @SuppressLint("MutableCollectionMutableState")
+    var cellInfos by remember {
+        mutableStateOf(actualCellInfosState)
+    }
+
+    @SuppressLint("MutableCollectionMutableState")
+    var strengthInfos by remember {
+        mutableStateOf(actualStrengthInfosState)
+    }
 
     val refreshState = rememberPullRefreshState(
         refreshing = refreshing,
@@ -62,28 +80,40 @@ fun MainContent() {
         }
     )
 
+    LaunchedEffect(
+        actualSubIdsState.toList(),
+        actualCellInfosState.toList(),
+        actualStrengthInfosState.toList()
+    ) {
+        if (actualSubIdsState.isNotEmpty()) {
+            subIds = actualSubIdsState
+            cellInfos = actualCellInfosState
+            strengthInfos = actualStrengthInfosState
+        }
+    }
+
     Box(
         modifier = Modifier.pullRefresh(
             state = refreshState
         )
     ) {
-        Crossfade(
-            targetState = refreshing,
+        SelectionContainer(
             modifier = Modifier.fillMaxSize()
         ) {
-            if (it) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            } else {
-                SelectionContainer(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    val state = rememberLazyGridState()
+            val state = rememberLazyGridState()
 
+            Crossfade(targetState = actualSubIdsState.isNotEmpty()) { hasSubIds ->
+                if (hasSubIds) {
                     LazyVerticalGrid(
                         contentPadding = WindowInsets.systemBars
-                            .add(WindowInsets(left = 8.dp, right = 8.dp, top = 8.dp, bottom = 8.dp + 24.dp))
+                            .add(
+                                WindowInsets(
+                                    left = 8.dp,
+                                    right = 8.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp + 24.dp
+                                )
+                            )
                             .asPaddingValues(),
                         state = state,
                         modifier = Modifier.fillMaxHeight(),
@@ -108,7 +138,9 @@ fun MainContent() {
                             val lastStrengthIndex = strengthInfos[t]?.lastIndex ?: 0
                             val cellInfosEmpty = cellInfos[t]?.isEmpty() ?: true
 
-                            itemsIndexed(strengthInfos[t]!!, { index, _ -> "$t:$index" }) { index, item ->
+                            itemsIndexed(
+                                strengthInfos[t]!!,
+                                { index, _ -> "$t:$index" }) { index, item ->
                                 val isFinal = index == lastStrengthIndex && cellInfosEmpty
 
                                 AnimatedVisibility(
@@ -168,6 +200,10 @@ fun MainContent() {
                                 }
                             }
                         }
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 }
             }

@@ -195,10 +195,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     @SuppressLint("InlinedApi")
     private fun refresh(newIds: List<Int> = emptyList()) {
         cellModel.isRefreshing.value = true
-        subs.removeOnSubscriptionsChangedListener(subsListener)
-        subsListener.clear()
 
         launch {
+            subs.removeOnSubscriptionsChangedListener(subsListener)
+            subsListener.clear()
+
             betweenUtils.queueClear()
             cellModel.destroy()
 
