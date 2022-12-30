@@ -36,6 +36,11 @@ fun CellIdentityNrWrapper.CellIdentityNr(
                 it.toString()
             )
         }
+        plmn?.apply {
+            if (isNotBlank()) {
+                FormatText(R.string.operator_format, this)
+            }
+        }
 
         val dlFreqs = rememberSaveable(inputs = arrayOf(nrArfcn)) {
             arfcnInfo.map { it.dlFreq }
