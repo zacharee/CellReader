@@ -3,8 +3,8 @@ buildscript {
         compose_version = '1.4.0-alpha03'
         compose_compiler_version = '1.4.0-alpha02'
         glance_version = "1.0.0-alpha05"
-        version_code = 28
-        version_name = "0.18"
+        version_code = 29
+        version_name = "0.19"
     }
 
     dependencies {
