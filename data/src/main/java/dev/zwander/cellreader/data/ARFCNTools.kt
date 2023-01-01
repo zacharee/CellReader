@@ -45,7 +45,7 @@ object ARFCNTools {
         val earfcn = 65537
         val uarfcn = 4390
         val gsmarfcn = 666
-        val nrarfcn = 470009
+        val nrarfcn = 389000
         val tdscdmaarfcn = 9590
 
         println(earfcnToInfo(earfcn))
@@ -154,7 +154,9 @@ object ARFCNTools {
                 -1
             }
             val ful = if (firstUl != -1) {
-                refContainer.fRefOff.toDouble() + refContainer.dfGlobal.toDouble() * ((firstDl - firstUl).absoluteValue + nrarfcn - refContainer.nRefOff.toDouble())
+                val realDl = if (firstDl == -1) firstUl else firstDl
+
+                refContainer.fRefOff.toDouble() + refContainer.dfGlobal.toDouble() * ((realDl - firstUl).absoluteValue + nrarfcn - refContainer.nRefOff.toDouble())
             } else {
                 -1
             }
@@ -726,7 +728,7 @@ object NRARFCNTable : TreeMap<Pair<IntRange, IntRange>, ARFCNContainer>(IntRange
         putAll(
             listOf(
                 (422000..434000 to 384000..396000) to ARFCNContainer(band = 1),
-                (386000..392000 to 370000..382000) to ARFCNContainer(band = 2),
+                (386000..398000 to 370000..382000) to ARFCNContainer(band = 2),
                 (361000..376000 to 342000..357000) to ARFCNContainer(band = 3),
                 (173800..178800 to 164800..169800) to ARFCNContainer(band = 5),
                 (524000..538000 to 500000..514000) to ARFCNContainer(band = 7),

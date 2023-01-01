@@ -193,9 +193,9 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         runBlocking {
             betweenUtils.queueClear()
         }
-        cancel()
         cellModel.destroy()
         subs.removeOnSubscriptionsChangedListener(subsListener)
+        cancel()
     }
 
     @SuppressLint("InlinedApi")
@@ -326,9 +326,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
             launch(Dispatchers.IO) {
                 betweenUtils.queueCellInfos(cellInfos.value)
-            }
-
-            launch {
                 updateWidgets()
             }
         }
@@ -368,9 +365,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
             launch(Dispatchers.IO) {
                 betweenUtils.queueSignalStrengths(strengthInfos.value)
-            }
-
-            launch {
                 updateWidgets()
             }
         }
@@ -386,9 +380,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
             launch(Dispatchers.IO) {
                 betweenUtils.queueServiceState(serviceStates.value)
-            }
-
-            launch {
                 updateWidgets()
             }
         }
@@ -407,9 +398,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
         launch(Dispatchers.IO) {
             betweenUtils.queueDisplayInfos(cellModel.displayInfos.value)
-        }
-
-        launch {
             updateWidgets()
         }
     }
@@ -421,9 +409,6 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
         launch(Dispatchers.IO) {
             betweenUtils.queueDataConnectionStates(cellModel.dataConnectionStates.value)
-        }
-
-        launch {
             updateWidgets()
         }
     }
@@ -448,19 +433,19 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
 
         override fun onSubscriptionsChanged() {
-            launch {
-                val newList = subs.allSubscriptionInfoList
-                val newIds = newList.map { it.subscriptionId }
-                val currentIds = currentList.map { it.subscriptionId }
+            val newList = subs.allSubscriptionInfoList
+            val newIds = newList.map { it.subscriptionId }
+            val currentIds = currentList.map { it.subscriptionId }
 
-                val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
+            val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
 
-                if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
-                    clear()
-                    currentList.addAll(newList)
+            if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
+                clear()
+                currentList.addAll(newList)
 
-                    refresh(newIds)
-                } else {
+                refresh(newIds)
+            } else {
+                launch {
                     newList.forEach { subInfo ->
                         cellModel.subInfos.update {
                             it[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
@@ -473,11 +458,14 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                         updateWidgets()
                     }
                 }
+            }
 
-                cellModel.primaryCell.value = defaultId
-                cellModel.subIds.update {
-                    it.updateComparator(SubsComparator(defaultId))
-                }
+            cellModel.primaryCell.value = defaultId
+            cellModel.subIds.update {
+                it.updateComparator(SubsComparator(defaultId))
+            }
+
+            launch {
                 updateWidgets()
 
                 withContext(Dispatchers.IO) {

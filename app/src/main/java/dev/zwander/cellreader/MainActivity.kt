@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun init() {
-        startService()
+        UpdaterService.start(this, true)
 
         setContent {
             val sysUiController = rememberSystemUiController()
@@ -113,10 +113,6 @@ class MainActivity : ComponentActivity() {
         }
 
         initialized = true
-    }
-
-    private fun startService() {
-        UpdaterService.start(this, false)
     }
 }
 
