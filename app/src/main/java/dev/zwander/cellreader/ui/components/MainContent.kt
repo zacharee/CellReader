@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,14 +30,11 @@ import dev.zwander.cellreader.data.data.LocalCellModel
 import dev.zwander.cellreader.data.layouts.CellSignalStrengthCard
 import dev.zwander.cellreader.data.layouts.SIMCard
 import dev.zwander.cellreader.data.layouts.SignalCard
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun MainContent() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val model = LocalCellModel.current
 
     val showingCells = remember {
@@ -72,9 +68,7 @@ fun MainContent() {
     val refreshState = rememberPullRefreshState(
         refreshing = refreshing,
         onRefresh = {
-            scope.launch(Dispatchers.IO) {
-                UpdaterService.refresh(context)
-            }
+            UpdaterService.refresh(context)
         }
     )
 
