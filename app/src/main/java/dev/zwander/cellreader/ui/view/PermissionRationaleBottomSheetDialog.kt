@@ -12,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ComponentActivity
@@ -26,12 +25,17 @@ import dev.zwander.cellreader.data.databinding.PermissionDialogLayoutBinding
 import kotlinx.parcelize.Parcelize
 import tk.zwander.patreonsupportersretrieval.util.launchUrl
 
-class PermissionRationaleBottomSheetDialog(context: Context, private vararg val permissions: PermissionInfo) : BottomSheetDialog(context) {
+class PermissionRationaleBottomSheetDialog(
+    context: Context,
+    private vararg val permissions: PermissionInfo,
+    @StringRes private val titleRes: Int = R.string.required_permissions,
+    @StringRes private val negativeRes: Int = R.string.close_app,
+) : BottomSheetDialog(context) {
     private val layout = PermissionDialogLayoutBinding.inflate(window.layoutInflater)
 
     init {
         setCancelable(false)
-        setTitle(R.string.required_permissions)
+        setTitle(titleRes)
         setContentView(layout.root)
 
         ViewTreeLifecycleOwner.set(window.decorView, (context as ComponentActivity))
@@ -99,7 +103,7 @@ class PermissionRationaleBottomSheetDialog(context: Context, private vararg val 
                         TextButton(
                             onClick = negativeListener
                         ) {
-                            Text(text = stringResource(id = R.string.close_app))
+                            Text(text = stringResource(id = negativeRes))
                         }
 
                         TextButton(

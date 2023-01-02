@@ -9,9 +9,13 @@ object PermissionUtils {
     private val permissions = arrayOf(
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.READ_PHONE_STATE,
-        android.Manifest.permission.READ_PHONE_NUMBERS
+        android.Manifest.permission.READ_PHONE_NUMBERS,
     ) + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        arrayOf()
+    } + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     } else {
         arrayOf()
     }

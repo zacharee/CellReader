@@ -17,12 +17,19 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.ProvideCellModel
+import dev.zwander.cellreader.data.util.preferences
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
 import dev.zwander.cellreader.ui.view.PermissionRationaleBottomSheetDialog
 import dev.zwander.cellreader.utils.PermissionUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private var initialized = false
 
     private val permReq =
@@ -36,6 +43,17 @@ class MainActivity : ComponentActivity() {
             PermissionRationaleBottomSheetDialog.PermissionInfo(
                 dev.zwander.cellreader.data.R.string.required_permission_fine_location
             )
+        )
+    }
+
+    private val backgroundLocationDialog by lazy {
+        PermissionRationaleBottomSheetDialog(
+            this,
+            PermissionRationaleBottomSheetDialog.PermissionInfo(
+                dev.zwander.cellreader.data.R.string.optional_permission_background_location
+            ),
+            titleRes = dev.zwander.cellreader.data.R.string.optional_permissions,
+            negativeRes = dev.zwander.cellreader.data.R.string.skip
         )
     }
 
@@ -65,44 +83,87 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("InlinedApi")
     private fun handlePermissions(permissions: List<String>) {
-        with (permissions) {
-            when {
-                isEmpty() -> init()
-                contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                    locationDialog.show(
-                        positiveListener = {
-                            permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
-                            locationDialog.dismiss()
-                        },
-                        negativeListener = {
-                            finish()
-                        }
-                    )
-                }
-                else -> {
-                    otherDialog.show(
-                        positiveListener = {
-                            permReq.launch(permissions.toTypedArray())
-                            otherDialog.dismiss()
-                        },
-                        negativeListener = {
-                            finish()
-                        }
-                    )
+        launch(Dispatchers.IO) {
+            val actualPermissions = ArrayList(permissions)
+
+            @SuppressLint("InlinedApi")
+            if (preferences.declinedBackgroundLocation.stateIn(this).value) {
+                actualPermissions.remove(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+
+            with (actualPermissions) {
+                when {
+                    isEmpty() -> launch(Dispatchers.Main) {
+                        init()
+                    }
+                    contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                        locationDialog.show(
+                            positiveListener = {
+                                permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
+                                locationDialog.dismiss()
+                            },
+                            negativeListener = {
+                                finish()
+                            }
+                        )
+                    }
+                    contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) -> {
+                        backgroundLocationDialog.show(
+                            positiveListener = {
+                                permReq.launch(arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+                                backgroundLocationDialog.dismiss()
+                            },
+                            negativeListener = {
+                                backgroundLocationDialog.dismiss()
+                                permReq.launch((actualPermissions - android.Manifest.permission.ACCESS_BACKGROUND_LOCATION).toTypedArray())
+                                launch {
+                                    preferences.updateDeclinedBackgroundLocation(true)
+                                }
+                            }
+                        )
+                    }
+                    else -> {
+                        otherDialog.show(
+                            positiveListener = {
+                                permReq.launch(actualPermissions.toTypedArray())
+                                otherDialog.dismiss()
+                            },
+                            negativeListener = {
+                                finish()
+                            }
+                        )
+                    }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (initialized &&
+                PermissionUtils.getMissingPermissions(this)
+                    .contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            UpdaterService.start(
+                this, true
+            )
         }
     }
 
     override fun onDestroy() {
         initialized = false
 
+        cancel()
         super.onDestroy()
     }
 
     private fun init() {
-        UpdaterService.start(this, true)
+        UpdaterService.start(
+            this,
+            false
+        )
 
         setContent {
             val sysUiController = rememberSystemUiController()

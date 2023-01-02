@@ -15,17 +15,13 @@ import dev.zwander.cellreader.data.wrappers.*
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 import io.gsonfire.GsonFireBuilder
 import io.gsonfire.TypeSelector
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
-@OptIn(DelicateCoroutinesApi::class)
 class BetweenUtils private constructor(private val context: Context) {
     companion object {
         const val CELL_INFOS_PATH = "/cell_infos"
@@ -61,16 +57,6 @@ class BetweenUtils private constructor(private val context: Context) {
         fun getInstance(context: Context): BetweenUtils {
             return instance ?: BetweenUtils(context.applicationContext ?: context).apply {
                 instance = this
-            }
-        }
-    }
-
-    private var canSend = false
-
-    init {
-        GlobalScope.launch {
-            context.preferences.sendToWear.collect {
-                canSend = it
             }
         }
     }
@@ -454,23 +440,25 @@ class BetweenUtils private constructor(private val context: Context) {
     }
 
     private suspend fun Mutex.sendInfo(gson: Gson, path: String, pairs: List<Pair<String, Any>>): DataItem? {
-        return if (canSend) {
-            withLock {
-                val mapped = pairs.map {
-                    it.first to gson.toJson(it.second).toByteArray()
-                }
-
-                val request = PutDataMapRequest.create(path).apply {
-                    mapped.forEach { (key, item) ->
-                        dataMap.putByteArray(key, item)
+        return coroutineScope {
+            if (context.preferences.sendToWear.first()) {
+                withLock {
+                    val mapped = pairs.map {
+                        it.first to gson.toJson(it.second).toByteArray()
                     }
-                }.asPutDataRequest()
-                    .setUrgent()
 
-                getDataClient()?.putDataItem(request)?.await()
+                    val request = PutDataMapRequest.create(path).apply {
+                        mapped.forEach { (key, item) ->
+                            dataMap.putByteArray(key, item)
+                        }
+                    }.asPutDataRequest()
+                        .setUrgent()
+
+                    getDataClient()?.putDataItem(request)?.await()
+                }
+            } else {
+                null
             }
-        } else {
-            null
         }
     }
 

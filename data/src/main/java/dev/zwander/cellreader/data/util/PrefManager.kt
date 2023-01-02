@@ -23,18 +23,28 @@ class PrefManager private constructor(private val context: Context) {
         }
 
         val SEND_TO_WEAR = booleanPreferencesKey("send_to_wear")
+        val HAS_DECLINED_BACKGROUND_LOCATION = booleanPreferencesKey("declined_background_location")
     }
 
-    private val Context.store by preferencesDataStore(
+    val Context.store by preferencesDataStore(
         "settings"
     )
 
     val sendToWear: Flow<Boolean>
         get() = context.store.data.map { it[SEND_TO_WEAR] ?: false }
 
+    val declinedBackgroundLocation: Flow<Boolean>
+        get() = context.store.data.map { it[HAS_DECLINED_BACKGROUND_LOCATION] ?: false }
+
     suspend fun updateSendToWear(sendToWear: Boolean) {
         context.store.edit {
             it[SEND_TO_WEAR] = sendToWear
+        }
+    }
+
+    suspend fun updateDeclinedBackgroundLocation(declined: Boolean) {
+        context.store.edit {
+            it[HAS_DECLINED_BACKGROUND_LOCATION] = declined
         }
     }
 }
