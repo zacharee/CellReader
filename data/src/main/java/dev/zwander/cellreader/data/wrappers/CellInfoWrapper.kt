@@ -39,7 +39,7 @@ sealed class CellInfoWrapper(
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is CellInfoGsmWrapper
+        return other is CellInfoWrapper
                 && other.cellIdentity == cellIdentity
                 && other.cellSignalStrength == cellSignalStrength
     }
