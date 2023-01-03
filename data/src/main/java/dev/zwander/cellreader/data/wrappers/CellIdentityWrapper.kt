@@ -9,13 +9,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 sealed class CellIdentityWrapper(
-    open val type: Int,
-    open val mcc: String?,
-    open val mnc: String?,
-    open val alphaLong: String?,
-    open val alphaShort: String?,
-    open val globalCellId: String?,
-    open val channelNumber: Int,
+    val type: Int
 ) {
     val plmn: String?
         get() = if (mcc.isNullOrBlank()) null else (mcc + mnc)
@@ -45,6 +39,13 @@ sealed class CellIdentityWrapper(
         }
     }
 
+    abstract val mcc: String?
+    abstract val mnc: String?
+    abstract val alphaLong: String?
+    abstract val alphaShort: String?
+    abstract val globalCellId: String?
+    abstract val channelNumber: Int
+
     abstract override fun hashCode(): Int
     abstract override fun equals(other: Any?): Boolean
 }
@@ -62,8 +63,7 @@ data class CellIdentityGsmWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_GSM, mcc, mnc, alphaLong,
-    alphaShort, globalCellId, channelNumber
+    CellInfo.TYPE_GSM
 ) {
     override val arfcnInfo = ARFCNTools.gsmArfcnToInfo(arfcn)
 
@@ -120,10 +120,12 @@ data class CellIdentityCdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_CDMA, null, null,
-    alphaLong, alphaShort, globalCellId, channelNumber
+    CellInfo.TYPE_CDMA
 ) {
     override val arfcnInfo = listOf<ARFCNInfo>()
+
+    override val mcc: String? = null
+    override val mnc: String? = null
 
     constructor(identity: CellIdentityCdma) : this(
         identity.networkId,
@@ -174,8 +176,7 @@ data class CellIdentityTdscdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_TDSCDMA, mcc, mnc, alphaLong,
-    alphaShort, globalCellId, channelNumber
+    CellInfo.TYPE_TDSCDMA
 ) {
     override val arfcnInfo = ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
 
@@ -250,8 +251,7 @@ data class CellIdentityWcdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_WCDMA, mcc, mnc, alphaLong,
-    alphaShort, globalCellId, channelNumber
+    CellInfo.TYPE_WCDMA
 ) {
     override val arfcnInfo = ARFCNTools.uarfcnToInfo(uarfcn)
 
@@ -324,8 +324,7 @@ data class CellIdentityLteWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_LTE, mcc, mnc, alphaLong,
-    alphaShort, globalCellId, channelNumber
+    CellInfo.TYPE_LTE
 ) {
     override val arfcnInfo: List<ARFCNInfo>
         get() = ARFCNTools.earfcnToInfo(earfcn)
@@ -410,8 +409,7 @@ data class CellIdentityNrWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_NR, mcc, mnc, alphaLong,
-    alphaShort, globalCellId, channelNumber
+    CellInfo.TYPE_NR
 ) {
     override val arfcnInfo = ARFCNTools.nrArfcnToInfo(nrArfcn)
 
