@@ -26,7 +26,7 @@ data class NetworkRegistrationInfoWrapper(
         fun registrationStateToString(context: Context, @RegistrationState registrationState: Int): String {
             return context.resources.getString(
                 when (registrationState) {
-                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING -> R.string.not_roaming
+                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING -> R.string.not_registered
                     NetworkRegistrationInfo.REGISTRATION_STATE_HOME -> R.string.home
                     NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING -> R.string.not_reg_searching
                     NetworkRegistrationInfo.REGISTRATION_STATE_DENIED -> R.string.denied

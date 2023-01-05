@@ -229,6 +229,7 @@
 
     <string name="home">Home</string>
     <string name="not_reg_searching">Searching Not Registered</string>
+    <string name="not_registered">Not Registered</string>
     <string name="denied">Denied</string>
     <string name="roaming">Roaming</string>
     <string name="voice">Voice</string>
