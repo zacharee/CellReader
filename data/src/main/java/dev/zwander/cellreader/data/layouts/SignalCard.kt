@@ -1,18 +1,12 @@
 package dev.zwander.cellreader.data.layouts
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.layouts.cellIdentity.CellIdentity
-import dev.zwander.cellreader.data.layouts.cellsignalstrength.CellSignalStrength
+import dev.zwander.cellreader.data.data.CellSignalInfo
 import dev.zwander.cellreader.data.typeString
-import dev.zwander.cellreader.data.util.CellUtils
-import dev.zwander.cellreader.data.util.FormatText
-import dev.zwander.cellreader.data.util.onCast
-import dev.zwander.cellreader.data.wrappers.CellInfoLteWrapper
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 
 @Composable
@@ -38,46 +32,21 @@ fun SignalCard(
         ),
         modifier = modifier,
         basicInfo = {
-            with(cellInfo) {
-                CellIdentity(
-                    cellIdentity = cellIdentity,
-                    simple = true,
-                    advanced = false
-                )
-
-                CellSignalStrength(
-                    cellSignalStrength = cellSignalStrength,
-                    simple = true,
-                    advanced = false
-                )
-            }
+            CellSignalInfo.Renderer.RenderIdentity(
+                identity = cellInfo.cellIdentity,
+                strength = cellInfo.cellSignalStrength,
+                cellInfo = cellInfo,
+                simple = true,
+                advanced = false
+            )
         }
     ) {
-        with(cellInfo) {
-            FormatText(R.string.registered_format, isRegistered.toString())
-            FormatText(
-                R.string.cell_connection_status_format,
-                CellUtils.connectionStatusToString(context, connectionStatus)
-            )
-            FormatText(R.string.timestamp_format, timeStamp)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                onCast<CellInfoLteWrapper> {
-                    FormatText(R.string.endc_available_format, "${cellConfig?.endcAvailable}")
-                }
-            }
-
-            CellSignalStrength(
-                cellSignalStrength = cellSignalStrength,
-                simple = false,
-                advanced = true
-            )
-
-            CellIdentity(
-                cellIdentity = cellIdentity,
-                simple = false,
-                advanced = true
-            )
-        }
+        CellSignalInfo.Renderer.RenderIdentity(
+            identity = cellInfo.cellIdentity,
+            strength = cellInfo.cellSignalStrength,
+            cellInfo = cellInfo,
+            simple = false,
+            advanced = true
+        )
     }
 }

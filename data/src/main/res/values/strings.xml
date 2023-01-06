@@ -237,6 +237,7 @@
     <string name="sms">SMS</string>
     <string name="video">Video</string>
     <string name="emergency">Emergency</string>
+    <string name="advanced">Advanced</string>
 
     <string name="wwan">WWAN</string>
     <string name="wlan">WLAN</string>

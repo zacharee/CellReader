@@ -9,9 +9,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import dev.zwander.cellreader.data.layouts.cellsignalstrength.CellSignalStrength
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.WearSafeText
+import dev.zwander.cellreader.data.data.CellSignalInfo
+import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.hasAdvancedItems
+import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.orderOf
 import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.wrappers.*
@@ -43,10 +45,14 @@ fun CellSignalStrengthCard(
 ) {
     val context = LocalContext.current
 
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
     ExpanderSignalCard(
         isFinal = isFinal,
-        expanded = false,
-        onExpand = {},
+        expanded = expanded,
+        onExpand = { expanded = it },
         level = cellSignalStrength.level,
         dBm = cellSignalStrength.dbm,
         type = cellSignalStrength.typeString(context),
@@ -56,13 +62,22 @@ fun CellSignalStrengthCard(
         ),
         modifier = modifier,
         basicInfo = {
-            with(cellSignalStrength) {
-                CellSignalStrength(
-                    cellSignalStrength = this,
-                    simple = true,
+            CellSignalInfo.Renderer.RenderStrength(
+                strength = cellSignalStrength,
+                simple = true,
+                advanced = false
+            )
+        },
+        expandedInfo = if (cellSignalStrength.orderOf(context).hasAdvancedItems) {
+            {
+                CellSignalInfo.Renderer.RenderStrength(
+                    strength = cellSignalStrength,
+                    simple = false,
                     advanced = true
                 )
             }
+        } else {
+            null
         }
     )
 }

@@ -17,7 +17,7 @@ import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.WearSafeText
-import dev.zwander.cellreader.data.layouts.cellIdentity.CellIdentity
+import dev.zwander.cellreader.data.data.CellSignalInfo
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.NetworkRegistrationInfoWrapper
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
@@ -80,8 +80,8 @@ fun NetworkRegInfo(
                     )
 
                     cellIdentity?.apply {
-                        CellIdentity(
-                            cellIdentity = this,
+                        CellSignalInfo.Renderer.RenderIdentity(
+                            identity = cellIdentity,
                             simple = true,
                             advanced = true
                         )
