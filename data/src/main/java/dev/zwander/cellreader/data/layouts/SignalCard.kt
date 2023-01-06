@@ -1,11 +1,15 @@
 package dev.zwander.cellreader.data.layouts
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellSignalInfo
+import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.orderOf
 import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 
@@ -18,6 +22,15 @@ fun SignalCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+
+    val identityOrder = remember(cellInfo.cellIdentity) {
+        cellInfo.cellIdentity.orderOf()
+    }
+    val hasAdvancedItems by remember(identityOrder) {
+        with (identityOrder) {
+            context.hasAdvancedItems
+        }
+    }.collectAsState(initial = false)
 
     ExpanderSignalCard(
         isFinal = isFinal,
@@ -39,14 +52,19 @@ fun SignalCard(
                 simple = true,
                 advanced = false
             )
+        },
+        expandedInfo = if (hasAdvancedItems) {
+            {
+                CellSignalInfo.Renderer.RenderIdentity(
+                    identity = cellInfo.cellIdentity,
+                    strength = cellInfo.cellSignalStrength,
+                    cellInfo = cellInfo,
+                    simple = false,
+                    advanced = true
+                )
+            }
+        } else {
+            null
         }
-    ) {
-        CellSignalInfo.Renderer.RenderIdentity(
-            identity = cellInfo.cellIdentity,
-            strength = cellInfo.cellSignalStrength,
-            cellInfo = cellInfo,
-            simple = false,
-            advanced = true
-        )
-    }
+    )
 }

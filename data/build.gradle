@@ -74,6 +74,7 @@ dependencies {
     api('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4')
     api('org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4')
     api('org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4')
+    api "org.jetbrains.kotlin:kotlin-reflect:1.7.22"
 
     api 'dev.rikka.shizuku:api:12.2.0'
     api 'dev.rikka.shizuku:provider:12.2.0'

@@ -4,11 +4,15 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import dev.zwander.cellreader.data.R
-import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.identityCdmaOrder
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.castGeneric
@@ -30,6 +34,8 @@ import dev.zwander.cellreader.data.wrappers.CellSignalStrengthNrWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthTdscdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWcdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 object CellSignalInfo {
     sealed class Keys<T>(@StringRes val label: Int, val key: String, val defaultShown: Boolean, private val render: @Composable T.() -> Unit) {
@@ -784,12 +790,14 @@ object CellSignalInfo {
 
             with (Orderer) {
                 val order = remember(identity) {
-                    identity.orderOf(context)
+                    identity.orderOf()
                 }
-                
+
                 val (simpleOrder, advancedOrder) = remember(order) {
-                    order.splitInfo
-                }
+                    with (order) {
+                        context.splitOrder
+                    }
+                }.collectAsState(initial = order.defaultSplitOrder).value
                 
                 if (simple) {
                     simpleOrder.forEach {
@@ -835,12 +843,14 @@ object CellSignalInfo {
 
             with (Orderer) {
                 val order = remember(strength) {
-                    strength.orderOf(context)
+                    strength.orderOf()
                 }
 
                 val (simpleOrder, advancedOrder) = remember(order) {
-                    order.splitInfo
-                }
+                    with (order) {
+                        context.splitOrder
+                    }
+                }.collectAsState(initial = order.defaultSplitOrder).value
 
                 if (simple) {
                     simpleOrder.forEach {
@@ -858,6 +868,69 @@ object CellSignalInfo {
     }
 
     object Orderer {
+        sealed class PreferenceKey(keyString: String) {
+            val key: Preferences.Key<Set<String>> = stringSetPreferencesKey(keyString)
+
+            sealed class Identity(keyString: String) : PreferenceKey("$keyString-identity") {
+                object CDMA : Identity("cdma")
+                object GSM : Identity("gsm")
+                object LTE : Identity("lte")
+                object NR : Identity("nr")
+                object TDSCDMA : Identity("tdscdma")
+                object WCDMA : Identity("wcdma")
+            }
+
+            sealed class Strength(keyString: String) : PreferenceKey("$keyString-strength") {
+                object CDMA : Strength("cdma")
+                object GSM : Strength("gsm")
+                object LTE : Strength("lte")
+                object NR : Strength("nr")
+                object TDSCDMA : Strength("tdscdma")
+                object WCDMA : Strength("wcdma")
+            }
+        }
+
+        sealed class Order(private val key: PreferenceKey, private val defaultOrder: List<Keys<*>>) {
+            val Context.order: Flow<List<Keys<*>>>
+                get() = store.data.map { it[key.key]?.toKeys() ?: defaultOrder }
+
+            val Context.splitOrder: Flow<Pair<List<Keys<*>>, List<Keys<*>>>>
+                get() = order.map { it.splitInfo }
+
+            val Context.hasAdvancedItems: Flow<Boolean>
+                get() = splitOrder.map { it.second.isNotEmpty() }
+
+            val defaultSplitOrder = defaultOrder.splitInfo
+
+            suspend fun Context.updateOrder(newOrder: List<Keys<*>>) {
+                store.edit {
+                    it[key.key] = newOrder.map { k -> k.key }.toSet()
+                }
+            }
+
+            sealed class Identity(key: PreferenceKey, defaultOrder: List<Keys<*>>) : Order(key, defaultOrder) {
+                object CDMA : Identity(PreferenceKey.Identity.CDMA, defaultIdentityCdmaOrder)
+                object GSM : Identity(PreferenceKey.Identity.GSM, defaultIdentityGsmOrder)
+                object LTE : Identity(PreferenceKey.Identity.LTE, defaultIdentityLteOrder)
+                object NR : Identity(PreferenceKey.Identity.NR, defaultIdentityNrOrder)
+                object TDSCDMA : Identity(PreferenceKey.Identity.TDSCDMA, defaultIdentityTdscdmaOrder)
+                object WCDMA : Identity(PreferenceKey.Identity.WCDMA, defaultIdentityWcdmaOrder)
+            }
+
+            sealed class Strength(key: PreferenceKey, defaultOrder: List<Keys<*>>) : Order(key, defaultOrder) {
+                object CDMA : Strength(PreferenceKey.Strength.CDMA, defaultStrengthCdmaOrder)
+                object GSM : Strength(PreferenceKey.Strength.GSM, defaultStrengthGsmOrder)
+                object LTE : Strength(PreferenceKey.Strength.LTE, defaultStrengthLteOrder)
+                object NR : Strength(PreferenceKey.Strength.NR, defaultStrengthNrOrder)
+                object TDSCDMA : Strength(PreferenceKey.Strength.TDSCDMA, defaultStrengthTdscdmaOrder)
+                object WCDMA : Strength(PreferenceKey.Strength.WCDMA, defaultStrengthWcdmaOrder)
+            }
+        }
+
+        private val Context.store by preferencesDataStore(
+            "cell_item_order"
+        )
+
         private val defaultIdentityCdmaOrder = listOf(
             Keys.IdentityKeys.Carrier,
             Keys.AdvancedSeparator,
@@ -1072,47 +1145,8 @@ object CellSignalInfo {
             Keys.AdvancedSeparator
         )
 
-        val Context.identityCdmaOrder: List<Keys<*>>
-            get() = defaultIdentityCdmaOrder
-
-        val Context.strengthCdmaOrder: List<Keys<*>>
-            get() = defaultStrengthCdmaOrder
-
-        val Context.identityGsmOrder: List<Keys<*>>
-            get() = defaultIdentityGsmOrder
-
-        val Context.strengthGsmOrder: List<Keys<*>>
-            get() = defaultStrengthGsmOrder
-
-        val Context.identityLteOrder: List<Keys<*>>
-            get() = defaultIdentityLteOrder
-
-        val Context.strengthLteOrder: List<Keys<*>>
-            get() = defaultStrengthLteOrder
-
-        val Context.identityNrOrder: List<Keys<*>>
-            get() = defaultIdentityNrOrder
-
-        val Context.strengthNrOrder: List<Keys<*>>
-            get() = defaultStrengthNrOrder
-
-        val Context.identityTdscdmaOrder: List<Keys<*>>
-            get() = defaultIdentityTdscdmaOrder
-
-        val Context.strengthTdscdmaOrder: List<Keys<*>>
-            get() = defaultStrengthTdscdmaOrder
-
-        val Context.identityWcdmaOrder: List<Keys<*>>
-            get() = defaultIdentityWcdmaOrder
-        
-        val Context.strengthWcdmaOrder: List<Keys<*>>
-            get() = defaultStrengthWcdmaOrder
-
         val List<Keys<*>>.advancedIndex: Int
             get() = indexOf(Keys.AdvancedSeparator)
-
-        val List<Keys<*>>.hasAdvancedItems: Boolean
-            get() = advancedIndex < lastIndex
 
         val List<Keys<*>>.splitInfo: Pair<List<Keys<*>>, List<Keys<*>>>
             get() {
@@ -1128,24 +1162,33 @@ object CellSignalInfo {
                 return simple to advanced
             }
 
-        fun CellIdentityWrapper.orderOf(context: Context): List<Keys<*>> =
+        fun CellIdentityWrapper.orderOf(): Order.Identity =
             when (this) {
-                is CellIdentityCdmaWrapper -> context.identityCdmaOrder
-                is CellIdentityGsmWrapper -> context.identityGsmOrder
-                is CellIdentityLteWrapper -> context.identityLteOrder
-                is CellIdentityNrWrapper -> context.identityNrOrder
-                is CellIdentityTdscdmaWrapper -> context.identityTdscdmaOrder
-                is CellIdentityWcdmaWrapper -> context.identityWcdmaOrder
+                is CellIdentityCdmaWrapper -> Order.Identity.CDMA
+                is CellIdentityGsmWrapper -> Order.Identity.GSM
+                is CellIdentityLteWrapper -> Order.Identity.LTE
+                is CellIdentityNrWrapper -> Order.Identity.NR
+                is CellIdentityTdscdmaWrapper -> Order.Identity.TDSCDMA
+                is CellIdentityWcdmaWrapper -> Order.Identity.WCDMA
             }
 
-        fun CellSignalStrengthWrapper.orderOf(context: Context): List<Keys<*>> =
+        fun CellSignalStrengthWrapper.orderOf(): Order.Strength =
             when (this) {
-                is CellSignalStrengthCdmaWrapper -> context.strengthCdmaOrder
-                is CellSignalStrengthGsmWrapper -> context.strengthGsmOrder
-                is CellSignalStrengthLteWrapper -> context.strengthLteOrder
-                is CellSignalStrengthNrWrapper -> context.strengthNrOrder
-                is CellSignalStrengthTdscdmaWrapper -> context.strengthTdscdmaOrder
-                is CellSignalStrengthWcdmaWrapper -> context.strengthWcdmaOrder
+                is CellSignalStrengthCdmaWrapper -> Order.Strength.CDMA
+                is CellSignalStrengthGsmWrapper -> Order.Strength.GSM
+                is CellSignalStrengthLteWrapper -> Order.Strength.LTE
+                is CellSignalStrengthNrWrapper -> Order.Strength.NR
+                is CellSignalStrengthTdscdmaWrapper -> Order.Strength.TDSCDMA
+                is CellSignalStrengthWcdmaWrapper -> Order.Strength.WCDMA
             }
+
+        private fun String.keyStringToKeys(): Keys<*> {
+            return Keys::class.sealedSubclasses.mapNotNull { it.objectInstance }
+                .first { it.key == this }
+        }
+
+        private fun Set<String>.toKeys(): List<Keys<*>> {
+            return this.map { it.keyStringToKeys() }
+        }
     }
 }

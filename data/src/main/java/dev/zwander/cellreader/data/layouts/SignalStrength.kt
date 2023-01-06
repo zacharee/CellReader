@@ -12,7 +12,6 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.data.CellSignalInfo
-import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.hasAdvancedItems
 import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.orderOf
 import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.FormatText
@@ -49,6 +48,15 @@ fun CellSignalStrengthCard(
         mutableStateOf(false)
     }
 
+    val order = remember(cellSignalStrength) {
+        cellSignalStrength.orderOf()
+    }
+    val hasAdvancedItems by remember(order) {
+        with (order) {
+            context.hasAdvancedItems
+        }
+    }.collectAsState(initial = false)
+
     ExpanderSignalCard(
         isFinal = isFinal,
         expanded = expanded,
@@ -68,7 +76,7 @@ fun CellSignalStrengthCard(
                 advanced = false
             )
         },
-        expandedInfo = if (cellSignalStrength.orderOf(context).hasAdvancedItems) {
+        expandedInfo = if (hasAdvancedItems) {
             {
                 CellSignalInfo.Renderer.RenderStrength(
                     strength = cellSignalStrength,
