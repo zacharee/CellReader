@@ -26,8 +26,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private var initialized = false
@@ -89,51 +91,51 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             val actualPermissions = ArrayList(permissions)
 
             @SuppressLint("InlinedApi")
-            if (preferences.declinedBackgroundLocation.stateIn(this).value) {
+            if (preferences.declinedBackgroundLocation.first()) {
                 actualPermissions.remove(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
 
-            with (actualPermissions) {
-                when {
-                    isEmpty() -> launch(Dispatchers.Main) {
-                        init()
-                    }
-                    contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                        locationDialog.show(
-                            positiveListener = {
-                                permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
-                                locationDialog.dismiss()
-                            },
-                            negativeListener = {
-                                finish()
-                            }
-                        )
-                    }
-                    contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) -> {
-                        backgroundLocationDialog.show(
-                            positiveListener = {
-                                permReq.launch(arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION))
-                                backgroundLocationDialog.dismiss()
-                            },
-                            negativeListener = {
-                                backgroundLocationDialog.dismiss()
-                                permReq.launch((actualPermissions - android.Manifest.permission.ACCESS_BACKGROUND_LOCATION).toTypedArray())
-                                launch {
-                                    preferences.updateDeclinedBackgroundLocation(true)
+            withContext(Dispatchers.Main) {
+                with (actualPermissions) {
+                    when {
+                        isEmpty() -> init()
+                        contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                            locationDialog.show(
+                                positiveListener = {
+                                    permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
+                                    locationDialog.dismiss()
+                                },
+                                negativeListener = {
+                                    finish()
                                 }
-                            }
-                        )
-                    }
-                    else -> {
-                        otherDialog.show(
-                            positiveListener = {
-                                permReq.launch(actualPermissions.toTypedArray())
-                                otherDialog.dismiss()
-                            },
-                            negativeListener = {
-                                finish()
-                            }
-                        )
+                            )
+                        }
+                        contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) -> {
+                            backgroundLocationDialog.show(
+                                positiveListener = {
+                                    permReq.launch(arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+                                    backgroundLocationDialog.dismiss()
+                                },
+                                negativeListener = {
+                                    backgroundLocationDialog.dismiss()
+                                    permReq.launch((actualPermissions - android.Manifest.permission.ACCESS_BACKGROUND_LOCATION).toTypedArray())
+                                    launch {
+                                        preferences.updateDeclinedBackgroundLocation(true)
+                                    }
+                                }
+                            )
+                        }
+                        else -> {
+                            otherDialog.show(
+                                positiveListener = {
+                                    permReq.launch(actualPermissions.toTypedArray())
+                                    otherDialog.dismiss()
+                                },
+                                negativeListener = {
+                                    finish()
+                                }
+                            )
+                        }
                     }
                 }
             }
