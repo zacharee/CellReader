@@ -16,6 +16,7 @@ import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.orderOf
 import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.wrappers.*
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun SignalStrength(
@@ -56,6 +57,11 @@ fun CellSignalStrengthCard(
             context.hasAdvancedItems
         }
     }.collectAsState(initial = false)
+    val hasRenderableAdvancedItems by remember(order) {
+        with (order) {
+            context.splitOrder.map { it.second.any { k -> k.canRender(cellSignalStrength) } }
+        }
+    }.collectAsState(initial = hasAdvancedItems)
 
     ExpanderSignalCard(
         isFinal = isFinal,
@@ -76,7 +82,7 @@ fun CellSignalStrengthCard(
                 advanced = false
             )
         },
-        expandedInfo = if (hasAdvancedItems) {
+        expandedInfo = if (hasAdvancedItems && hasRenderableAdvancedItems) {
             {
                 CellSignalInfo.Renderer.RenderStrength(
                     strength = cellSignalStrength,

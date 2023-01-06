@@ -15,9 +15,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.asMccMnc
+import dev.zwander.cellreader.data.util.avail
 import dev.zwander.cellreader.data.util.castGeneric
-import dev.zwander.cellreader.data.util.onAvail
-import dev.zwander.cellreader.data.util.onCast
 import dev.zwander.cellreader.data.wrappers.CellIdentityCdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellIdentityGsmWrapper
 import dev.zwander.cellreader.data.wrappers.CellIdentityLteWrapper
@@ -38,57 +37,83 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 object CellSignalInfo {
-    sealed class Keys<T>(@StringRes val label: Int, val key: String, val defaultShown: Boolean, private val render: @Composable T.() -> Unit) {
+    sealed class Keys<T>(
+        @StringRes val label: Int,
+        val key: String,
+        private val canRender: T.() -> Boolean,
+        private val render: @Composable T.() -> Unit
+    ) {
         abstract fun cast(info: Any?): T?
 
         @Composable
         fun Render(info: Any?) {
-            cast(info)?.let {
-                render.invoke(it)
+            if (canRender(info)) {
+                cast(info)?.let {
+                    render.invoke(it)
+                }
             }
         }
 
-        object AdvancedSeparator : Keys<Unit>(R.string.advanced, "advanced", false, {}) {
+        fun canRender(info: Any?) = cast(info)?.let { it.canRender() } ?: false
+
+        object AdvancedSeparator : Keys<Unit>(R.string.advanced, "advanced", { false }, {}) {
             override fun cast(info: Any?): Unit? {
                 return null
             }
         }
 
-        sealed class IdentityKeys<T : CellIdentityWrapper>(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable T.() -> Unit) : Keys<T>(label, "identity-$key", defaultShown, render) {
-            object Bands : IdentityKeys<CellIdentityWrapper>(R.string.bands_format, "bands", true, {
-                if (bands.isNotEmpty()) {
+        sealed class IdentityKeys<T : CellIdentityWrapper>(
+            @StringRes label: Int,
+            key: String,
+            canRender: T.() -> Boolean,
+            render: @Composable T.() -> Unit
+        ) : Keys<T>(label, "identity-$key", canRender, render) {
+            object Bands : IdentityKeys<CellIdentityWrapper>(
+                R.string.bands_format,
+                "bands",
+                { bands.isNotEmpty() },
+                {
                     FormatText(
                         R.string.bands_format,
                         bands.joinToString(", ")
                     )
-                }
-            }) {
+                }) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
             }
-            object Channel : IdentityKeys<CellIdentityWrapper>(R.string.channel_format, "channel", false, {
-                channelNumber.onAvail {
-                    FormatText(R.string.channel_format, it.toString())
-                }
-            }) {
+
+            object Channel : IdentityKeys<CellIdentityWrapper>(
+                R.string.channel_format,
+                "channel",
+                { channelNumber.avail() },
+                {
+                    FormatText(R.string.channel_format, channelNumber.toString())
+                }) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
             }
-            object GCI : IdentityKeys<CellIdentityWrapper>(R.string.gci_format, "gci", false, {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+            object GCI : IdentityKeys<CellIdentityWrapper>(
+                R.string.gci_format,
+                "gci",
+                { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && globalCellId != null },
+                {
                     globalCellId?.apply {
                         FormatText(R.string.gci_format, this)
                     }
-                }
-            }) {
+                }) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
             }
-            object Carrier : IdentityKeys<CellIdentityWrapper>(R.string.operator_format, "carrier", true, {
-                if (!alphaLong.isNullOrBlank() || !alphaShort.isNullOrBlank()) {
+
+            object Carrier : IdentityKeys<CellIdentityWrapper>(
+                R.string.operator_format,
+                "carrier",
+                { !alphaLong.isNullOrBlank() || !alphaShort.isNullOrBlank() },
+                {
                     FormatText(
                         R.string.operator_format,
                         setOf(
@@ -96,683 +121,787 @@ object CellSignalInfo {
                             alphaShort
                         ).joinToString("/")
                     )
-                }
-            }) {
-                override fun cast(info: Any?): CellIdentityWrapper? {
-                    return info?.castGeneric()
-                }
-            }
-            object PLMN : IdentityKeys<CellIdentityWrapper>(R.string.plmn_format, "plmn", true, {
-                mcc?.apply {
-                    FormatText(R.string.plmn_format, "${mcc}-${mnc}")
-                }
-            }) {
+                }) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
             }
 
-            sealed class CDMAKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellIdentityCdmaWrapper.() -> Unit) : IdentityKeys<CellIdentityCdmaWrapper>(label, "$key-cdma", defaultShown, render) {
+            object PLMN : IdentityKeys<CellIdentityWrapper>(
+                R.string.plmn_format,
+                "plmn",
+                { mcc != null && mnc != null },
+                {
+                    mcc?.apply {
+                        FormatText(R.string.plmn_format, "${mcc}-${mnc}")
+                    }
+                }) {
+                override fun cast(info: Any?): CellIdentityWrapper? {
+                    return info?.castGeneric()
+                }
+            }
+
+            sealed class CDMAKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellIdentityCdmaWrapper.() -> Boolean,
+                render: @Composable CellIdentityCdmaWrapper.() -> Unit
+            ) : IdentityKeys<CellIdentityCdmaWrapper>(label, "$key-cdma", canRender, render) {
                 override fun cast(info: Any?): CellIdentityCdmaWrapper? {
                     return info?.castGeneric()
                 }
 
-                object LatLon : CDMAKeys(R.string.lat_lon_format, "lat-lon", false, {
-                    longitude.onAvail {
+                object LatLon : CDMAKeys(
+                    R.string.lat_lon_format,
+                    "lat-lon",
+                    { latitude.avail() && longitude.avail() },
+                    {
                         FormatText(
                             R.string.lat_lon_format,
                             "${latitude}/${longitude}"
                         )
-                    }
-                })
-                object CDMANetID : CDMAKeys(R.string.cdma_network_id_format, "net-id", false, {
-                    networkId.onAvail {
-                        FormatText(R.string.cdma_network_id_format, it.toString())
-                    }
-                })
-                object BasestationID : CDMAKeys(R.string.basestation_id_format, "basestation-id", false, {
-                    basestationId.onAvail {
-                        FormatText(R.string.basestation_id_format, it.toString())
-                    }
-                })
-                object CDMASysID : CDMAKeys(R.string.cdma_system_id_format, "sys-id", false, {
-                    systemId.onAvail {
-                        FormatText(R.string.cdma_system_id_format, it.toString())
-                    }
-                })
+                    })
+
+                object CDMANetID :
+                    CDMAKeys(R.string.cdma_network_id_format, "net-id", { networkId.avail() }, {
+                        FormatText(R.string.cdma_network_id_format, networkId.toString())
+                    })
+
+                object BasestationID : CDMAKeys(
+                    R.string.basestation_id_format,
+                    "basestation-id",
+                    { basestationId.avail() },
+                    {
+                        FormatText(R.string.basestation_id_format, basestationId.toString())
+                    })
+
+                object CDMASysID :
+                    CDMAKeys(R.string.cdma_system_id_format, "sys-id", { systemId.avail() }, {
+                        FormatText(R.string.cdma_system_id_format, systemId.toString())
+                    })
             }
 
-            sealed class GSMKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellIdentityGsmWrapper.() -> Unit) : IdentityKeys<CellIdentityGsmWrapper>(label, "$key-gsm", defaultShown, render) {
+            sealed class GSMKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellIdentityGsmWrapper.() -> Boolean,
+                render: @Composable CellIdentityGsmWrapper.() -> Unit
+            ) : IdentityKeys<CellIdentityGsmWrapper>(label, "$key-gsm", canRender, render) {
                 override fun cast(info: Any?): CellIdentityGsmWrapper? {
                     return info?.castGeneric()
                 }
 
-                object LAC : GSMKeys(R.string.lac_format, "lac", false, {
-                    lac.onAvail {
-                        FormatText(R.string.lac_format, "$it")
-                    }
+                object LAC : GSMKeys(R.string.lac_format, "lac", { lac.avail() }, {
+                    FormatText(R.string.lac_format, "$lac")
                 })
-                object CID : GSMKeys(R.string.cid_format, "cid", false, {
-                    cid.onAvail {
-                        FormatText(R.string.cid_format, "$it")
-                    }
+
+                object CID : GSMKeys(R.string.cid_format, "cid", { cid.avail() }, {
+                    FormatText(R.string.cid_format, "$cid")
                 })
-                object BSIC : GSMKeys(R.string.bsic_format, "bsic", false, {
-                    bsic.onAvail {
-                        FormatText(R.string.bsic_format, "$bsic")
-                    }
+
+                object BSIC : GSMKeys(R.string.bsic_format, "bsic", { bsic.avail() }, {
+                    FormatText(R.string.bsic_format, "$bsic")
                 })
-                object ARFCN : GSMKeys(R.string.arfcn_format, "arfcn", false, {
-                    arfcn.onAvail {
-                        FormatText(R.string.arfcn_format, "$arfcn")
-                    }
+
+                object ARFCN : GSMKeys(R.string.arfcn_format, "arfcn", { arfcn.avail() }, {
+                    FormatText(R.string.arfcn_format, "$arfcn")
                 })
-                object DLFreqs : GSMKeys(R.string.dl_freqs_format, "dlfreqs", false, {
+
+                object DLFreqs : GSMKeys(R.string.dl_freqs_format, "dlfreqs", { arfcn.avail() }, {
                     val dlFreqs = rememberSaveable(inputs = arrayOf(arfcn)) {
                         arfcnInfo.map { it.dlFreq }
                     }
 
-                    if (dlFreqs.isNotEmpty()) {
-                        FormatText(
-                            textId = R.string.dl_freqs_format,
-                            dlFreqs.joinToString(", ")
-                        )
-                    }
+                    FormatText(
+                        textId = R.string.dl_freqs_format,
+                        dlFreqs.joinToString(", ")
+                    )
                 })
-                object ULFreqs : GSMKeys(R.string.ul_freqs_format, "ulfreqs", false, {
+
+                object ULFreqs : GSMKeys(R.string.ul_freqs_format, "ulfreqs", { arfcn.avail() }, {
                     val ulFreqs = rememberSaveable(inputs = arrayOf(arfcn)) {
                         arfcnInfo.map { it.ulFreq }
                     }
 
-                    if (ulFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.ul_freqs_format,
+                        ulFreqs.joinToString(", ")
+                    )
+                })
+
+                object AdditionalPLMNs : GSMKeys(
+                    R.string.additional_plmns_format,
+                    "additional-plmns",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !additionalPlmns.isNullOrEmpty() },
+                    {
                         FormatText(
-                            textId = R.string.ul_freqs_format,
-                            ulFreqs.joinToString(", ")
+                            R.string.additional_plmns_format,
+                            additionalPlmns?.joinToString(", ") { it.asMccMnc }
                         )
-                    }
-                })
-                object AdditionalPLMNs : GSMKeys(R.string.additional_plmns_format, "additional-plmns", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if (!additionalPlmns.isNullOrEmpty()) {
-                            FormatText(
-                                R.string.additional_plmns_format,
-                                additionalPlmns.joinToString(", ") { it.asMccMnc }
-                            )
-                        }
-                    }
-                })
+                    })
             }
 
-            sealed class LTEKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellIdentityLteWrapper.() -> Unit) : IdentityKeys<CellIdentityLteWrapper>(label, "$key-lte", defaultShown, render) {
+            sealed class LTEKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellIdentityLteWrapper.() -> Boolean,
+                render: @Composable CellIdentityLteWrapper.() -> Unit
+            ) : IdentityKeys<CellIdentityLteWrapper>(label, "$key-lte", canRender, render) {
                 override fun cast(info: Any?): CellIdentityLteWrapper? {
                     return info?.castGeneric()
                 }
 
-                object Bandwidth : LTEKeys(R.string.bandwidth_format, "bandwidth", true, {
-                    bandwidth.onAvail {
-                        FormatText(R.string.bandwidth_format, it.toString())
-                    }
+                object Bandwidth :
+                    LTEKeys(R.string.bandwidth_format, "bandwidth", { bandwidth.avail() }, {
+                        FormatText(R.string.bandwidth_format, bandwidth.toString())
+                    })
+
+                object TAC : LTEKeys(R.string.tac_format, "tac", { tac.avail() }, {
+                    FormatText(R.string.tac_format, tac.toString())
                 })
-                object TAC : LTEKeys(R.string.tac_format, "tac", false, {
-                    tac.onAvail {
-                        FormatText(R.string.tac_format, it.toString())
-                    }
+
+                object CI : LTEKeys(R.string.ci_format, "ci", { ci.avail() }, {
+                    FormatText(R.string.ci_format, ci.toString())
                 })
-                object CI : LTEKeys(R.string.ci_format, "ci", false, {
-                    ci.onAvail {
-                        FormatText(R.string.ci_format, it.toString())
-                    }
+
+                object PCI : LTEKeys(R.string.pci_format, "pci", { pci.avail() }, {
+                    FormatText(R.string.pci_format, pci.toString())
                 })
-                object PCI : LTEKeys(R.string.pci_format, "pci", false, {
-                    pci.onAvail {
-                        FormatText(R.string.pci_format, it.toString())
-                    }
+
+                object EARFCN : LTEKeys(R.string.earfcn_format, "earfcn", { earfcn.avail() }, {
+                    FormatText(R.string.earfcn_format, earfcn.toString())
                 })
-                object EARFCN : LTEKeys(R.string.earfcn_format, "earfcn", false, {
-                    earfcn.onAvail {
-                        FormatText(R.string.earfcn_format, it.toString())
-                    }
-                })
-                object DLFreqs : LTEKeys(R.string.dl_freqs_format, "dlfreqs", false, {
+
+                object DLFreqs : LTEKeys(R.string.dl_freqs_format, "dlfreqs", { earfcn.avail() }, {
                     val dlFreqs = rememberSaveable(inputs = arrayOf(earfcn)) {
                         arfcnInfo.map { it.dlFreq }
                     }
 
-                    if (dlFreqs.isNotEmpty()) {
-                        FormatText(
-                            textId = R.string.dl_freqs_format,
-                            dlFreqs.joinToString(", ")
-                        )
-                    }
+                    FormatText(
+                        textId = R.string.dl_freqs_format,
+                        dlFreqs.joinToString(", ")
+                    )
                 })
-                object ULFreqs : LTEKeys(R.string.ul_freqs_format, "ulfreqs", false, {
+
+                object ULFreqs : LTEKeys(R.string.ul_freqs_format, "ulfreqs", { earfcn.avail() }, {
                     val ulFreqs = rememberSaveable(inputs = arrayOf(earfcn)) {
                         arfcnInfo.map { it.ulFreq }
                     }
 
-                    if (ulFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.ul_freqs_format,
+                        ulFreqs.joinToString(", ")
+                    )
+                })
+
+                object AdditionalPLMNs : LTEKeys(
+                    R.string.additional_plmns_format,
+                    "additional-plmns",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !additionalPlmns.isNullOrEmpty() },
+                    {
                         FormatText(
-                            textId = R.string.ul_freqs_format,
-                            ulFreqs.joinToString(", ")
+                            R.string.additional_plmns_format,
+                            additionalPlmns?.joinToString(", ") { it.asMccMnc }
                         )
-                    }
-                })
-                object AdditionalPLMNs : LTEKeys(R.string.additional_plmns_format, "additional-plmns", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if (!additionalPlmns.isNullOrEmpty()) {
-                            FormatText(
-                                R.string.additional_plmns_format,
-                                additionalPlmns.joinToString(", ") { it.asMccMnc }
-                            )
-                        }
-                    }
-                })
-                object CSGID : LTEKeys(R.string.csg_id_format, "csg-id", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object CSGID : LTEKeys(
+                    R.string.csg_id_format,
+                    "csg-id",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(R.string.csg_id_format, csgIdentity.toString())
                         }
-                    }
-                })
-                object CSGIndicator : LTEKeys(R.string.csg_indicator_format, "csg-indicator", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object CSGIndicator : LTEKeys(
+                    R.string.csg_indicator_format,
+                    "csg-indicator",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(
                                 R.string.csg_indicator_format,
                                 csgIndicator.toString()
                             )
                         }
-                    }
-                })
-                object HomeNodeBName : LTEKeys(R.string.home_node_b_name_format, "home-node-b-name", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object HomeNodeBName : LTEKeys(
+                    R.string.home_node_b_name_format,
+                    "home-node-b-name",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(R.string.home_node_b_name_format, homeNodebName ?: "")
                         }
-                    }
-                })
+                    })
             }
 
-            sealed class NRKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellIdentityNrWrapper.() -> Unit) : IdentityKeys<CellIdentityNrWrapper>(label, "$key-nr", defaultShown, render) {
+            sealed class NRKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellIdentityNrWrapper.() -> Boolean,
+                render: @Composable CellIdentityNrWrapper.() -> Unit
+            ) : IdentityKeys<CellIdentityNrWrapper>(label, "$key-nr", canRender, render) {
                 override fun cast(info: Any?): CellIdentityNrWrapper? {
                     return info?.castGeneric()
                 }
 
-                object TAC : NRKeys(R.string.tac_format, "tac", false, {
-                    tac.onAvail {
-                        FormatText(R.string.tac_format, it.toString())
-                    }
+                object TAC : NRKeys(R.string.tac_format, "tac", { tac.avail() }, {
+                    FormatText(R.string.tac_format, tac.toString())
                 })
-                object NCI : NRKeys(R.string.nci_format, "nci", false, {
-                    nci.onAvail {
-                        FormatText(R.string.nci_format, it.toString())
-                    }
+
+                object NCI : NRKeys(R.string.nci_format, "nci", { nci.avail() }, {
+                    FormatText(R.string.nci_format, nci.toString())
                 })
-                object PCI : NRKeys(R.string.pci_format, "pci", false, {
-                    pci.onAvail {
-                        FormatText(
-                            textId = R.string.pci_format,
-                            it.toString()
-                        )
-                    }
+
+                object PCI : NRKeys(R.string.pci_format, "pci", { pci.avail() }, {
+                    FormatText(
+                        textId = R.string.pci_format,
+                        pci.toString()
+                    )
                 })
-                object NRARFCN : NRKeys(R.string.nrarfcn_format, "nrarfcn", false, {
-                    nrArfcn.onAvail {
-                        FormatText(
-                            textId = R.string.nrarfcn_format,
-                            it.toString()
-                        )
-                    }
+
+                object NRARFCN : NRKeys(R.string.nrarfcn_format, "nrarfcn", { nrArfcn.avail() }, {
+                    FormatText(
+                        textId = R.string.nrarfcn_format,
+                        nrArfcn.toString()
+                    )
                 })
-                object DLFreqs : NRKeys(R.string.dl_freqs_format, "dlfreqs", false, {
+
+                object DLFreqs : NRKeys(R.string.dl_freqs_format, "dlfreqs", { nrArfcn.avail() }, {
                     val dlFreqs = rememberSaveable(inputs = arrayOf(nrArfcn)) {
                         arfcnInfo.map { it.dlFreq }
                     }
 
-                    if (dlFreqs.isNotEmpty()) {
-                        FormatText(
-                            textId = R.string.dl_freqs_format,
-                            dlFreqs.joinToString(", ")
-                        )
-                    }
+                    FormatText(
+                        textId = R.string.dl_freqs_format,
+                        dlFreqs.joinToString(", ")
+                    )
                 })
-                object ULFreqs : NRKeys(R.string.ul_freqs_format, "ulfreqs", false, {
+
+                object ULFreqs : NRKeys(R.string.ul_freqs_format, "ulfreqs", { nrArfcn.avail() }, {
                     val ulFreqs = rememberSaveable(inputs = arrayOf(nrArfcn)) {
                         arfcnInfo.map { it.ulFreq }
                     }
 
-                    if (ulFreqs.isNotEmpty()) {
+                    FormatText(
+                        textId = R.string.ul_freqs_format,
+                        ulFreqs.joinToString(", ")
+                    )
+                })
+
+                object AdditionalPLMNs : NRKeys(
+                    R.string.additional_plmns_format,
+                    "additional-plmns",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !additionalPlmns.isNullOrEmpty() },
+                    {
                         FormatText(
-                            textId = R.string.ul_freqs_format,
-                            ulFreqs.joinToString(", ")
+                            textId = R.string.additional_plmns_format,
+                            additionalPlmns?.joinToString(", ") { it.asMccMnc }
                         )
-                    }
-                })
-                object AdditionalPLMNs : NRKeys(R.string.additional_plmns_format, "additional-plmns", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if (!additionalPlmns.isNullOrEmpty()) {
-                            FormatText(
-                                textId = R.string.additional_plmns_format,
-                                additionalPlmns.joinToString(", ") { it.asMccMnc }
-                            )
-                        }
-                    }
-                })
+                    })
             }
 
-            sealed class TDSCDMAKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellIdentityTdscdmaWrapper.() -> Unit) : IdentityKeys<CellIdentityTdscdmaWrapper>(label, "$key-tdscdma", defaultShown, render) {
+            sealed class TDSCDMAKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellIdentityTdscdmaWrapper.() -> Boolean,
+                render: @Composable CellIdentityTdscdmaWrapper.() -> Unit
+            ) : IdentityKeys<CellIdentityTdscdmaWrapper>(label, "$key-tdscdma", canRender, render) {
                 override fun cast(info: Any?): CellIdentityTdscdmaWrapper? {
                     return info?.castGeneric()
                 }
 
-                object LAC : TDSCDMAKeys(R.string.lac_format, "lac", false, {
-                    lac.onAvail {
-                        FormatText(R.string.lac_format, it.toString())
-                    }
+                object LAC : TDSCDMAKeys(R.string.lac_format, "lac", { lac.avail() }, {
+                    FormatText(R.string.lac_format, lac.toString())
                 })
-                object CID : TDSCDMAKeys(R.string.cid_format, "cid", false, {
-                    cid.onAvail {
-                        FormatText(R.string.cid_format, it.toString())
-                    }
-                })
-                object CPID : TDSCDMAKeys(R.string.cpid_format, "cpid", false, {
-                    cpid.onAvail {
-                        FormatText(R.string.cpid_format, it.toString())
-                    }
-                })
-                object UARFCN : TDSCDMAKeys(R.string.uarfcn_format, "uarfcn", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        uarfcn.onAvail {
-                            FormatText(R.string.uarfcn_format, it.toString())
-                        }
-                    }
-                })
-                object Freqs : TDSCDMAKeys(R.string.freqs_format, "freqs", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        val freqs = rememberSaveable(inputs = arrayOf(uarfcn)) {
-                            arfcnInfo.map { it.dlFreq }
-                        }
 
-                        if (freqs.isNotEmpty()) {
+                object CID : TDSCDMAKeys(R.string.cid_format, "cid", { cid.avail() }, {
+                    FormatText(R.string.cid_format, cid.toString())
+                })
+
+                object CPID : TDSCDMAKeys(R.string.cpid_format, "cpid", { cpid.avail() }, {
+                    FormatText(R.string.cpid_format, cpid.toString())
+                })
+
+                object UARFCN : TDSCDMAKeys(
+                    R.string.uarfcn_format,
+                    "uarfcn",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && uarfcn.avail() },
+                    {
+                        FormatText(R.string.uarfcn_format, uarfcn.toString())
+                    })
+
+                object Freqs : TDSCDMAKeys(
+                    R.string.freqs_format,
+                    "freqs",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && uarfcn.avail() },
+                    {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val freqs = rememberSaveable(inputs = arrayOf(uarfcn)) {
+                                arfcnInfo.map { it.dlFreq }
+                            }
+
                             FormatText(
                                 textId = R.string.freqs_format,
                                 freqs.joinToString(", ")
                             )
                         }
-                    }
-                })
-                object AdditionalPLMNs : TDSCDMAKeys(R.string.additional_plmns_format, "additional-plmns", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if (!additionalPlmns.isNullOrEmpty()) {
-                            FormatText(
-                                R.string.additional_plmns_format,
-                                additionalPlmns.joinToString(", ") { it.asMccMnc }
-                            )
-                        }
-                    }
-                })
-                object CSGID : TDSCDMAKeys(R.string.csg_id_format, "csg-id", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object AdditionalPLMNs : TDSCDMAKeys(
+                    R.string.additional_plmns_format,
+                    "additional-plmns",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !additionalPlmns.isNullOrEmpty() },
+                    {
+                        FormatText(
+                            R.string.additional_plmns_format,
+                            additionalPlmns?.joinToString(", ") { it.asMccMnc }
+                        )
+                    })
+
+                object CSGID : TDSCDMAKeys(
+                    R.string.csg_id_format,
+                    "csg-id",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(R.string.csg_id_format, csgIdentity.toString())
                         }
-                    }
-                })
-                object CSGIndicator : TDSCDMAKeys(R.string.csg_indicator_format, "csg-indicator", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object CSGIndicator : TDSCDMAKeys(
+                    R.string.csg_indicator_format,
+                    "csg-indicator",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(
                                 R.string.csg_indicator_format,
                                 csgIndicator.toString()
                             )
                         }
-                    }
-                })
-                object HomeNodeBName : TDSCDMAKeys(R.string.home_node_b_name_format, "home-node-b-name", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object HomeNodeBName : TDSCDMAKeys(
+                    R.string.home_node_b_name_format,
+                    "home-node-b-name",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(R.string.home_node_b_name_format, homeNodebName ?: "")
                         }
-                    }
-                })
+                    })
             }
 
-            sealed class WCDMAKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellIdentityWcdmaWrapper.() -> Unit) : IdentityKeys<CellIdentityWcdmaWrapper>(label, "$key-wcdma", defaultShown, render) {
+            sealed class WCDMAKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellIdentityWcdmaWrapper.() -> Boolean,
+                render: @Composable CellIdentityWcdmaWrapper.() -> Unit
+            ) : IdentityKeys<CellIdentityWcdmaWrapper>(label, "$key-wcdma", canRender, render) {
                 override fun cast(info: Any?): CellIdentityWcdmaWrapper? {
                     return info?.castGeneric()
                 }
 
-                object LAC : WCDMAKeys(R.string.lac_format, "lac", false, {
-                    lac.onAvail {
-                        FormatText(R.string.lac_format, it.toString())
-                    }
+                object LAC : WCDMAKeys(R.string.lac_format, "lac", { lac.avail() }, {
+                    FormatText(R.string.lac_format, lac.toString())
                 })
-                object CID : WCDMAKeys(R.string.cid_format, "cid", false, {
-                    cid.onAvail {
-                        FormatText(R.string.cid_format, it.toString())
-                    }
-                })
-                object UARFCN : WCDMAKeys(R.string.uarfcn_format, "uarfcn", false, {
-                    uarfcn.onAvail {
-                        FormatText(R.string.uarfcn_format, it.toString())
-                    }
-                })
-                object DLFreqs : WCDMAKeys(R.string.dl_freqs_format, "dlfreqs", false, {
-                    val dlFreqs = rememberSaveable(inputs = arrayOf(uarfcn)) {
-                        arfcnInfo.map { it.dlFreq }
-                    }
 
-                    if (dlFreqs.isNotEmpty()) {
+                object CID : WCDMAKeys(R.string.cid_format, "cid", { cid.avail() }, {
+                    FormatText(R.string.cid_format, cid.toString())
+                })
+
+                object UARFCN : WCDMAKeys(R.string.uarfcn_format, "uarfcn", { uarfcn.avail() }, {
+                    FormatText(R.string.uarfcn_format, uarfcn.toString())
+                })
+
+                object DLFreqs :
+                    WCDMAKeys(R.string.dl_freqs_format, "dlfreqs", { uarfcn.avail() }, {
+                        val dlFreqs = rememberSaveable(inputs = arrayOf(uarfcn)) {
+                            arfcnInfo.map { it.dlFreq }
+                        }
+
                         FormatText(
                             textId = R.string.dl_freqs_format,
                             dlFreqs.joinToString(", ")
                         )
-                    }
-                })
-                object ULFreqs : WCDMAKeys(R.string.ul_freqs_format, "ulfreqs", false, {
-                    val ulFreqs = rememberSaveable(inputs = arrayOf(uarfcn)) {
-                        arfcnInfo.map { it.ulFreq }
-                    }
+                    })
 
-                    if (ulFreqs.isNotEmpty()) {
+                object ULFreqs :
+                    WCDMAKeys(R.string.ul_freqs_format, "ulfreqs", { uarfcn.avail() }, {
+                        val ulFreqs = rememberSaveable(inputs = arrayOf(uarfcn)) {
+                            arfcnInfo.map { it.ulFreq }
+                        }
+
                         FormatText(
                             textId = R.string.ul_freqs_format,
                             ulFreqs.joinToString(", ")
                         )
-                    }
-                })
-                object AdditionalPLMNs : WCDMAKeys(R.string.additional_plmns_format, "additional-plmns", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if (!additionalPlmns.isNullOrEmpty()) {
-                            FormatText(
-                                R.string.additional_plmns_format,
-                                additionalPlmns.joinToString(", ") { it.asMccMnc }
-                            )
-                        }
-                    }
-                })
-                object CSGID : WCDMAKeys(R.string.csg_id_format, "csg-id", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object AdditionalPLMNs : WCDMAKeys(
+                    R.string.additional_plmns_format,
+                    "additional-plmns",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !additionalPlmns.isNullOrEmpty() },
+                    {
+                        FormatText(
+                            R.string.additional_plmns_format,
+                            additionalPlmns?.joinToString(", ") { it.asMccMnc }
+                        )
+                    })
+
+                object CSGID : WCDMAKeys(
+                    R.string.csg_id_format,
+                    "csg-id",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(R.string.csg_id_format, csgIdentity.toString())
                         }
-                    }
-                })
-                object CSGIndicator : WCDMAKeys(R.string.csg_indicator_format, "csg-indicator", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object CSGIndicator : WCDMAKeys(
+                    R.string.csg_indicator_format,
+                    "csg-indicator",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(
                                 R.string.csg_indicator_format,
                                 csgIndicator.toString()
                             )
                         }
-                    }
-                })
-                object HomeNodeBName : WCDMAKeys(R.string.home_node_b_name_format, "home-node-b-name", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    })
+
+                object HomeNodeBName : WCDMAKeys(
+                    R.string.home_node_b_name_format,
+                    "home-node-b-name",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && csgInfo != null },
+                    {
                         csgInfo?.apply {
                             FormatText(R.string.home_node_b_name_format, homeNodebName ?: "")
                         }
-                    }
-                })
+                    })
             }
         }
 
-        sealed class StrengthKeys<T>(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable T.() -> Unit) : Keys<T>(label, "$key-strength", defaultShown, render) {
-            object ASU : StrengthKeys<CellSignalStrengthWrapper>(R.string.asu_format, "asu", false, {
-                FormatText(R.string.asu_format, "$asuLevel")
-            }) {
-                override fun cast(info: Any?): CellSignalStrengthWrapper? {
-                    return info?.castGeneric()
-                }
-            }
-            object Valid : StrengthKeys<CellSignalStrengthWrapper>(R.string.valid_format, "valid", false, {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    FormatText(R.string.valid_format, "$valid")
-                }
-            }) {
+        sealed class StrengthKeys<T>(
+            @StringRes label: Int,
+            key: String,
+            canRender: T.() -> Boolean,
+            render: @Composable T.() -> Unit
+        ) : Keys<T>(label, "$key-strength", canRender, render) {
+            object ASU :
+                StrengthKeys<CellSignalStrengthWrapper>(R.string.asu_format, "asu", { true }, {
+                    FormatText(R.string.asu_format, "$asuLevel")
+                }) {
                 override fun cast(info: Any?): CellSignalStrengthWrapper? {
                     return info?.castGeneric()
                 }
             }
 
-            sealed class CDMAKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellSignalStrengthCdmaWrapper.() -> Unit) : StrengthKeys<CellSignalStrengthCdmaWrapper>(label, "$key-cdma", defaultShown, render) {
+            object Valid : StrengthKeys<CellSignalStrengthWrapper>(
+                R.string.valid_format,
+                "valid",
+                { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q },
+                {
+                    FormatText(R.string.valid_format, "$valid")
+                }) {
+                override fun cast(info: Any?): CellSignalStrengthWrapper? {
+                    return info?.castGeneric()
+                }
+            }
+
+            sealed class CDMAKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellSignalStrengthCdmaWrapper.() -> Boolean,
+                render: @Composable CellSignalStrengthCdmaWrapper.() -> Unit
+            ) : StrengthKeys<CellSignalStrengthCdmaWrapper>(label, "$key-cdma", canRender, render) {
                 override fun cast(info: Any?): CellSignalStrengthCdmaWrapper? {
                     return info?.castGeneric()
                 }
 
-                object CDMAdBm : CDMAKeys(R.string.cdma_dbm_format, "cdma-dbm", false, {
-                    cdmaDbm.onAvail {
+                object CDMAdBm :
+                    CDMAKeys(R.string.cdma_dbm_format, "cdma-dbm", { cdmaDbm.avail() }, {
                         FormatText(R.string.cdma_dbm_format, "$cdmaDbm")
-                    }
-                })
-                object EvDOdBm : CDMAKeys(R.string.evdo_dbm_format, "evdo-dbm", false, {
-                    evdoDbm.onAvail {
+                    })
+
+                object EvDOdBm :
+                    CDMAKeys(R.string.evdo_dbm_format, "evdo-dbm", { evdoDbm.avail() }, {
                         FormatText(R.string.evdo_dbm_format, "$evdoDbm")
-                    }
-                })
-                object CDMAEcIo : CDMAKeys(R.string.cdma_ecio_format, "cdma-ecio", false, {
-                    cdmaEcio.onAvail {
+                    })
+
+                object CDMAEcIo :
+                    CDMAKeys(R.string.cdma_ecio_format, "cdma-ecio", { cdmaEcio.avail() }, {
                         FormatText(R.string.cdma_ecio_format, "$cdmaEcio")
-                    }
-                })
-                object EvDOEcIo : CDMAKeys(R.string.evdo_ecio_format, "evdo-ecio", false, {
-                    evdoEcio.onAvail {
+                    })
+
+                object EvDOEcIo :
+                    CDMAKeys(R.string.evdo_ecio_format, "evdo-ecio", { evdoEcio.avail() }, {
                         FormatText(R.string.evdo_ecio_format, "$evdoEcio")
-                    }
+                    })
+
+                object SnR : CDMAKeys(R.string.snr_format, "snr", { evdoSnr.avail() }, {
+                    FormatText(R.string.snr_format, "$evdoSnr")
                 })
-                object SnR : CDMAKeys(R.string.snr_format, "snr", false, {
-                    evdoSnr.onAvail {
-                        FormatText(R.string.snr_format, "$evdoSnr")
-                    }
-                })
-                object EvDOASU : CDMAKeys(R.string.evdo_asu_format, "evdo-asu", false, {
-                    evdoAsuLevel.onAvail {
-                        FormatText(R.string.evdo_asu_format, "$it")
-                    }
+
+                object EvDOASU : CDMAKeys(R.string.evdo_asu_format, "evdo-asu", { true }, {
+                    FormatText(R.string.evdo_asu_format, "$evdoAsuLevel")
                 })
             }
 
-            sealed class GSMKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellSignalStrengthGsmWrapper.() -> Unit) : StrengthKeys<CellSignalStrengthGsmWrapper>(label, "$key-gsm", defaultShown, render) {
+            sealed class GSMKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellSignalStrengthGsmWrapper.() -> Boolean,
+                render: @Composable CellSignalStrengthGsmWrapper.() -> Unit
+            ) : StrengthKeys<CellSignalStrengthGsmWrapper>(label, "$key-gsm", canRender, render) {
                 override fun cast(info: Any?): CellSignalStrengthGsmWrapper? {
                     return info?.castGeneric()
                 }
 
-                object RSSI : GSMKeys(R.string.rssi_format, "rssi", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        rssi.onAvail {
-                            FormatText(R.string.rssi_format, "$rssi")
-                        }
-                    }
-                })
-                object BitErrorRate : GSMKeys(R.string.bit_error_rate_format, "ber", false, {
-                    bitErrorRate.onAvail {
-                        FormatText(R.string.bit_error_rate_format, "$it")
-                    }
-                })
-                object TimingAdvance : GSMKeys(R.string.timing_advance_format, "timing-advance", false, {
-                    timingAdvance.onAvail {
+                object RSSI : GSMKeys(
+                    R.string.rssi_format,
+                    "rssi",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && rssi.avail() },
+                    {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    })
+
+                object BitErrorRate :
+                    GSMKeys(R.string.bit_error_rate_format, "ber", { bitErrorRate.avail() }, {
+                        FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
+                    })
+
+                object TimingAdvance : GSMKeys(R.string.timing_advance_format, "timing-advance",
+                    { timingAdvance.avail() }, {
                         FormatText(R.string.timing_advance_format, "$timingAdvance")
-                    }
-                })
+                    })
             }
 
-            sealed class LTEKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellSignalStrengthLteWrapper.() -> Unit) : StrengthKeys<CellSignalStrengthLteWrapper>(label, "$key-lte", defaultShown, render) {
+            sealed class LTEKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellSignalStrengthLteWrapper.() -> Boolean,
+                render: @Composable CellSignalStrengthLteWrapper.() -> Unit
+            ) : StrengthKeys<CellSignalStrengthLteWrapper>(label, "$key-lte", canRender, render) {
                 override fun cast(info: Any?): CellSignalStrengthLteWrapper? {
                     return info?.castGeneric()
                 }
 
-                object RSRQ : LTEKeys(R.string.rsrq_format, "rsrq", true, {
+                object RSRQ : LTEKeys(R.string.rsrq_format, "rsrq", { true }, {
                     FormatText(R.string.rsrq_format, "$rsrq")
                 })
-                object RSSI : LTEKeys(R.string.rssi_format, "rssi", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        rssi.onAvail {
-                            FormatText(R.string.rssi_format, "$rssi")
-                        }
-                    }
+
+                object RSSI : LTEKeys(
+                    R.string.rssi_format,
+                    "rssi",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && rssi.avail() },
+                    {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    })
+
+                object CQI : LTEKeys(R.string.cqi_format, "cqi", { cqi.avail() }, {
+                    FormatText(R.string.cqi_format, "$cqi")
                 })
-                object CQI : LTEKeys(R.string.cqi_format, "cqi", false, {
-                    cqi.onAvail {
-                        FormatText(R.string.cqi_format, "$cqi")
-                    }
+
+                object CQIIndex : LTEKeys(
+                    R.string.cqi_table_index_format,
+                    "cqi-index",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && cqiTableIndex.avail() },
+                    {
+                        FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
+                    })
+
+                object RSSnR : LTEKeys(R.string.rssnr_format, "rssnr", { rssnr.avail() }, {
+                    FormatText(R.string.rssnr_format, "$rssnr")
                 })
-                object CQIIndex : LTEKeys(R.string.cqi_table_index_format, "cqi-index", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        cqiTableIndex.onAvail {
-                            FormatText(R.string.cqi_table_index_format, "$cqiTableIndex")
-                        }
-                    }
-                })
-                object RSSnR : LTEKeys(R.string.rssnr_format, "rssnr", false, {
-                    rssnr.onAvail {
-                        FormatText(R.string.rssnr_format, "$rssnr")
-                    }
-                })
-                object TimingAdvance : LTEKeys(R.string.timing_advance_format, "timing-advance", false, {
-                    timingAdvance.onAvail {
+
+                object TimingAdvance : LTEKeys(
+                    R.string.timing_advance_format,
+                    "timing-advance",
+                    { timingAdvance.avail() },
+                    {
                         FormatText(R.string.timing_advance_format, "$timingAdvance")
-                    }
-                })
+                    })
             }
 
-            sealed class NRKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellSignalStrengthNrWrapper.() -> Unit) : StrengthKeys<CellSignalStrengthNrWrapper>(label, "$key-nr", defaultShown, render) {
+            sealed class NRKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellSignalStrengthNrWrapper.() -> Boolean,
+                render: @Composable CellSignalStrengthNrWrapper.() -> Unit
+            ) : StrengthKeys<CellSignalStrengthNrWrapper>(label, "$key-nr", canRender, render) {
                 override fun cast(info: Any?): CellSignalStrengthNrWrapper? {
                     return info?.castGeneric()
                 }
 
-                object SSRSRQ : NRKeys(R.string.ss_rsrq_format, "ss-rsrq", true, {
-                    ssRsrq.onAvail {
-                        FormatText(R.string.ss_rsrq_format, it.toString())
-                    }
+                object SSRSRQ : NRKeys(R.string.ss_rsrq_format, "ss-rsrq", { ssRsrq.avail() }, {
+                    FormatText(R.string.ss_rsrq_format, ssRsrq.toString())
                 })
-                object CSIRSRQ : NRKeys(R.string.csi_rsrq_format, "csi-rsrq", true, {
-                    csiRsrq.onAvail {
-                        FormatText(R.string.csi_rsrq_format, it.toString())
-                    }
+
+                object CSIRSRQ : NRKeys(R.string.csi_rsrq_format, "csi-rsrq", { csiRsrq.avail() }, {
+                    FormatText(R.string.csi_rsrq_format, csiRsrq.toString())
                 })
-                object CSICQIReport : NRKeys(R.string.csi_cqi_report_format, "csi-cqi-report", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        if (!csiCqiReport.isNullOrEmpty()) {
-                            FormatText(R.string.csi_cqi_report_format, csiCqiReport.joinToString(", "))
-                        }
-                    }
-                })
-                object CSICQIIndex : NRKeys(R.string.csi_cqi_table_index_format, "csi-cqi-index", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        csiCqiTableIndex.onAvail {
-                            FormatText(R.string.csi_cqi_table_index_format, "$csiCqiTableIndex")
-                        }
-                    }
-                })
-                object SSSinR : NRKeys(R.string.ss_sinr_format, "ss-sinr", false, {
-                    ssSinr.onAvail {
-                        FormatText(R.string.ss_sinr_format, "$ssSinr")
-                    }
+
+                object CSICQIReport : NRKeys(R.string.csi_cqi_report_format,
+                    "csi-cqi-report",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !csiCqiReport.isNullOrEmpty() },
+                    {
+                        FormatText(R.string.csi_cqi_report_format, csiCqiReport?.joinToString(", "))
+                    })
+
+                object CSICQIIndex : NRKeys(R.string.csi_cqi_table_index_format,
+                    "csi-cqi-index",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && csiCqiTableIndex.avail() },
+                    {
+                        FormatText(R.string.csi_cqi_table_index_format, "$csiCqiTableIndex")
+                    })
+
+                object SSSinR : NRKeys(R.string.ss_sinr_format, "ss-sinr", { ssSinr.avail() }, {
+                    FormatText(R.string.ss_sinr_format, "$ssSinr")
                 })
             }
 
-            sealed class TDSCDMAKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellSignalStrengthTdscdmaWrapper.() -> Unit) : StrengthKeys<CellSignalStrengthTdscdmaWrapper>(label, "$key-tdscdma", defaultShown, render) {
+            sealed class TDSCDMAKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellSignalStrengthTdscdmaWrapper.() -> Boolean,
+                render: @Composable CellSignalStrengthTdscdmaWrapper.() -> Unit
+            ) : StrengthKeys<CellSignalStrengthTdscdmaWrapper>(
+                label,
+                "$key-tdscdma",
+                canRender,
+                render
+            ) {
                 override fun cast(info: Any?): CellSignalStrengthTdscdmaWrapper? {
                     return info?.castGeneric()
                 }
 
-                object RSSI : TDSCDMAKeys(R.string.rssi_format, "rssi", false, {
-                    rssi.onAvail {
-                        FormatText(R.string.rssi_format, "$rssi")
-                    }
+                object RSSI : TDSCDMAKeys(R.string.rssi_format, "rssi", { rssi.avail() }, {
+                    FormatText(R.string.rssi_format, "$rssi")
                 })
-                object BitErrorRate : TDSCDMAKeys(R.string.bit_error_rate_format, "ber", false, {
-                    bitErrorRate.onAvail {
+
+                object BitErrorRate :
+                    TDSCDMAKeys(R.string.bit_error_rate_format, "ber", { bitErrorRate.avail() }, {
                         FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
-                    }
-                })
-                object RSCP : TDSCDMAKeys(R.string.rscp_format, "rscp", false, {
-                    rscp.onAvail {
-                        FormatText(R.string.rscp_format, "$rscp")
-                    }
+                    })
+
+                object RSCP : TDSCDMAKeys(R.string.rscp_format, "rscp", { rscp.avail() }, {
+                    FormatText(R.string.rscp_format, "$rscp")
                 })
             }
 
-            sealed class WCDMAKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellSignalStrengthWcdmaWrapper.() -> Unit) : StrengthKeys<CellSignalStrengthWcdmaWrapper>(label, "$key-wcdma", defaultShown, render) {
+            sealed class WCDMAKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellSignalStrengthWcdmaWrapper.() -> Boolean,
+                render: @Composable CellSignalStrengthWcdmaWrapper.() -> Unit
+            ) : StrengthKeys<CellSignalStrengthWcdmaWrapper>(
+                label,
+                "$key-wcdma",
+                canRender,
+                render
+            ) {
                 override fun cast(info: Any?): CellSignalStrengthWcdmaWrapper? {
                     return info?.castGeneric()
                 }
 
-                object RSSI : WCDMAKeys(R.string.rssi_format, "rssi", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        rssi.onAvail {
-                            FormatText(R.string.rssi_format, "$rssi")
-                        }
-                    }
-                })
-                object BitErrorRate : WCDMAKeys(R.string.bit_error_rate_format, "ber", false, {
-                    bitErrorRate.onAvail {
+                object RSSI : WCDMAKeys(
+                    R.string.rssi_format,
+                    "rssi",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && rssi.avail() },
+                    {
+                        FormatText(R.string.rssi_format, "$rssi")
+                    })
+
+                object BitErrorRate :
+                    WCDMAKeys(R.string.bit_error_rate_format, "ber", { bitErrorRate.avail() }, {
                         FormatText(R.string.bit_error_rate_format, "$bitErrorRate")
-                    }
-                })
-                object RSCP : WCDMAKeys(R.string.rscp_format, "rscp", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        rscp.onAvail {
-                            FormatText(R.string.rscp_format, "$rscp")
-                        }
-                    }
-                })
-                object EcNo : WCDMAKeys(R.string.ecno_format, "ecno", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        ecNo.onAvail {
-                            FormatText(R.string.ecno_format, "$ecNo")
-                        }
-                    }
-                })
+                    })
+
+                object RSCP : WCDMAKeys(
+                    R.string.rscp_format,
+                    "rscp",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && rscp.avail() },
+                    {
+                        FormatText(R.string.rscp_format, "$rscp")
+                    })
+
+                object EcNo : WCDMAKeys(
+                    R.string.ecno_format,
+                    "ecno",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ecNo.avail() },
+                    {
+                        FormatText(R.string.ecno_format, "$ecNo")
+                    })
             }
         }
 
-        sealed class InfoKeys<T>(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable T.() -> Unit) : Keys<T>(label, "$key-info", defaultShown, render) {
-            object Registered : InfoKeys<CellInfoWrapper>(R.string.registered_format, "registered", false, {
-                FormatText(R.string.registered_format, isRegistered.toString())
-            }) {
+        sealed class InfoKeys<T>(
+            @StringRes label: Int,
+            key: String,
+            canRender: T.() -> Boolean,
+            render: @Composable T.() -> Unit
+        ) : Keys<T>(label, "$key-info", canRender, render) {
+            object Registered : InfoKeys<CellInfoWrapper>(R.string.registered_format, "registered",
+                { true }, {
+                    FormatText(R.string.registered_format, isRegistered.toString())
+                }) {
                 override fun cast(info: Any?): CellInfoWrapper? {
                     return info?.castGeneric()
                 }
             }
 
-            object Status : InfoKeys<CellInfoWrapper>(R.string.cell_connection_status_format, "status", false, {
-                val context = LocalContext.current
+            object Status :
+                InfoKeys<CellInfoWrapper>(R.string.cell_connection_status_format, "status",
+                    { true }, {
+                        val context = LocalContext.current
 
-                FormatText(
-                    R.string.cell_connection_status_format,
-                    dev.zwander.cellreader.data.util.CellUtils.connectionStatusToString(
-                        context,
-                        connectionStatus
-                    )
-                )
-            }) {
+                        FormatText(
+                            R.string.cell_connection_status_format,
+                            dev.zwander.cellreader.data.util.CellUtils.connectionStatusToString(
+                                context,
+                                connectionStatus
+                            )
+                        )
+                    }) {
                 override fun cast(info: Any?): CellInfoWrapper? {
                     return info?.castGeneric()
                 }
             }
 
-            object Timestamp : InfoKeys<CellInfoWrapper>(R.string.timestamp_format, "timestamp", false, {
-                FormatText(R.string.timestamp_format, timeStamp)
-            }) {
+            object Timestamp : InfoKeys<CellInfoWrapper>(R.string.timestamp_format, "timestamp",
+                { true }, {
+                    FormatText(R.string.timestamp_format, timeStamp)
+                }) {
                 override fun cast(info: Any?): CellInfoWrapper? {
                     return info?.castGeneric()
                 }
             }
 
-            sealed class LTEKeys(@StringRes label: Int, key: String, defaultShown: Boolean, render: @Composable CellInfoLteWrapper.() -> Unit) : InfoKeys<CellInfoLteWrapper>(label, "$key-lte", defaultShown, render) {
+            sealed class LTEKeys(
+                @StringRes label: Int,
+                key: String,
+                canRender: CellInfoLteWrapper.() -> Boolean,
+                render: @Composable CellInfoLteWrapper.() -> Unit
+            ) : InfoKeys<CellInfoLteWrapper>(label, "$key-lte", canRender, render) {
                 override fun cast(info: Any?): CellInfoLteWrapper? {
                     return info?.castGeneric()
                 }
 
-                object ENDC : LTEKeys(R.string.endc_available_format, "endc", false, {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        onCast<CellInfoLteWrapper> {
-                            FormatText(R.string.endc_available_format, "${cellConfig?.endcAvailable}")
-                        }
-                    }
-                })
+                object ENDC : LTEKeys(
+                    R.string.endc_available_format,
+                    "endc",
+                    { Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && cellConfig != null },
+                    {
+                        FormatText(R.string.endc_available_format, "${cellConfig?.endcAvailable}")
+                    })
             }
         }
     }
@@ -788,17 +917,17 @@ object CellSignalInfo {
         ) {
             val context = LocalContext.current
 
-            with (Orderer) {
+            with(Orderer) {
                 val order = remember(identity) {
                     identity.orderOf()
                 }
 
                 val (simpleOrder, advancedOrder) = remember(order) {
-                    with (order) {
+                    with(order) {
                         context.splitOrder
                     }
                 }.collectAsState(initial = order.defaultSplitOrder).value
-                
+
                 if (simple) {
                     simpleOrder.forEach {
                         if (it is Keys.IdentityKeys) {
@@ -814,7 +943,7 @@ object CellSignalInfo {
                         }
                     }
                 }
-                
+
                 if (advanced) {
                     advancedOrder.forEach {
                         if (it is Keys.IdentityKeys) {
@@ -832,7 +961,7 @@ object CellSignalInfo {
                 }
             }
         }
-        
+
         @Composable
         fun RenderStrength(
             strength: CellSignalStrengthWrapper,
@@ -841,13 +970,13 @@ object CellSignalInfo {
         ) {
             val context = LocalContext.current
 
-            with (Orderer) {
+            with(Orderer) {
                 val order = remember(strength) {
                     strength.orderOf()
                 }
 
                 val (simpleOrder, advancedOrder) = remember(order) {
-                    with (order) {
+                    with(order) {
                         context.splitOrder
                     }
                 }.collectAsState(initial = order.defaultSplitOrder).value
@@ -890,7 +1019,10 @@ object CellSignalInfo {
             }
         }
 
-        sealed class Order(private val key: PreferenceKey, private val defaultOrder: List<Keys<*>>) {
+        sealed class Order(
+            private val key: PreferenceKey,
+            private val defaultOrder: List<Keys<*>>
+        ) {
             val Context.order: Flow<List<Keys<*>>>
                 get() = store.data.map { it[key.key]?.toKeys() ?: defaultOrder }
 
@@ -908,21 +1040,27 @@ object CellSignalInfo {
                 }
             }
 
-            sealed class Identity(key: PreferenceKey, defaultOrder: List<Keys<*>>) : Order(key, defaultOrder) {
+            sealed class Identity(key: PreferenceKey, defaultOrder: List<Keys<*>>) :
+                Order(key, defaultOrder) {
                 object CDMA : Identity(PreferenceKey.Identity.CDMA, defaultIdentityCdmaOrder)
                 object GSM : Identity(PreferenceKey.Identity.GSM, defaultIdentityGsmOrder)
                 object LTE : Identity(PreferenceKey.Identity.LTE, defaultIdentityLteOrder)
                 object NR : Identity(PreferenceKey.Identity.NR, defaultIdentityNrOrder)
-                object TDSCDMA : Identity(PreferenceKey.Identity.TDSCDMA, defaultIdentityTdscdmaOrder)
+                object TDSCDMA :
+                    Identity(PreferenceKey.Identity.TDSCDMA, defaultIdentityTdscdmaOrder)
+
                 object WCDMA : Identity(PreferenceKey.Identity.WCDMA, defaultIdentityWcdmaOrder)
             }
 
-            sealed class Strength(key: PreferenceKey, defaultOrder: List<Keys<*>>) : Order(key, defaultOrder) {
+            sealed class Strength(key: PreferenceKey, defaultOrder: List<Keys<*>>) :
+                Order(key, defaultOrder) {
                 object CDMA : Strength(PreferenceKey.Strength.CDMA, defaultStrengthCdmaOrder)
                 object GSM : Strength(PreferenceKey.Strength.GSM, defaultStrengthGsmOrder)
                 object LTE : Strength(PreferenceKey.Strength.LTE, defaultStrengthLteOrder)
                 object NR : Strength(PreferenceKey.Strength.NR, defaultStrengthNrOrder)
-                object TDSCDMA : Strength(PreferenceKey.Strength.TDSCDMA, defaultStrengthTdscdmaOrder)
+                object TDSCDMA :
+                    Strength(PreferenceKey.Strength.TDSCDMA, defaultStrengthTdscdmaOrder)
+
                 object WCDMA : Strength(PreferenceKey.Strength.WCDMA, defaultStrengthWcdmaOrder)
             }
         }
