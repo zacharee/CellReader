@@ -35,6 +35,7 @@ import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWcdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.reflect.KClass
 
 object CellSignalInfo {
     sealed class Keys<T>(
@@ -43,6 +44,37 @@ object CellSignalInfo {
         private val canRender: T.() -> Boolean,
         private val render: @Composable T.() -> Unit
     ) {
+        companion object {
+            private val objectsCache = mutableListOf<Keys<*>>()
+
+            fun getAllObjects(): List<Keys<*>> {
+                return if (objectsCache.isNotEmpty()) {
+                    objectsCache
+                } else {
+                    findSealedObjects(Keys::class).apply {
+                        objectsCache.addAll(this)
+                    }
+                }
+            }
+
+            private fun findSealedObjects(parent: KClass<out Keys<*>>): List<Keys<*>> {
+                val subclasses = parent.sealedSubclasses
+                val objects = mutableListOf<Keys<*>>()
+
+                subclasses.forEach { subclass ->
+                    val objectInstance = subclass.objectInstance
+
+                    if (objectInstance != null) {
+                        objects.add(objectInstance)
+                    } else {
+                        objects.addAll(findSealedObjects(subclass))
+                    }
+                }
+
+                return objects
+            }
+        }
+
         abstract fun cast(info: Any?): T?
 
         @Composable
@@ -1024,7 +1056,9 @@ object CellSignalInfo {
             private val defaultOrder: List<Keys<*>>
         ) {
             val Context.order: Flow<List<Keys<*>>>
-                get() = store.data.map { it[key.key]?.toKeys() ?: defaultOrder }
+                get() = store.data.map {
+                    it[key.key]?.toKeys()?.ifEmpty { defaultOrder } ?: defaultOrder
+                }
 
             val Context.splitOrder: Flow<Pair<List<Keys<*>>, List<Keys<*>>>>
                 get() = order.map { it.splitInfo }
@@ -1035,6 +1069,11 @@ object CellSignalInfo {
             val defaultSplitOrder = defaultOrder.splitInfo
 
             suspend fun Context.updateOrder(newOrder: List<Keys<*>>) {
+                // Separate remove and set operations needed here in order
+                // for the store to actually update.
+                store.edit {
+                    it.remove(key.key)
+                }
                 store.edit {
                     it[key.key] = newOrder.map { k -> k.key }.toSet()
                 }
@@ -1321,8 +1360,7 @@ object CellSignalInfo {
             }
 
         private fun String.keyStringToKeys(): Keys<*> {
-            return Keys::class.sealedSubclasses.mapNotNull { it.objectInstance }
-                .first { it.key == this }
+            return Keys.getAllObjects().first { it.key == this }
         }
 
         private fun Set<String>.toKeys(): List<Keys<*>> {

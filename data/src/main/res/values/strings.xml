@@ -5,6 +5,20 @@
 
     <string name="send_data_to_wear">Send Data to Wear</string>
 
+    <string name="reorder">Reorder</string>
+    <string name="cdma_signal_strength">CDMA Signal Strength</string>
+    <string name="cdma_info">CDMA Info</string>
+    <string name="gsm_signal_strength">GSM Signal Strength</string>
+    <string name="gsm_info">GSM Info</string>
+    <string name="lte_signal_strength">LTE Signal Strength</string>
+    <string name="lte_info">LTE Info</string>
+    <string name="nr_signal_strength">NR Signal Strength</string>
+    <string name="nr_info">NR Info</string>
+    <string name="tdscdma_signal_strength">TDSCDMA Signal Strength</string>
+    <string name="tdscdma_info">TDSCDMA Info</string>
+    <string name="wcdma_signal_strength">WCDMA Signal Strength</string>
+    <string name="wcdma_info">WCDMA Info</string>
+
     <string name="signal_strength">Signal Strength</string>
     <string name="service_state">Service State</string>
     <string name="network_registrations">Network Registrations</string>

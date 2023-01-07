@@ -8,9 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,9 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
@@ -261,17 +261,24 @@ private fun BoxScope.BottomBar(
             )
         }
 
-        Box(
+        BoxWithConstraints(
             modifier = Modifier.animateContentSize()
         ) {
+            val constraints = constraints
+            val density = LocalDensity.current
+
             dialogs.forEach { (which, func) ->
                 androidx.compose.animation.AnimatedVisibility(
                     visible = whichDialog == which,
                     enter = fadeIn() + expandIn(clip = false, expandFrom = Alignment.TopStart),
                     exit = fadeOut() + shrinkOut(clip = false, shrinkTowards = Alignment.TopStart)
                 ) {
-                    Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    Box(
+                        modifier = Modifier.heightIn(
+                            max = with (density) {
+                                constraints.maxHeight.toDp()
+                            }
+                        )
                     ) {
                         func()
                     }
