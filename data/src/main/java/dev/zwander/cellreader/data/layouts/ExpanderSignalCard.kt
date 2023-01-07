@@ -132,8 +132,8 @@ fun ExpanderSignalCard(
 
                                         FlowRow(
                                             mainAxisSpacing = 16.dp,
-                                            mainAxisAlignment = MainAxisAlignment.SpaceBetween,
-                                            mainAxisSize = com.google.accompanist.flowlayout.SizeMode.Expand
+                                            mainAxisAlignment = MainAxisAlignment.SpaceAround,
+                                            mainAxisSize = com.google.accompanist.flowlayout.SizeMode.Expand,
                                         ) {
                                             expandedInfo()
                                         }
