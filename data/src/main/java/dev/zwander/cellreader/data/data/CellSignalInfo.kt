@@ -34,6 +34,7 @@ import dev.zwander.cellreader.data.wrappers.CellSignalStrengthTdscdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWcdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthWrapper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlin.reflect.KClass
 
@@ -946,6 +947,7 @@ object CellSignalInfo {
             cellInfo: CellInfoWrapper? = null,
             simple: Boolean,
             advanced: Boolean,
+            defaultOrder: Boolean = false
         ) {
             val context = LocalContext.current
 
@@ -954,9 +956,9 @@ object CellSignalInfo {
                     identity.orderOf()
                 }
 
-                val (simpleOrder, advancedOrder) = remember(order) {
+                val (simpleOrder, advancedOrder) = remember(order, defaultOrder) {
                     with(order) {
-                        context.splitOrder
+                        if (defaultOrder) MutableStateFlow(order.defaultSplitOrder) else context.splitOrder
                     }
                 }.collectAsState(initial = order.defaultSplitOrder).value
 

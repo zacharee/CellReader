@@ -83,7 +83,8 @@ fun NetworkRegInfo(
                         CellSignalInfo.Renderer.RenderIdentity(
                             identity = cellIdentity,
                             simple = true,
-                            advanced = true
+                            advanced = true,
+                            defaultOrder = true
                         )
                     }
 
