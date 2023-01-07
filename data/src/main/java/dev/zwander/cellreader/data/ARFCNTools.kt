@@ -130,15 +130,17 @@ object ARFCNTools {
         }
     }
 
-    private fun calculateGsmArfcnInfo(gsmarfcn: Int, containers: List<Pair<IntRange, GSMARFCNContainer>>): List<ARFCNInfo> {
-        return containers.map { (_, info) ->
-            val ful = info.fulEq(gsmarfcn)
-            val fdl = info.fdlEq(ful)
+    private fun calculateGsmArfcnInfo(gsmarfcn: Int, containers: List<Pair<IntRange, List<GSMARFCNContainer>>>): List<ARFCNInfo> {
+        return containers.flatMap { (_, infos) ->
+            infos.map { info ->
+                val ful = info.fulEq(gsmarfcn)
+                val fdl = info.fdlEq(ful)
 
-            ARFCNInfo(
-                info.band,
-                fdl, ful
-            )
+                ARFCNInfo(
+                    info.band,
+                    fdl, ful
+                )
+            }
         }
     }
 
@@ -794,64 +796,77 @@ object NRARFCNTable : TreeMap<Pair<IntRange, IntRange>, ARFCNContainer>(IntRange
     }
 }
 
-object GSMARFCNTable : TreeMap<IntRange, GSMARFCNContainer>(IntRangeComparator) {
+object GSMARFCNTable : TreeMap<IntRange, List<GSMARFCNContainer>>(IntRangeComparator) {
     init {
         putAll(listOf(
-            259..293 to GSMARFCNContainer(
-                { 450.6 + 0.2 * (it.toDouble() - 259) },
-                { it.toDouble() + 10 },
-                "GSM 450"
+            259..293 to listOf(
+                GSMARFCNContainer(
+                    { 450.6 + 0.2 * (it.toDouble() - 259) },
+                    { it.toDouble() + 10 },
+                    "GSM 450"
+                )
             ),
-            306..340 to GSMARFCNContainer(
-                { 479+0.2*(it.toDouble()-306) },
-                { it.toDouble() + 10 },
-                "GSM 480"
+            306..340 to listOf(
+                GSMARFCNContainer(
+                    { 479+0.2*(it.toDouble()-306) },
+                    { it.toDouble() + 10 },
+                    "GSM 480"
+                )
             ),
-            128..251 to GSMARFCNContainer(
-                { 824.2+0.2*(it.toDouble()-128) },
-                { it.toDouble() + 45 },
-                "GSM 850"
+            128..251 to listOf(
+                GSMARFCNContainer(
+                    { 824.2+0.2*(it.toDouble()-128) },
+                    { it.toDouble() + 45 },
+                    "GSM 850"
+                )
             ),
-            1..124 to GSMARFCNContainer(
-                { 890 + 0.2 * it.toDouble() },
-                { it.toDouble() + 45 },
-                "P-GSM"
+            1..124 to listOf(
+                GSMARFCNContainer(
+                    { 890 + 0.2 * it.toDouble() },
+                    { it.toDouble() + 45 },
+                    "P-GSM"
+                )
             ),
-            975..1023 to GSMARFCNContainer(
-                { 890+0.2*(it.toDouble()-1024) },
-                { it.toDouble() + 45 },
-                "E-GSM"
+            975..1023 to listOf(
+                GSMARFCNContainer(
+                    { 890+0.2*(it.toDouble()-1024) },
+                    { it.toDouble() + 45 },
+                    "E-GSM"
+                )
             ),
-            0..124 to GSMARFCNContainer(
-                { 890+0.2*(it.toDouble()) },
-                { it.toDouble() + 45 },
-                "E-GSM"
+            0..124 to listOf(
+                GSMARFCNContainer(
+                    { 890+0.2*(it.toDouble()) },
+                    { it.toDouble() + 45 },
+                    "E-GSM"
+                ),
+                GSMARFCNContainer(
+                    { 890 + 0.2 * it.toDouble() },
+                    { it.toDouble() + 80 },
+                    "R-GSM"
+                )
             ),
-            955..1023 to GSMARFCNContainer(
-                { 890+0.2*(it.toDouble()-1024) },
-                { it.toDouble() + 45 },
-                "GSM-R"
+            955..1023 to listOf(
+                GSMARFCNContainer(
+                    { 890 + 0.2 * (it.toDouble() - 1024) },
+                    { it.toDouble() + 45 },
+                    "R-GSM"
+                )
             ),
-            512..885 to GSMARFCNContainer(
-                { 1710.2+0.2*(it.toDouble()-512) },
-                { it.toDouble() + 95 },
-                "DCS 1800"
+            512..885 to listOf(
+                GSMARFCNContainer(
+                    { 1710.2+0.2*(it.toDouble()-512) },
+                    { it.toDouble() + 95 },
+                    "DCS 1800"
+                )
             ),
-            512..810 to GSMARFCNContainer(
-                { 1850.2 + 0.2*(it.toDouble()-512) },
-                { it.toDouble() + 80 },
-                "PCS 1900"
+            512..810 to listOf(
+                GSMARFCNContainer(
+                    { 1850.2 + 0.2*(it.toDouble()-512) },
+                    { it.toDouble() + 80 },
+                    "PCS 1900"
+                )
             ),
-            0..124 to GSMARFCNContainer(
-                { 890 + 0.2 * it.toDouble() },
-                { it.toDouble() + 80 },
-                "R-GSM"
-            ),
-            955..1023 to GSMARFCNContainer(
-                { 890 + 0.2 * (it.toDouble() - 1024) },
-                { it.toDouble() + 45 },
-                "R-GSM"
-            )
         ))
     }
 }
