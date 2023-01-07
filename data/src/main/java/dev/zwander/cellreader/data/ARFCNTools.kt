@@ -807,11 +807,6 @@ object GSMARFCNTable : TreeMap<IntRange, GSMARFCNContainer>(IntRangeComparator) 
                 { it.toDouble() + 10 },
                 "GSM 480"
             ),
-            438..511 to GSMARFCNContainer(
-                { 747.2 + 0.2*(it.toDouble()-438) },
-                { it.toDouble() + 30 },
-                "GSM 750"
-            ),
             128..251 to GSMARFCNContainer(
                 { 824.2+0.2*(it.toDouble()-128) },
                 { it.toDouble() + 45 },
@@ -824,6 +819,11 @@ object GSMARFCNTable : TreeMap<IntRange, GSMARFCNContainer>(IntRangeComparator) 
             ),
             975..1023 to GSMARFCNContainer(
                 { 890+0.2*(it.toDouble()-1024) },
+                { it.toDouble() + 45 },
+                "E-GSM"
+            ),
+            0..124 to GSMARFCNContainer(
+                { 890+0.2*(it.toDouble()) },
                 { it.toDouble() + 45 },
                 "E-GSM"
             ),
@@ -841,6 +841,16 @@ object GSMARFCNTable : TreeMap<IntRange, GSMARFCNContainer>(IntRangeComparator) 
                 { 1850.2 + 0.2*(it.toDouble()-512) },
                 { it.toDouble() + 80 },
                 "PCS 1900"
+            ),
+            0..124 to GSMARFCNContainer(
+                { 890 + 0.2 * it.toDouble() },
+                { it.toDouble() + 80 },
+                "R-GSM"
+            ),
+            955..1023 to GSMARFCNContainer(
+                { 890 + 0.2 * (it.toDouble() - 1024) },
+                { it.toDouble() + 45 },
+                "R-GSM"
             )
         ))
     }
