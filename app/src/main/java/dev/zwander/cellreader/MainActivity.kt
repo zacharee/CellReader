@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,13 +24,11 @@ import dev.zwander.cellreader.ui.components.MainContent
 import dev.zwander.cellreader.ui.view.PermissionRationaleBottomSheetDialog
 import dev.zwander.cellreader.utils.PermissionUtils
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
     private var initialized = false
@@ -87,7 +86,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     @SuppressLint("InlinedApi")
     private fun handlePermissions(permissions: List<String>) {
-        launch(Dispatchers.IO) {
+        launch {
             val actualPermissions = ArrayList(permissions)
 
             @SuppressLint("InlinedApi")
@@ -95,47 +94,46 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 actualPermissions.remove(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
 
-            withContext(Dispatchers.Main) {
-                with (actualPermissions) {
-                    when {
-                        isEmpty() -> init()
-                        contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                            locationDialog.show(
-                                positiveListener = {
-                                    permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
-                                    locationDialog.dismiss()
-                                },
-                                negativeListener = {
-                                    finish()
-                                }
-                            )
-                        }
-                        contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) -> {
-                            backgroundLocationDialog.show(
-                                positiveListener = {
-                                    permReq.launch(arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION))
-                                    backgroundLocationDialog.dismiss()
-                                },
-                                negativeListener = {
-                                    backgroundLocationDialog.dismiss()
+            with (actualPermissions) {
+                when {
+                    isEmpty() -> init()
+                    contains(android.Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                        locationDialog.show(
+                            positiveListener = {
+                                permReq.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
+                                locationDialog.dismiss()
+                            },
+                            negativeListener = {
+                                finish()
+                            }
+                        )
+                    }
+                    contains(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION) -> {
+                        backgroundLocationDialog.show(
+                            positiveListener = {
+                                permReq.launch(arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+                                backgroundLocationDialog.dismiss()
+                            },
+                            negativeListener = {
+                                runBlocking {
+                                    preferences.updateDeclinedBackgroundLocation(true)
+
                                     permReq.launch((actualPermissions - android.Manifest.permission.ACCESS_BACKGROUND_LOCATION).toTypedArray())
-                                    launch {
-                                        preferences.updateDeclinedBackgroundLocation(true)
-                                    }
+                                    backgroundLocationDialog.dismiss()
                                 }
-                            )
-                        }
-                        else -> {
-                            otherDialog.show(
-                                positiveListener = {
-                                    permReq.launch(actualPermissions.toTypedArray())
-                                    otherDialog.dismiss()
-                                },
-                                negativeListener = {
-                                    finish()
-                                }
-                            )
-                        }
+                            }
+                        )
+                    }
+                    else -> {
+                        otherDialog.show(
+                            positiveListener = {
+                                permReq.launch(actualPermissions.toTypedArray())
+                                otherDialog.dismiss()
+                            },
+                            negativeListener = {
+                                finish()
+                            }
+                        )
                     }
                 }
             }
@@ -171,6 +169,8 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             val sysUiController = rememberSystemUiController()
             sysUiController.setStatusBarColor(Color.Transparent)
             sysUiController.setNavigationBarColor(Color.Transparent)
+            sysUiController.statusBarDarkContentEnabled = !isSystemInDarkTheme()
+            sysUiController.navigationBarDarkContentEnabled = !isSystemInDarkTheme()
 
             Content()
         }
