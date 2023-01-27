@@ -234,7 +234,6 @@ val reorderSettings = listOf(
 @Composable
 fun Settings() {
     val context = LocalContext.current
-    val density = LocalDensity.current
     val prefs = context.preferences
 
     val scope = rememberCoroutineScope()

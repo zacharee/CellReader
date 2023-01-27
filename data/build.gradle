@@ -26,7 +26,7 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 
     buildFeatures {
@@ -42,8 +42,8 @@ android {
 
 dependencies {
     api 'androidx.core:core-ktx:1.9.0'
-    api 'androidx.appcompat:appcompat:1.5.1'
-    api 'com.google.android.material:material:1.7.0'
+    api 'androidx.appcompat:appcompat:1.6.0'
+    api 'com.google.android.material:material:1.8.0'
     api "com.google.android.gms:play-services-wearable:18.0.0"
     api "androidx.savedstate:savedstate:1.2.0"
     api "androidx.savedstate:savedstate-ktx:1.2.0"
@@ -58,11 +58,11 @@ dependencies {
     api "androidx.glance:glance-wear-tiles:$glance_version"
 
     api "androidx.compose.material:material:$compose_version"
-    api "androidx.compose.material3:material3:1.1.0-alpha03"
-    api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api 'androidx.wear.compose:compose-material:1.2.0-alpha01'
-    api 'androidx.wear.compose:compose-foundation:1.2.0-alpha01'
-    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
+    api 'androidx.compose.material3:material3:1.1.0-alpha04'
+    api "androidx.compose.runtime:runtime-livedata:1.4.0-alpha04"
+    api 'androidx.wear.compose:compose-material:1.2.0-alpha03'
+    api 'androidx.wear.compose:compose-foundation:1.2.0-alpha03'
+    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0-alpha05'
 
     api 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 
@@ -74,7 +74,7 @@ dependencies {
     api('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4')
     api('org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4')
     api('org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4')
-    api "org.jetbrains.kotlin:kotlin-reflect:1.7.22"
+    api "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     api 'dev.rikka.shizuku:api:12.2.0'
     api 'dev.rikka.shizuku:provider:12.2.0'

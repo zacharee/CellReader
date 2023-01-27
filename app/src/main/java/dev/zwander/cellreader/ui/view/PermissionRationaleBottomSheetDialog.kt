@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ComponentActivity
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.ViewTreeViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.zwander.cellreader.data.CellReaderTheme
@@ -38,8 +38,8 @@ class PermissionRationaleBottomSheetDialog(
         setTitle(titleRes)
         setContentView(layout.root)
 
-        ViewTreeLifecycleOwner.set(window.decorView, (context as ComponentActivity))
-        ViewTreeViewModelStoreOwner.set(window.decorView, context as androidx.activity.ComponentActivity)
+        window.decorView.setViewTreeLifecycleOwner(context as ComponentActivity)
+        window.decorView.setViewTreeViewModelStoreOwner(context as androidx.activity.ComponentActivity)
         window.decorView.setViewTreeSavedStateRegistryOwner(context)
     }
 

@@ -20,8 +20,10 @@ import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.util.asExecutor
 import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
+import dev.zwander.cellreader.utils.PermissionUtils
 import dev.zwander.cellreader.widget.SignalWidget
 import kotlinx.coroutines.*
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListenerCallback {
@@ -42,6 +44,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     }
 
     private var isStarted = false
+    private var stalledAfterSecurityException = AtomicBoolean(false)
 
     private val telephony by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
@@ -59,6 +62,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
 
         if (intent?.action == ACTION_REFRESH && isStarted) {
+            refresh()
+        }
+
+        if (isStarted && stalledAfterSecurityException.get()) {
             refresh()
         }
 
@@ -200,6 +207,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
     @SuppressLint("InlinedApi")
     private fun refresh(newIds: List<Int> = emptyList()) {
+        stalledAfterSecurityException.set(false)
         cellModel.isRefreshing.value = true
         val isStarted = isStarted
 
@@ -222,8 +230,12 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     subs.addOnSubscriptionsChangedListener(subsListener)
                 }
 
-                if (subs.allSubscriptionInfoList.isEmpty()) {
-                    init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
+                try {
+                    if (subs.allSubscriptionInfoList.isEmpty()) {
+                        init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
+                    }
+                } catch (ignored: SecurityException) {
+                    stalledAfterSecurityException.set(true)
                 }
             } else {
                 init(newIds)
@@ -233,86 +245,89 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
     }
 
-    @SuppressLint("MissingPermission", "InlinedApi")
+    @SuppressLint("InlinedApi", "MissingPermission")
     private fun init(subscriptions: List<Int>) {
-        val isEmpty = (subs.activeSubscriptionInfoList ?: listOf()).isEmpty()
+        try {
+            val isEmpty = (subs.activeSubscriptionInfoList ?: listOf()).isEmpty()
 
-        with (cellModel) {
-            primaryCell.value = SubscriptionManager.getDefaultDataSubscriptionId()
+            with (cellModel) {
+                primaryCell.value = SubscriptionManager.getDefaultDataSubscriptionId()
 
-            telephonies.putAll(
-                subscriptions.mapNotNull { subId ->
-                    subInfos.update {
-                        it[subId] = (if (isEmpty) {
-                            subs.allSubscriptionInfoList.find { info -> info.subscriptionId == subId }
-                        } else {
-                            subs.getActiveSubscriptionInfo(subId)
-                        })?.let { subInfo ->
-                            SubscriptionInfoWrapper(
-                                subInfo,
-                                this@UpdaterService
-                            )
-                        }
-                    }
-
-                    if (subInfos.value[subId] != null || isEmpty) {
-                        cellInfos.update {
-                            it[subId] = listOf()
-                        }
-                        strengthInfos.update {
-                            it[subId] = listOf()
-                        }
-
-                        subIds.update {
-                            it.add(subId)
-                            it.updateComparator(SubsComparator(primaryCell.value))
-                        }
-
-                        launch(Dispatchers.IO) {
-                            betweenUtils.queueSubscriptionInfo(subInfos.value)
-                            betweenUtils.queueNewSubId(subIds.value)
-                        }
-
-                        subId to telephony.createForSubscriptionId(subId).also { telephony ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                val callback = telephonyCallbacks[subId] ?: TelephonyListener(subId, this@UpdaterService).apply {
-                                    telephonyCallbacks[subId] = this
-                                }
-                                val privileged = privilegedCallbacks[subId] ?: PhysicalChannelConfigListener(this@UpdaterService).apply {
-                                    privilegedCallbacks[subId] = this
-                                }
-
-                                telephony.registerTelephonyCallback(callbackExecutor, callback)
-                                service?.registerPrivilegedListener(subId, privileged)
+                telephonies.putAll(
+                    subscriptions.mapNotNull { subId ->
+                        subInfos.update {
+                            it[subId] = (if (isEmpty) {
+                                subs.allSubscriptionInfoList.find { info -> info.subscriptionId == subId }
                             } else {
-                                val listener = telephonyListeners[subId] ?: StateListener(subId, this@UpdaterService).apply {
-                                    telephonyListeners[subId] = this
-                                }
-
-                                @Suppress("DEPRECATION")
-                                telephony.listen(
-                                    listener,
-                                    PhoneStateListener.LISTEN_SERVICE_STATE or
-                                            PhoneStateListener.LISTEN_CELL_INFO or
-                                            PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or
-                                            PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED
-                                            or PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
+                                subs.getActiveSubscriptionInfo(subId)
+                            })?.let { subInfo ->
+                                SubscriptionInfoWrapper(
+                                    subInfo,
+                                    this@UpdaterService
                                 )
                             }
-
-                            updateCellInfo(subId, telephony.allCellInfo ?: mutableListOf())
-                            updateSignal(subId, telephony.signalStrength)
-                            updateServiceState(subId, telephony.serviceState)
                         }
-                    } else {
-                        null
+
+                        if (subInfos.value[subId] != null || isEmpty) {
+                            cellInfos.update {
+                                it[subId] = listOf()
+                            }
+                            strengthInfos.update {
+                                it[subId] = listOf()
+                            }
+
+                            subIds.update {
+                                it.add(subId)
+                                it.updateComparator(SubsComparator(primaryCell.value))
+                            }
+
+                            launch(Dispatchers.IO) {
+                                betweenUtils.queueSubscriptionInfo(subInfos.value)
+                                betweenUtils.queueNewSubId(subIds.value)
+                            }
+
+                            subId to telephony.createForSubscriptionId(subId).also { telephony ->
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    val callback = telephonyCallbacks[subId] ?: TelephonyListener(subId, this@UpdaterService).apply {
+                                        telephonyCallbacks[subId] = this
+                                    }
+                                    val privileged = privilegedCallbacks[subId] ?: PhysicalChannelConfigListener(this@UpdaterService).apply {
+                                        privilegedCallbacks[subId] = this
+                                    }
+
+                                    telephony.registerTelephonyCallback(callbackExecutor, callback)
+                                    service?.registerPrivilegedListener(subId, privileged)
+                                } else {
+                                    val listener = telephonyListeners[subId] ?: StateListener(subId, this@UpdaterService).apply {
+                                        telephonyListeners[subId] = this
+                                    }
+
+                                    @Suppress("DEPRECATION")
+                                    telephony.listen(
+                                        listener,
+                                        PhoneStateListener.LISTEN_SERVICE_STATE or
+                                                PhoneStateListener.LISTEN_CELL_INFO or
+                                                PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or
+                                                PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED
+                                                or PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
+                                    )
+                                }
+
+                                updateCellInfo(subId, telephony.allCellInfo ?: mutableListOf())
+                                updateSignal(subId, telephony.signalStrength)
+                                updateServiceState(subId, telephony.serviceState)
+                            }
+                        } else {
+                            null
+                        }
                     }
-                }
-            )
+                )
+            }
+        } catch (e: SecurityException) {
+            stalledAfterSecurityException.set(true)
         }
     }
 
-    @SuppressLint("MissingPermission")
     override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (cellModel) {
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
@@ -433,44 +448,48 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
 
         override fun onSubscriptionsChanged() {
-            val newList = subs.allSubscriptionInfoList
-            val newIds = newList.map { it.subscriptionId }
-            val currentIds = currentList.map { it.subscriptionId }
+            try {
+                val newList = subs.allSubscriptionInfoList
+                val newIds = newList.map { it.subscriptionId }
+                val currentIds = currentList.map { it.subscriptionId }
 
-            val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
+                val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
 
-            if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
-                clear()
-                currentList.addAll(newList)
+                if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
+                    clear()
+                    currentList.addAll(newList)
 
-                refresh(newIds)
-            } else {
-                launch {
-                    newList.forEach { subInfo ->
-                        cellModel.subInfos.update {
-                            it[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                    refresh(newIds)
+                } else {
+                    launch {
+                        newList.forEach { subInfo ->
+                            cellModel.subInfos.update {
+                                it[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                            }
+
+                            withContext(Dispatchers.IO) {
+                                betweenUtils.queueSubscriptionInfo(cellModel.subInfos.value)
+                            }
+
+                            updateWidgets()
                         }
-
-                        withContext(Dispatchers.IO) {
-                            betweenUtils.queueSubscriptionInfo(cellModel.subInfos.value)
-                        }
-
-                        updateWidgets()
                     }
                 }
-            }
 
-            cellModel.primaryCell.value = defaultId
-            cellModel.subIds.update {
-                it.updateComparator(SubsComparator(defaultId))
-            }
-
-            launch {
-                updateWidgets()
-
-                withContext(Dispatchers.IO) {
-                    betweenUtils.queuePrimaryCell(defaultId)
+                cellModel.primaryCell.value = defaultId
+                cellModel.subIds.update {
+                    it.updateComparator(SubsComparator(defaultId))
                 }
+
+                launch {
+                    updateWidgets()
+
+                    withContext(Dispatchers.IO) {
+                        betweenUtils.queuePrimaryCell(defaultId)
+                    }
+                }
+            } catch (ignored: SecurityException) {
+                stalledAfterSecurityException.set(true)
             }
         }
     }

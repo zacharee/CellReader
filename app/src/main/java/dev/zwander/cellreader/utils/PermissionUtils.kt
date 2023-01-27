@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -20,9 +21,11 @@ object PermissionUtils {
         arrayOf()
     }
 
-    fun getMissingPermissions(context: Context): Array<String> {
+    @SuppressLint("InlinedApi")
+    fun getMissingPermissions(context: Context, excludeBackgroundLocation: Boolean = false): Array<String> {
         return permissions.filter { permission ->
-            context.checkCallingOrSelfPermission(permission) != PackageManager.PERMISSION_GRANTED
+            context.checkCallingOrSelfPermission(permission) != PackageManager.PERMISSION_GRANTED &&
+                    (!excludeBackgroundLocation || permission == android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }.toTypedArray()
     }
 

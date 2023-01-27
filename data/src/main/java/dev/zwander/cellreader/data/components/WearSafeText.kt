@@ -55,6 +55,7 @@ fun WearSafeText(
             overflow,
             softWrap,
             maxLines,
+            minLines,
             onTextLayout,
             style
         )
