@@ -28,6 +28,14 @@ android {
         kotlinCompilerExtensionVersion compose_compiler_version
     }
     namespace 'dev.zwander.cellreader.wear'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
 }
 
 dependencies {

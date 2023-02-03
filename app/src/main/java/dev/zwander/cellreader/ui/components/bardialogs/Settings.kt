@@ -11,7 +11,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -39,12 +40,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -374,7 +374,6 @@ private fun SwitchGuts(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ReorderDialog(
     setting: ReorderSettingsItemData,
@@ -391,6 +390,10 @@ fun ReorderDialog(
     })
 
     val initialValue by setting.initialValue(context).collectAsState(initial = listOf())
+
+    var infoDialogText by remember {
+        mutableStateOf<String?>(null)
+    }
 
     LaunchedEffect(key1 = setting.nameRes, key2 = initialValue.toList()) {
         withContext(Dispatchers.IO) {
@@ -429,7 +432,7 @@ fun ReorderDialog(
                             colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                             elevation = CardDefaults.outlinedCardElevation()
                         ) {
-                            Box(
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = if (isAdvancedSeparator) 32.dp else 48.dp)
@@ -440,13 +443,26 @@ fun ReorderDialog(
                                             MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
                                         }
                                     ),
-                                contentAlignment = Alignment.CenterStart
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = stringResource(id = it.label),
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     fontWeight = if (isAdvancedSeparator) FontWeight.Bold else FontWeight.Normal
                                 )
+
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                if (!isAdvancedSeparator) {
+                                    val helpText = it.retrieveHelpText(info = it.retrieveHelpText(info = null))
+
+                                    IconButton(onClick = { infoDialogText = helpText }) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.baseline_help_outline_24),
+                                            contentDescription = stringResource(id = R.string.info)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -481,4 +497,21 @@ fun ReorderDialog(
         ),
         modifier = Modifier.fillMaxWidth(0.7f)
     )
+
+    infoDialogText?.let {
+        AlertDialog(
+            onDismissRequest = { infoDialogText = null },
+            title = {
+                Text(text = stringResource(id = R.string.info))
+            },
+            text = {
+                Text(text = it)
+            },
+            confirmButton = {
+                TextButton(onClick = { infoDialogText = null }) {
+                    Text(text = stringResource(id = android.R.string.ok))
+                }
+            }
+        )
+    }
 }

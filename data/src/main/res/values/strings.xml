@@ -18,6 +18,7 @@
     <string name="tdscdma_info">TDSCDMA Info</string>
     <string name="wcdma_signal_strength">WCDMA Signal Strength</string>
     <string name="wcdma_info">WCDMA Info</string>
+    <string name="info">Info</string>
 
     <string name="signal_strength">Signal Strength</string>
     <string name="service_state">Service State</string>
@@ -281,4 +282,49 @@
     <string name="grant">Grant</string>
     <string name="close_app">Close App</string>
     <string name="privacy_policy">Privacy Policy</string>
+
+    <string name="bands_helper_text">These are the bands you\'re connected to on this cell as reported by Android or inferred by CellReader. Usually if multiple bands are shown, it\'s because CellReader is inferring them from the ARFCN and that ARFCN represents multiple possible bands.\n\nCellReader is inferring the shown bands: %s.</string>
+    <string name="channel_helper_text">This usually is just another name for the ARFCN of the cell. CDMA cells have no channel reported channel number.</string>
+    <string name="gci_helper_text">GCI stands for Global Cell ID. This is a unique identifier for the cell.</string>
+    <string name="carrier_helper_text">The carrier field shows the names of the cell\'s carrier/operator.</string>
+    <string name="plmn_helper_text">PLMN stands for Public Land Mobile Network. This field shows the PLMN code, which consists of the MCC (Mobile Country Code) and the MNC (Mobile Network Code) of the cell\'s carrier.</string>
+    <string name="lat_lon_helper_text">This field shows the latitude and longitude of the CDMA base station.</string>
+    <string name="net_id_helper_text">The network ID of this CDMA base station.</string>
+    <string name="basestation_id_helper_text">The ID of this CDMA base station.</string>
+    <string name="sys_id_helper_text">The system ID of this CDMA base station.</string>
+    <string name="lac_helper_text">LAC stands for Location Area Code, which represents the approximate location of the phone or client device.</string>
+    <string name="cid_helper_text">CID stands for Cell ID and identifies the base transceiver station or an area that station covers.</string>
+    <string name="bsic_helper_text">BSIC stands for Base Station Identity Code and uniquely identifies a base station.</string>
+    <string name="arfcn_helper_text">ARFCN stands for Absolute Radio-Frequency Channel Number. Different technologies prepend this to distinguish them from each other. WCDMA and TDSCDMA use UARFCN, LTE uses EARFCN, and 5G uses NRARFCN. The ARFCN can be used to infer a band or set of bands along with their upload and download frequencies.</string>
+    <string name="dl_freqs_helper_text">The possible download frequencies for this cell, inferred from the ARFCN.</string>
+    <string name="ul_freqs_helper_text">The possible upload frequencies for this cell, inferred from the ARFCN.</string>
+    <string name="additional_plmns_helper_text">Represents other PLMN codes this cell supports.</string>
+    <string name="bandwidth_helper_text">The bandwidth of the current cell connection in KHz.</string>
+    <string name="tac_helper_text">TAC stands for Tracking Area Code and identifies a specific area within a carrier\'s network.</string>
+    <string name="ci_helper_text">CI stands for Cell ID and can be used to identify a specific antenna or even the Tracking Area Code.</string>
+    <string name="pci_helper_text">PCI stands for Physical Cell ID and can be used to distinguish different cells in the same area.</string>
+    <string name="csg_id_helper_text">CSG ID stands for Closed Subscriber Group ID. A CSG represents a set of users allowed to connect to a specific cell, similar to MAC address whitelisting with Wi-Fi.</string>
+    <string name="csg_indicator_helper_text">CSG stands for Closed Subscriber Group. A CSG represents a set of users allowed to connect to a specific cell, similar to MAC address whitelisting with Wi-Fi. If this indicator is \"true\", only allowed devices can connect to the cell.</string>
+    <string name="home_node_b_helper_text">Displays the name for the CSG (Closed Subscriber Group) managing this cell.</string>
+    <string name="nci_helper_text">NCI stands for NR Cell Identity and can be used to identify a specific antenna or even the Tracking Area Code.</string>
+    <string name="cpid_helper_text">CPID stands for Cell Parameters ID and is used to identify the cell.</string>
+    <string name="freqs_helper_text">The possible download/upload frequencies for this cell, inferred from the ARFCN.</string>
+    <string name="asu_helper_text">ASU stands for Arbitrary Strength Unit. This is proportional to the received signal strength of the phone or client device.</string>
+    <string name="valid_helper_text">This will be \"true\" if this signal strength information is different from the default/empty signal strength representation.</string>
+    <string name="dbm_helper_text">Equivalent to the RSSI (Received Signal Strength Indicator) in dBm.</string>
+    <string name="ecio_helper_text">Ec/Io stands for Energy to Interference Ratio, which represents the quality of the signal.</string>
+    <string name="snr_helper_text">SnR or SinR stands for Signal to Noise Ratio and represents the quality of the signal.</string>
+    <string name="rssi_helper_text">RSSI stands for Received Signal Strength Indicator and represents the signal strength in dBm.</string>
+    <string name="bit_error_rate_helper_text">The Bit Error Rate represents the number of received bit errors over a unit time.</string>
+    <string name="timing_advance_helper_text">Timing Advance represents how much time a signal takes to get from the phone or client device to the cell\'s base station.</string>
+    <string name="rsrq_helper_text">RSRQ stands for Received Signal Reference Quality and represents the quality of the signal.</string>
+    <string name="rsrp_helper_text">RSRP stands for Received Signal Reference Power and generally provides a more accurate signal strength measurement for LTE and 5G than RSSI.</string>
+    <string name="cqi_helper_text">CQI stands for Channel Quality Indicator and acts as an indication of signal quality.</string>
+    <string name="cqi_index_helper_text">CQI stands for Channel Quality Indicator. The CQI Table Index represents the index of the table found in 3GPP TS 136.213 section 7.2.3.</string>
+    <string name="rscp_helper_text">RSCP stands for Received Signal Code Power and is used as a signal strength indicator.</string>
+    <string name="ecno_helper_text">Ec/No stands for Energy Per Chip to Noise Density and represents a measure of signal quality.</string>
+    <string name="registered_helper_text">Denotes whether the phone or client device is registered to a mobile network that provides service on this cell.</string>
+    <string name="status_helper_text">Denotes the current connection status of the phone or client device to this cell.</string>
+    <string name="timestamp_helper_text">Represents the approximate time since boot in milliseconds the information this cell was retrieved from the modem.</string>
+    <string name="endc_helper_text">ENDC stands for E-UTRAN New Radio - Dual Connectivity and indicates whether the phone or client device is connected to both LTE and 5G at once (5G NSA).</string>
 </resources>

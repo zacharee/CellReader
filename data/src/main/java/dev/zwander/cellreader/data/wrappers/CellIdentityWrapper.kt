@@ -14,6 +14,9 @@ sealed class CellIdentityWrapper(
     val plmn: String?
         get() = if (mcc.isNullOrBlank()) null else (mcc + mnc)
 
+    open val inferringBands: Boolean
+        get() = true
+
     open val bands: List<String>
         get() {
             val info = arfcnInfo
@@ -329,8 +332,11 @@ data class CellIdentityLteWrapper(
     override val arfcnInfo: List<ARFCNInfo>
         get() = ARFCNTools.earfcnToInfo(earfcn)
 
+    override val inferringBands: Boolean
+        get() = _bands.isNullOrEmpty()
+
     override val bands: List<String>
-        get() = if (_bands.isNullOrEmpty()) super.bands else _bands.map { it.toString() }
+        get() = if (inferringBands) super.bands else _bands!!.map { it.toString() }
 
     constructor(identity: CellIdentityLte) : this(
         identity.ci,
@@ -413,8 +419,11 @@ data class CellIdentityNrWrapper(
 ) {
     override val arfcnInfo = ARFCNTools.nrArfcnToInfo(nrArfcn)
 
+    override val inferringBands: Boolean
+        get() = _bands.isNullOrEmpty()
+
     override val bands: List<String>
-        get() = if (_bands.isNullOrEmpty()) super.bands else _bands.map { it.toString() }
+        get() = if (inferringBands) super.bands else _bands!!.map { it.toString() }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(identity: CellIdentityNr) : this(
