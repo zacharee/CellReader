@@ -5,6 +5,11 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -92,11 +97,11 @@ fun MainContent() {
         SelectionContainer(
             modifier = Modifier.fillMaxSize()
         ) {
-            val state = rememberLazyGridState()
+            val state = rememberLazyStaggeredGridState()
 
             Crossfade(targetState = actualSubIdsState.isNotEmpty() && !refreshing) { hasSubIds ->
                 if (hasSubIds) {
-                    LazyVerticalGrid(
+                    LazyVerticalStaggeredGrid(
                         contentPadding = WindowInsets.systemBars
                             .add(
                                 WindowInsets(
@@ -109,11 +114,11 @@ fun MainContent() {
                             .asPaddingValues(),
                         state = state,
                         modifier = Modifier.fillMaxHeight(),
-                        columns = GridCells.Adaptive(minSize = 300.dp),
+                        columns = StaggeredGridCells.Adaptive(minSize = 300.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         subIds.forEachIndexed { subIndex, t ->
-                            item(t, span = { GridItemSpan(this.maxLineSpan) }) {
+                            item(t, span = StaggeredGridItemSpan.FullLine ) {
                                 SIMCard(
                                     subId = t,
                                     expanded = expanded[t.toString()] ?: false,
@@ -121,7 +126,6 @@ fun MainContent() {
                                     showingCells = showingCells[t] ?: true,
                                     onShowingCells = { showingCells[t] = it },
                                     modifier = Modifier
-                                        .animateItemPlacement()
                                         .padding(bottom = 8.dp),
                                 )
                             }
@@ -138,7 +142,6 @@ fun MainContent() {
                                 AnimatedVisibility(
                                     visible = showingCells[t] != false,
                                     modifier = Modifier
-                                        .animateItemPlacement()
                                         .padding(bottom = if (!isFinal || subIndex != subIds.size - 1) 8.dp else 0.dp),
                                     enter = fadeIn() + expandIn(
                                         clip = false,
@@ -170,7 +173,6 @@ fun MainContent() {
                                 AnimatedVisibility(
                                     visible = showingCells[t] != false,
                                     modifier = Modifier
-                                        .animateItemPlacement()
                                         .padding(bottom = if (!isFinal || subIndex != subIds.size - 1) 8.dp else 0.dp),
                                     enter = fadeIn() + expandIn(
                                         clip = false,
