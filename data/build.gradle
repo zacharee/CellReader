@@ -42,7 +42,7 @@ android {
 
 dependencies {
     api 'androidx.core:core-ktx:1.9.0'
-    api 'androidx.appcompat:appcompat:1.6.0'
+    api 'androidx.appcompat:appcompat:1.6.1'
     api 'com.google.android.material:material:1.8.0'
     api "com.google.android.gms:play-services-wearable:18.0.0"
     api "androidx.savedstate:savedstate:1.2.0"
@@ -51,7 +51,7 @@ dependencies {
     api "androidx.compose.runtime:runtime:$compose_version"
     api "androidx.compose.foundation:foundation:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    api 'androidx.activity:activity-compose:1.6.1'
+    api 'androidx.activity:activity-compose:1.7.0-beta01'
     api 'com.google.accompanist:accompanist-flowlayout:0.28.0'
     api "androidx.glance:glance:$glance_version"
     api "androidx.glance:glance-appwidget:$glance_version"
@@ -59,10 +59,10 @@ dependencies {
 
     api "androidx.compose.material:material:$compose_version"
     api 'androidx.compose.material3:material3:1.1.0-alpha06'
-    api "androidx.compose.runtime:runtime-livedata:1.4.0-alpha04"
-    api 'androidx.wear.compose:compose-material:1.2.0-alpha03'
-    api 'androidx.wear.compose:compose-foundation:1.2.0-alpha03'
-    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0-alpha05'
+    api "androidx.compose.runtime:runtime-livedata:1.4.0-beta01"
+    api 'androidx.wear.compose:compose-material:1.2.0-alpha04'
+    api 'androidx.wear.compose:compose-foundation:1.2.0-alpha04'
+    api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0-beta01'
 
     api 'com.github.zacharee:PatreonSupportersRetrieval:6a923f211c'
 
