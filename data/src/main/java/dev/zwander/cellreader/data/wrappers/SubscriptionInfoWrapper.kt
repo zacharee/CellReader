@@ -11,6 +11,7 @@ import android.telephony.SubscriptionManager
 import android.util.Base64
 import dev.zwander.cellreader.data.allAccessRulesCompat
 import dev.zwander.cellreader.data.cardIdCompat
+import dev.zwander.cellreader.data.util.onAvail
 import java.io.ByteArrayOutputStream
 
 data class SubscriptionInfoWrapper(
@@ -66,13 +67,13 @@ data class SubscriptionInfoWrapper(
             Base64.encodeToString(output.toByteArray(), Base64.DEFAULT)
         },
         @Suppress("DEPRECATION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mccString else info.mcc.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mccString else info.mcc.onAvail { it.toString() },
         @Suppress("DEPRECATION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mncString else info.mnc.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mncString else info.mnc.onAvail { it.toString() },
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ArrayList(info.ehplmns) else arrayListOf(),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ArrayList(info.hplmns) else arrayListOf(),
         info.countryIso,
-        info.isEmbedded,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) info.isEmbedded else null,
         ArrayList(info.allAccessRulesCompat.map { UiccAccessRuleWrapper(it) }),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.cardString else null,
         info.cardIdCompat,

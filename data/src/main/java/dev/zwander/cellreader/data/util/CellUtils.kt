@@ -184,18 +184,18 @@ fun Int.avail() = this != CellInfo.UNAVAILABLE
 fun Long.avail() = this != CellInfo.UNAVAILABLE_LONG
 
 @SuppressLint("ComposableNaming")
-inline fun Int.onAvail(block: (Int) -> Unit) {
-    if (avail()) block(this)
+inline fun <T> Int.onAvail(block: (Int) -> T): T? {
+    return if (avail()) block(this) else null
 }
 
 @SuppressLint("ComposableNaming")
-inline fun Long.onAvail(block: (Long) -> Unit) {
-    if (avail()) block(this)
+inline fun <T> Long.onAvail(block: (Long) -> T): T? {
+    return if (avail()) block(this) else null
 }
 
 @SuppressLint("ComposableNaming")
-inline fun Int.onNegAvail(block: (Int) -> Unit) {
-    if (this != -1) block(this)
+inline fun <T> Int.onNegAvail(block: (Int) -> T): T? {
+    return if (this != -1) block(this) else null
 }
 
 fun duplexModeToString(context: Context, duplex: Int): String {

@@ -5,6 +5,8 @@ import android.telephony.*
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.data.ARFCNTools
+import dev.zwander.cellreader.data.util.avail
+import dev.zwander.cellreader.data.util.onAvail
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -33,7 +35,7 @@ sealed class CellIdentityWrapper(
             return when {
                 identity is CellIdentityGsm -> CellIdentityGsmWrapper(identity)
                 identity is CellIdentityCdma -> CellIdentityCdmaWrapper(identity)
-                identity is CellIdentityTdscdma -> CellIdentityTdscdmaWrapper(identity)
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) && identity is CellIdentityTdscdma -> CellIdentityTdscdmaWrapper(identity)
                 identity is CellIdentityWcdma -> CellIdentityWcdmaWrapper(identity)
                 identity is CellIdentityLte -> CellIdentityLteWrapper(identity)
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && identity is CellIdentityNr -> CellIdentityNrWrapper(identity)
@@ -53,6 +55,7 @@ sealed class CellIdentityWrapper(
     abstract override fun equals(other: Any?): Boolean
 }
 
+@Suppress("DEPRECATION")
 data class CellIdentityGsmWrapper(
     val lac: Int,
     val cid: Int,
@@ -80,12 +83,12 @@ data class CellIdentityGsmWrapper(
         } else {
             null
         },
-        identity.mccString,
-        identity.mncString,
-        identity.operatorAlphaLong.toString(),
-        identity.operatorAlphaShort.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        identity.channelNumber
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.arfcn
     )
 
     override fun hashCode(): Int {
@@ -136,10 +139,10 @@ data class CellIdentityCdmaWrapper(
         identity.basestationId,
         identity.longitude,
         identity.latitude,
-        identity.operatorAlphaLong.toString(),
-        identity.operatorAlphaShort.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        identity.channelNumber
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else CellInfo.UNAVAILABLE
     )
 
     override fun hashCode(): Int {
@@ -184,9 +187,9 @@ data class CellIdentityTdscdmaWrapper(
     override val arfcnInfo = ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
 
     constructor(identity: CellIdentityTdscdma) : this(
-        identity.lac,
-        identity.cid,
-        identity.cpid,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.lac else CellInfo.UNAVAILABLE,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cid else CellInfo.UNAVAILABLE,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cpid else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             identity.uarfcn
         } else {
@@ -202,12 +205,12 @@ data class CellIdentityTdscdmaWrapper(
         } else {
             null
         },
-        identity.mccString,
-        identity.mncString,
-        identity.operatorAlphaLong.toString(),
-        identity.operatorAlphaShort.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        identity.channelNumber
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else CellInfo.UNAVAILABLE,
     )
 
     override fun hashCode(): Int {
@@ -240,6 +243,7 @@ data class CellIdentityTdscdmaWrapper(
     }
 }
 
+@Suppress("DEPRECATION")
 data class CellIdentityWcdmaWrapper(
     val lac: Int,
     val cid: Int,
@@ -273,12 +277,12 @@ data class CellIdentityWcdmaWrapper(
         } else {
             null
         },
-        identity.mccString,
-        identity.mncString,
-        identity.operatorAlphaLong.toString(),
-        identity.operatorAlphaShort.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        identity.channelNumber
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.uarfcn
     )
 
     override fun hashCode(): Int {
@@ -311,6 +315,7 @@ data class CellIdentityWcdmaWrapper(
     }
 }
 
+@Suppress("DEPRECATION")
 data class CellIdentityLteWrapper(
     val ci: Int,
     val pci: Int,
@@ -343,7 +348,7 @@ data class CellIdentityLteWrapper(
         identity.pci,
         identity.tac,
         identity.earfcn,
-        identity.bandwidth,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.bandwidth else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.bands.toList())
         } else {
@@ -359,12 +364,12 @@ data class CellIdentityLteWrapper(
         } else {
             null
         },
-        identity.mccString,
-        identity.mncString,
-        identity.operatorAlphaLong.toString(),
-        identity.operatorAlphaShort.toString(),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        identity.channelNumber
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.earfcn
     )
 
     override fun hashCode(): Int {

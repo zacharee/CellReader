@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.data.util
 
+import android.os.Build
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -9,6 +10,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.TreeMap
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -61,19 +63,29 @@ fun String.toLightEnoughColorInt(): Int {
 }
 
 fun Color.toColorInt(): Int {
-    return android.graphics.Color.argb(alpha, red, green, blue)
+    return (alpha * 255.0f + 0.5f).toInt() shl 24 or
+            ((red * 255.0f + 0.5f).toInt() shl 16) or
+            ((green * 255.0f + 0.5f).toInt() shl 8) or (blue * 255.0f + 0.5f).toInt()
 }
 
 inline fun <reified T> MutableStateFlow<T>.update(noinline clone: ((T) -> T)? = null, noinline block: ((T) -> Unit)? = null) {
     val c = if (clone != null) {
         clone(value)
-    } else {
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         T::class.java.constructors.find {
             it.parameters.size == 1 &&
                     (it.parameters[0].type.isAssignableFrom(T::class.java) ||
                             T::class.java.isAssignableFrom(it.parameters[0].type) ||
                             it.parameters[0].type == T::class.java)
         }?.newInstance(value) as T
+    } else {
+        when (val value = value) {
+            is List<*> -> ArrayList(value)
+            is HashMap<*, *> -> HashMap(value)
+            is TreeMap<*, *> -> TreeMap(value)
+            is UpdatableTreeSet<*> -> UpdatableTreeSet(value)
+            else -> throw IllegalArgumentException("Invalid collection type ${T::class.java.canonicalName}")
+        } as T
     }
     block?.invoke(c)
 

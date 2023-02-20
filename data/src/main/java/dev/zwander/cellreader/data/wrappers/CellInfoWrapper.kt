@@ -54,7 +54,7 @@ data class CellInfoGsmWrapper(
     constructor(info: CellInfoGsm) : this(
         info.isRegistered,
         info.timeStampMillisCompat,
-        info.cellConnectionStatus,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
         CellIdentityGsmWrapper(info.cellIdentity),
         CellSignalStrengthGsmWrapper(info.cellSignalStrength)
     )
@@ -70,7 +70,7 @@ data class CellInfoCdmaWrapper(
     constructor(info: CellInfoCdma) : this(
         info.isRegistered,
         info.timeStampMillisCompat,
-        info.cellConnectionStatus,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
         CellIdentityCdmaWrapper(info.cellIdentity),
         CellSignalStrengthCdmaWrapper(info.cellSignalStrength)
     )
@@ -103,7 +103,7 @@ data class CellInfoWcdmaWrapper(
     constructor(info: CellInfoWcdma) : this(
         info.isRegistered,
         info.timeStampMillisCompat,
-        info.cellConnectionStatus,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
         CellIdentityWcdmaWrapper(info.cellIdentity),
         CellSignalStrengthWcdmaWrapper(info.cellSignalStrength)
     )
@@ -120,7 +120,7 @@ data class CellInfoLteWrapper(
     constructor(info: CellInfoLte) : this(
         info.isRegistered,
         info.timeStampMillisCompat,
-        info.cellConnectionStatus,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
         CellIdentityLteWrapper(info.cellIdentity),
         CellSignalStrengthLteWrapper(info.cellSignalStrength),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null

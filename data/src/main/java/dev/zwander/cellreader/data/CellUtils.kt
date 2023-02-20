@@ -39,13 +39,17 @@ val CellSignalStrengthWcdma.bitErrorRateCompat: Int
             .getInt(this)
     }
 
-val SubscriptionInfo.cardIdCompat: String
+val SubscriptionInfo.cardIdCompat: String?
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         cardId.toString()
     } else {
-        SubscriptionInfo::class.java
-            .getMethod("getCardId")
-            .invoke(this) as String
+        try {
+            SubscriptionInfo::class.java
+                .getMethod("getCardId")
+                .invoke(this) as String
+        } catch (e: Throwable) {
+            null
+        }
     }
 
 val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
@@ -54,7 +58,7 @@ val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
     } else {
         try {
             accessRules
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             listOf()
         }
     }

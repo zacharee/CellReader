@@ -8,10 +8,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.glance.appwidget.updateAll
 import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
@@ -39,7 +41,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val intent = Intent(context, UpdaterService::class.java)
             if (refresh) intent.action = ACTION_REFRESH
 
-            context.startForegroundService(intent)
+            ContextCompat.startForegroundService(context, intent)
         }
     }
 
@@ -314,8 +316,15 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                 }
 
                                 updateCellInfo(subId, telephony.allCellInfo ?: mutableListOf())
-                                updateSignal(subId, telephony.signalStrength)
-                                updateServiceState(subId, telephony.serviceState)
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                                    updateSignal(subId, telephony.signalStrength)
+                                }
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    updateServiceState(subId, telephony.serviceState)
+                                } else {
+                                    updateServiceState(subId, telephony.getServiceStateForSubscriber(subId))
+                                }
                             }
                         } else {
                             null
@@ -331,6 +340,10 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun updateCellInfo(subId: Int, infos: MutableList<CellInfo>) {
         with (cellModel) {
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
+
+            if (infos.isEmpty() && strengthInfos.value[subId]?.isNotEmpty() == true) {
+                return
+            }
 
             val foundIDs = mutableListOf<String>()
             val newInfo = sorted.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
@@ -354,13 +367,22 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             mutableListOf<CellSignalStrengthWrapper>().apply {
                 strength?.let { strength ->
                     if (strength.gsmSignalStrength != Int.MAX_VALUE) {
-                        add(CellSignalStrengthGsmWrapper(CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE)))
+                        add(CellSignalStrengthGsmWrapper(
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE)
+                            } else {
+                                CellSignalStrengthGsm::class.java.getConstructor(Int::class.java, Int::class.java)
+                                    .newInstance(strength.gsmSignalStrength, strength.gsmBitErrorRate)
+                            }
+                        ))
                     }
                     if (strength.cdmaDbm != Int.MAX_VALUE) {
                         add(CellSignalStrengthCdmaWrapper(CellSignalStrengthCdma(-strength.cdmaDbm, -strength.cdmaEcio, -strength.evdoDbm, -strength.evdoEcio, -strength.evdoSnr)))
                     }
-                    if (strength.wcdmaAsuLevel != 255) {
-                        add(CellSignalStrengthWcdmaWrapper(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE)))
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        if (strength.wcdmaAsuLevel != 255) {
+                            add(CellSignalStrengthWcdmaWrapper(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE)))
+                        }
                     }
                     if (strength.lteSignalStrength != Int.MAX_VALUE) {
                         add(CellSignalStrengthLteWrapper(CellSignalStrengthLte::class.java.getConstructor(Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java)

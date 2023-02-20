@@ -45,7 +45,7 @@ data class CellSignalStrengthGsmWrapper(
     constructor(strength: CellSignalStrengthGsm) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
         strength.bitErrorRateCompat,
-        strength.timingAdvance,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) strength.timingAdvance else CellInfo.UNAVAILABLE,
         strength.level,
         strength.dbm,
         strength.isValidCompat,
@@ -220,14 +220,17 @@ data class CellSignalStrengthLteWrapper(
     override val valid: Boolean?,
     override val asuLevel: Int
 ) : CellSignalStrengthWrapper() {
-    @SuppressLint("InlinedApi")
+    @SuppressLint("InlinedApi", "PrivateApi")
     constructor(strength: CellSignalStrengthLte) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
-        strength.rsrp,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) strength.rsrp else strength.dbm,
         strength.rsrq,
         strength.rssnr,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) strength.cqiTableIndex else CellInfo.UNAVAILABLE,
-        strength.cqi,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) strength.cqi else CellSignalStrengthLte::class.java
+            .getDeclaredField("mCqi")
+            .apply { isAccessible = true }
+            .get(strength) as Int,
         strength.timingAdvance,
         strength.level,
         strength.dbm,

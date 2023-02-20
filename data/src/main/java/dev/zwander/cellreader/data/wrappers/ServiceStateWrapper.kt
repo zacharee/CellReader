@@ -248,15 +248,15 @@ data class ServiceStateWrapper(
         state.isManualSelection,
         state.isEmergencyOnly,
         state.cssIndicator,
-        state.cdmaNetworkId,
-        state.cdmaSystemId,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaNetworkId else CellInfo.UNAVAILABLE,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaSystemId else CellInfo.UNAVAILABLE,
         state.cdmaRoamingIndicator,
         state.cdmaDefaultRoamingIndicator,
         state.cdmaEriIconIndex,
         state.cdmaEriIconMode,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.nrFrequencyRange else CellInfo.UNAVAILABLE,
-        state.channelNumber,
-        ArrayList(state.cellBandwidths.toList()),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.channelNumber else CellInfo.UNAVAILABLE,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ArrayList(state.cellBandwidths.toList()) else arrayListOf(),
         try {
             state.arfcnRsrpBoost
         } catch (e: Throwable) {

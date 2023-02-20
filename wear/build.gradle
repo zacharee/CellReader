@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "dev.zwander.cellreader"
-        minSdk 28
+        minSdk 24
         targetSdk 33
         versionCode version_code
         versionName version_name

@@ -7,19 +7,22 @@ import android.os.Build
 import rikka.shizuku.Shizuku
 
 object PermissionUtils {
-    private val permissions = arrayOf(
+    private val permissions = arrayListOf(
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.READ_PHONE_STATE,
-        android.Manifest.permission.READ_PHONE_NUMBERS,
-    ) + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)
-    } else {
-        arrayOf()
-    } + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        arrayOf(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-    } else {
-        arrayOf()
-    }
+    ).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            add(android.Manifest.permission.READ_PHONE_NUMBERS)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+    }.toList()
 
     @SuppressLint("InlinedApi")
     fun getMissingPermissions(context: Context, excludeBackgroundLocation: Boolean = false): Array<String> {
