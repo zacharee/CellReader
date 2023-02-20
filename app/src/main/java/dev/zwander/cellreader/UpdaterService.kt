@@ -310,8 +310,8 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                                         PhoneStateListener.LISTEN_SERVICE_STATE or
                                                 PhoneStateListener.LISTEN_CELL_INFO or
                                                 PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or
-                                                PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED
-                                                or PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
+                                                PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED or
+                                                PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
                                     )
                                 }
 
