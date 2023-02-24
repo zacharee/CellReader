@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk tools:overrideLibrary="androidx.wear.compose.material,androidx.wear.compose.material.core,androidx.wear.compose.foundation,androidx.glance.wear.tiles,androidx.wear.tiles" />
+    <uses-sdk tools:overrideLibrary="androidx.wear.compose.material,
+    androidx.wear.compose.material.core,
+    androidx.wear.compose.foundation,
+    androidx.glance.wear.tiles,
+    androidx.wear.tiles,
+    androidx.wear.tiles.renderer" />
 
     <application>
         <provider
