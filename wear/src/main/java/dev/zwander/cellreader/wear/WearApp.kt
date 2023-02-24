@@ -1,9 +1,5 @@
 package dev.zwander.cellreader.wear
 
-import android.app.Application
+import dev.zwander.cellreader.data.BaseApp
 
-class WearApp : Application() {
-    override fun onCreate() {
-        super.onCreate()
-    }
-}
+class WearApp : BaseApp()

@@ -17,6 +17,10 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <meta-data
+            android:name="com.bugsnag.android.API_KEY"
+            android:value="9fd8a842c002fc9e79b9d6ca7a12e091"/>
     </application>
 
 </manifest>

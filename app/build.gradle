@@ -1,9 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
     id 'kotlin-parcelize'
+    id 'com.bugsnag.android.gradle'
 }
 
 android {
@@ -61,11 +60,6 @@ dependencies {
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.28.0'
 
     implementation "com.google.android.gms:play-services-wearable:18.0.0"
-
-    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
-
-    implementation platform('com.google.firebase:firebase-bom:31.2.1')
-    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     implementation project(":data")
 

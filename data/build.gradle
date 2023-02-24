@@ -80,6 +80,9 @@ dependencies {
     api 'dev.rikka.shizuku:provider:13.1.0'
 
     api "org.burnoutcrew.composereorderable:reorderable:0.9.6"
+    api 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
+
+    api "com.bugsnag:bugsnag-android:5.28.4"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
