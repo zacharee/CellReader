@@ -26,7 +26,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
     data class TileItemInfo(
         val level: Int,
         val dBm: Int,
-        val bands: List<String>,
+        val bandString: String,
         val type: String,
         val subId: Int
     )
@@ -72,7 +72,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
                 TileItemInfo(
                     it.cellSignalStrength.level,
                     it.cellSignalStrength.dbm,
-                    it.cellIdentity.bands,
+                    it.cellIdentity.formattedBandString(false),
                     it.cellIdentity.typeString(this@CellTile),
                     subId
                 )
@@ -80,7 +80,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
                 TileItemInfo(
                     it.level,
                     it.dbm,
-                    listOf(),
+                    "",
                     it.typeString(this@CellTile),
                     subId
                 )
@@ -128,9 +128,9 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
         ) {
             SignalBarGroup(level = info.level, dbm = info.dBm, type = info.type)
 
-            if (info.bands.isNotEmpty()) {
+            if (info.bandString.isNotBlank()) {
                 Text(
-                    text = "${resources.getString(R.string.bands_format)}: ${info.bands.joinToString(", ")}",
+                    text = "${resources.getString(R.string.bands_format)}: ${info.bandString}",
                     style = TextStyle(
                         fontSize = 12.sp,
                         color = ColorProvider(Color.White)

@@ -241,6 +241,7 @@
     <string name="nr_sa">NR SA</string>
     <string name="lte_adv_pro">LTE Advanced Pro</string>
     <string name="nr_adv">NR Advanced</string>
+    <string name="inferred_bands">Inferred Bands</string>
 
     <string name="home">Home</string>
     <string name="not_reg_searching">Searching Not Registered</string>
@@ -283,7 +284,8 @@
     <string name="close_app">Close App</string>
     <string name="privacy_policy">Privacy Policy</string>
 
-    <string name="bands_helper_text">These are the bands you\'re connected to on this cell as reported by Android or inferred by CellReader. Usually if multiple bands are shown, it\'s because CellReader is inferring them from the ARFCN and that ARFCN represents multiple possible bands.\n\nCellReader is inferring the shown bands: %s.</string>
+    <string name="bands_helper_text">These are the bands you\'re connected to on this cell as reported by Android or inferred by CellReader. Usually if multiple bands are shown, it\'s because CellReader is inferring them from the ARFCN and that ARFCN represents multiple possible bands. Bands in parentheses are inferred.</string>
+    <string name="inferred_bands_helper_text">These are the bands CellReader is inferring from the ARFCN.</string>
     <string name="channel_helper_text">This usually is just another name for the ARFCN of the cell. CDMA cells have no channel reported channel number.</string>
     <string name="gci_helper_text">GCI stands for Global Cell ID. This is a unique identifier for the cell.</string>
     <string name="carrier_helper_text">The carrier field shows the names of the cell\'s carrier/operator.</string>

@@ -1,11 +1,11 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.data.ARFCNTools
-import dev.zwander.cellreader.data.util.avail
 import dev.zwander.cellreader.data.util.onAvail
 import java.util.*
 import kotlin.collections.ArrayList
@@ -19,12 +19,26 @@ sealed class CellIdentityWrapper(
     open val inferringBands: Boolean
         get() = true
 
-    open val bands: List<String>
+    open val realBands: List<String> = listOf()
+    val inferredBands: List<String>
         get() {
             val info = arfcnInfo
 
             return info.map { it.band }
         }
+
+    val hasBands: Boolean
+        get() = realBands.isNotEmpty() || inferredBands.isNotEmpty()
+
+    fun formattedBandString(full: Boolean): String {
+        val realString = realBands.joinToString(", ")
+        val inferredString = inferredBands.joinToString(", ", "(", ")")
+
+        return when {
+            realString.isNotBlank() -> "$realString${if (full) "\n$inferredString" else ""}"
+            else -> inferredString
+        }
+    }
 
     internal abstract val arfcnInfo: List<ARFCNInfo>
 
@@ -133,6 +147,7 @@ data class CellIdentityCdmaWrapper(
     override val mcc: String? = null
     override val mnc: String? = null
 
+    @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityCdma) : this(
         identity.networkId,
         identity.systemId,
@@ -186,6 +201,7 @@ data class CellIdentityTdscdmaWrapper(
 ) {
     override val arfcnInfo = ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
 
+    @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityTdscdma) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.lac else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cid else CellInfo.UNAVAILABLE,
@@ -340,9 +356,10 @@ data class CellIdentityLteWrapper(
     override val inferringBands: Boolean
         get() = _bands.isNullOrEmpty()
 
-    override val bands: List<String>
-        get() = if (inferringBands) super.bands else _bands!!.map { it.toString() }
+    override val realBands: List<String>
+        get() = _bands?.map { it.toString() } ?: listOf()
 
+    @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityLte) : this(
         identity.ci,
         identity.pci,
@@ -381,7 +398,8 @@ data class CellIdentityLteWrapper(
             additionalPlmns,
             csgInfo,
             bandwidth,
-            bands,
+            realBands,
+            inferredBands,
             mcc, mnc, alphaLong, alphaShort,
             globalCellId, channelNumber
         )
@@ -402,7 +420,8 @@ data class CellIdentityLteWrapper(
                 && other.globalCellId == globalCellId
                 && other.channelNumber == channelNumber
                 && other.bandwidth == bandwidth
-                && other.bands == bands
+                && other.inferredBands == inferredBands
+                && other.realBands == realBands
     }
 }
 
@@ -427,8 +446,8 @@ data class CellIdentityNrWrapper(
     override val inferringBands: Boolean
         get() = _bands.isNullOrEmpty()
 
-    override val bands: List<String>
-        get() = if (inferringBands) super.bands else _bands!!.map { it.toString() }
+    override val realBands: List<String>
+        get() = _bands?.map { it.toString() } ?: listOf()
 
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(identity: CellIdentityNr) : this(
@@ -461,7 +480,8 @@ data class CellIdentityNrWrapper(
             tac,
             nrArfcn,
             additionalPlmns,
-            bands,
+            realBands,
+            inferredBands,
             mcc, mnc, alphaLong, alphaShort,
             globalCellId, channelNumber
         )
@@ -480,6 +500,7 @@ data class CellIdentityNrWrapper(
                 && other.alphaShort == alphaShort
                 && other.globalCellId == globalCellId
                 && other.channelNumber == channelNumber
-                && other.bands == bands
+                && other.inferredBands == inferredBands
+                && other.realBands == realBands
     }
 }

@@ -117,7 +117,7 @@ object ARFCNTools {
                     -1
                 }
             )
-        }
+        }.sortedBy { it.band }
     }
 
     private fun calculateUarfcnInfo(uarfcn: Int, containers: List<Pair<IntRange, ARFCNContainer>>): List<ARFCNInfo> {
@@ -127,7 +127,7 @@ object ARFCNTools {
                 info.dlOffset.toDouble() + 0.2 * uarfcn,
                 info.ulOffset.toDouble() + 0.2 * ((uarfcn - dlRange.first) + info.ulRange.first)
             )
-        }
+        }.sortedBy { it.band }
     }
 
     private fun calculateGsmArfcnInfo(gsmarfcn: Int, containers: List<Pair<IntRange, List<GSMARFCNContainer>>>): List<ARFCNInfo> {
@@ -141,7 +141,7 @@ object ARFCNTools {
                     fdl, ful
                 )
             }
-        }
+        }.sortedBy { it.band }
     }
 
     private fun calculateNrArfcnInfo(nrarfcn: Int, refContainer: NRARFCNRefContainer, containers: List<Pair<Pair<IntRange, IntRange>, ARFCNContainer>>): List<ARFCNInfo> {
@@ -168,7 +168,7 @@ object ARFCNTools {
                 fdl,
                 ful
             )
-        }
+        }.sortedBy { it.band }
     }
 
     private fun calculateTdscdmaArfcnInfo(tdscdmaArfcn: Int, containers: List<Pair<IntRange, TDSCDMAARFCNContainer>>): List<ARFCNInfo> {
@@ -178,7 +178,7 @@ object ARFCNTools {
                 tdscdmaArfcn / 5.0,
                 tdscdmaArfcn / 5.0
             )
-        }
+        }.sortedBy { it.band }
     }
 }
 

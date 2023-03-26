@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.PaddedDivider
 import dev.zwander.cellreader.data.components.WearSafeText
-import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.util.duplexModeToString
 import dev.zwander.cellreader.data.util.onNegAvail
@@ -128,21 +127,6 @@ fun ServiceState(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
-
-            networkRegistrationInfos?.distinctBy { it.cellIdentity?.globalCellId }
-                ?.flatMap {
-                    it.cellIdentity?.bands?.map { band ->
-                        "${it.cellIdentity.typeString(context)} $band"
-                    } ?: listOf()
-                }
-                ?.joinToString(", ").apply {
-                    if (!isNullOrBlank()) {
-                        FormatText(
-                            textId = R.string.bands_format,
-                            textFormat = this
-                        )
-                    }
-                }
 
             networkRegistrationInfos?.let {
                 NetworkRegInfo(networkRegistrationInfoList = networkRegistrationInfos)

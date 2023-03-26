@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.*
@@ -263,28 +264,10 @@ class SignalWidget : GlanceAppWidget() {
                     }
                 }
                 this is CellIdentityLteWrapper -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
-                    } else {
-                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(earfcn)
-                        val bands = arfcnInfo.map { it.band }
-
-                        if (bands.isNotEmpty()) {
-                            map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
-                        }
-                    }
+                    map[context.resources.getString(R.string.bands_format)] = formattedBandString(false)
                 }
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && this is CellIdentityNrWrapper -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
-                    } else {
-                        val arfcnInfo = ARFCNTools.gsmArfcnToInfo(nrArfcn)
-                        val bands = arfcnInfo.map { it.band }
-
-                        if (bands.isNotEmpty()) {
-                            map[context.resources.getString(R.string.bands_format)] = bands.joinToString(", ")
-                        }
-                    }
+                    map[context.resources.getString(R.string.bands_format)] = formattedBandString(false)
                 }
             }
 
@@ -429,6 +412,6 @@ class SignalWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
 
-        context.startForegroundService(Intent(context, UpdaterService::class.java))
+        ContextCompat.startForegroundService(context, Intent(context, UpdaterService::class.java))
     }
 }

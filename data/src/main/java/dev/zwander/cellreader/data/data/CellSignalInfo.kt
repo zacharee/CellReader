@@ -131,9 +131,22 @@ object CellSignalInfo {
             object Bands : IdentityKeys<CellIdentityWrapper>(
                 R.string.bands_format,
                 "bands",
-                { stringResource(id = R.string.bands_helper_text, this?.inferringBands.toString()) },
-                { bands.isNotEmpty() },
-                { bands.joinToString(", ") }) {
+                { stringResource(id = R.string.bands_helper_text) },
+                { hasBands },
+                { formattedBandString(false) }
+            ) {
+                override fun cast(info: Any?): CellIdentityWrapper? {
+                    return info?.castGeneric()
+                }
+            }
+
+            object InferredBands : IdentityKeys<CellIdentityWrapper>(
+                R.string.inferred_bands,
+                "inferred_bands",
+                { stringResource(id = R.string.inferred_bands_helper_text) },
+                { inferredBands.isNotEmpty() },
+                { inferredBands.joinToString(", ", "(", ")") }
+            ) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
@@ -144,7 +157,8 @@ object CellSignalInfo {
                 "channel",
                 { R.string.channel_helper_text },
                 { channelNumber.avail() },
-                { channelNumber.toString() }) {
+                { channelNumber.toString() }
+            ) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
@@ -155,7 +169,8 @@ object CellSignalInfo {
                 "gci",
                 { R.string.gci_helper_text },
                 { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && globalCellId != null },
-                { globalCellId }) {
+                { globalCellId }
+            ) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
@@ -171,7 +186,8 @@ object CellSignalInfo {
                         alphaLong,
                         alphaShort
                     ).joinToString("/")
-                }) {
+                }
+            ) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
@@ -182,7 +198,8 @@ object CellSignalInfo {
                 "plmn",
                 { R.string.plmn_helper_text },
                 { mcc != null && mnc != null },
-                { "${mcc}-${mnc}" }) {
+                { "${mcc}-${mnc}" }
+            ) {
                 override fun cast(info: Any?): CellIdentityWrapper? {
                     return info?.castGeneric()
                 }
@@ -488,7 +505,8 @@ object CellSignalInfo {
                     { nrArfcn.avail() },
                     {
                         rememberSaveable(inputs = arrayOf(nrArfcn)) {
-                            arfcnInfo.map { it.dlFreq }.joinToString(", ")
+                            arfcnInfo.sortedBy { it.band }
+                                .map { it.dlFreq }.joinToString(", ")
                         }
                     }
                 )
@@ -500,7 +518,8 @@ object CellSignalInfo {
                     { nrArfcn.avail() },
                     {
                         rememberSaveable(inputs = arrayOf(nrArfcn)) {
-                            arfcnInfo.map { it.ulFreq }.joinToString(", ")
+                            arfcnInfo.sortedBy { it.band }
+                                .map { it.ulFreq }.joinToString(", ")
                         }
                     }
                 )
@@ -1257,7 +1276,13 @@ object CellSignalInfo {
         ) {
             val Context.order: Flow<List<Keys<*>>>
                 get() = store.data.map {
-                    it[key.key]?.toKeys()?.ifEmpty { defaultOrder } ?: defaultOrder
+                    val keys = it[key.key]?.toKeys()?.toMutableList()
+
+                    if (keys?.containsAll(defaultOrder) == false) {
+                        keys += (defaultOrder - keys)
+                    }
+
+                    keys?.ifEmpty { defaultOrder } ?: defaultOrder
                 }
 
             val Context.splitOrder: Flow<Pair<List<Keys<*>>, List<Keys<*>>>>
@@ -1345,6 +1370,7 @@ object CellSignalInfo {
             Keys.IdentityKeys.Carrier,
             Keys.IdentityKeys.PLMN,
             Keys.AdvancedSeparator,
+            Keys.IdentityKeys.InferredBands,
             Keys.IdentityKeys.Channel,
             Keys.IdentityKeys.GCI,
             Keys.IdentityKeys.GSMKeys.LAC,
@@ -1377,6 +1403,7 @@ object CellSignalInfo {
             Keys.IdentityKeys.PLMN,
             Keys.StrengthKeys.LTEKeys.RSRQ,
             Keys.AdvancedSeparator,
+            Keys.IdentityKeys.InferredBands,
             Keys.InfoKeys.Registered,
             Keys.InfoKeys.Status,
             Keys.InfoKeys.Timestamp,
@@ -1418,6 +1445,7 @@ object CellSignalInfo {
             Keys.StrengthKeys.NRKeys.SSRSRQ,
             Keys.StrengthKeys.NRKeys.CSIRSRQ,
             Keys.AdvancedSeparator,
+            Keys.IdentityKeys.InferredBands,
             Keys.InfoKeys.Registered,
             Keys.InfoKeys.Status,
             Keys.InfoKeys.Timestamp,
@@ -1455,6 +1483,7 @@ object CellSignalInfo {
             Keys.IdentityKeys.Carrier,
             Keys.IdentityKeys.PLMN,
             Keys.AdvancedSeparator,
+            Keys.IdentityKeys.InferredBands,
             Keys.InfoKeys.Registered,
             Keys.InfoKeys.Status,
             Keys.InfoKeys.Timestamp,
@@ -1490,6 +1519,7 @@ object CellSignalInfo {
             Keys.IdentityKeys.Carrier,
             Keys.IdentityKeys.PLMN,
             Keys.AdvancedSeparator,
+            Keys.IdentityKeys.InferredBands,
             Keys.InfoKeys.Registered,
             Keys.InfoKeys.Status,
             Keys.InfoKeys.Timestamp,
@@ -1522,7 +1552,7 @@ object CellSignalInfo {
             Keys.AdvancedSeparator
         )
 
-        val List<Keys<*>>.advancedIndex: Int
+        private val List<Keys<*>>.advancedIndex: Int
             get() = indexOf(Keys.AdvancedSeparator)
 
         val List<Keys<*>>.splitInfo: Pair<List<Keys<*>>, List<Keys<*>>>
