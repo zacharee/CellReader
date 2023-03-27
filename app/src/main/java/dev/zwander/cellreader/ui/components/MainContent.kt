@@ -99,7 +99,10 @@ fun MainContent() {
         ) {
             val state = rememberLazyStaggeredGridState()
 
-            Crossfade(targetState = actualSubIdsState.isNotEmpty() && !refreshing) { hasSubIds ->
+            Crossfade(
+                targetState = actualSubIdsState.isNotEmpty() && !refreshing,
+                label = "MainGrid"
+            ) { hasSubIds ->
                 if (hasSubIds) {
                     LazyVerticalStaggeredGrid(
                         contentPadding = WindowInsets.systemBars

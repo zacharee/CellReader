@@ -3,13 +3,13 @@ package dev.zwander.cellreader.data.util
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -76,19 +76,21 @@ fun FormatText(
     }
 
     if (showingHelpDialog) {
-        AlertDialog(
-            onDismissRequest = { showingHelpDialog = false },
-            title = {
-                Text(text = stringResource(id = R.string.info))
-            },
-            text = {
-                Text(text = helpText ?: "")
-            },
-            confirmButton = {
-                TextButton(onClick = { showingHelpDialog = false }) {
-                    Text(text = stringResource(id = android.R.string.ok))
-                }
-            }
-        )
+        DisableSelection {
+            AlertDialog(
+                onDismissRequest = { showingHelpDialog = false },
+                title = {
+                    Text(text = stringResource(id = R.string.info))
+                },
+                text = {
+                    Text(text = helpText ?: "")
+                },
+                confirmButton = {
+                    TextButton(onClick = { showingHelpDialog = false }) {
+                        Text(text = stringResource(id = android.R.string.ok))
+                    }
+                },
+            )
+        }
     }
 }
