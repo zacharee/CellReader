@@ -13,22 +13,11 @@ import kotlin.collections.ArrayList
 sealed class CellIdentityWrapper(
     val type: Int
 ) {
-    val plmn: String?
-        get() = if (mcc.isNullOrBlank()) null else (mcc + mnc)
-
-    open val inferringBands: Boolean
-        get() = true
-
     open val realBands: List<String> = listOf()
-    val inferredBands: List<String>
-        get() {
-            val info = arfcnInfo
 
-            return info.map { it.band }
-        }
-
-    val hasBands: Boolean
-        get() = realBands.isNotEmpty() || inferredBands.isNotEmpty()
+    val plmn: String? by lazy { if (mcc.isNullOrBlank()) null else (mcc + mnc) }
+    val inferredBands: List<String> by lazy { arfcnInfo.map { it.band } }
+    val hasBands: Boolean by lazy { realBands.isNotEmpty() || inferredBands.isNotEmpty() }
 
     fun formattedBandString(full: Boolean): String {
         val realString = realBands.joinToString(", ")
@@ -40,7 +29,7 @@ sealed class CellIdentityWrapper(
         }
     }
 
-    internal abstract val arfcnInfo: List<ARFCNInfo>
+    val arfcnInfo: List<ARFCNInfo> by lazy { ARFCNTools.getInfo(channelNumber, type) }
 
     companion object {
         fun newInstance(identity: CellIdentity?): CellIdentityWrapper? {
@@ -85,8 +74,6 @@ data class CellIdentityGsmWrapper(
 ) : CellIdentityWrapper(
     CellInfo.TYPE_GSM
 ) {
-    override val arfcnInfo = ARFCNTools.gsmArfcnToInfo(arfcn)
-
     constructor(identity: CellIdentityGsm) : this(
         identity.lac,
         identity.cid,
@@ -142,8 +129,6 @@ data class CellIdentityCdmaWrapper(
 ) : CellIdentityWrapper(
     CellInfo.TYPE_CDMA
 ) {
-    override val arfcnInfo = listOf<ARFCNInfo>()
-
     override val mcc: String? = null
     override val mnc: String? = null
 
@@ -199,8 +184,6 @@ data class CellIdentityTdscdmaWrapper(
 ) : CellIdentityWrapper(
     CellInfo.TYPE_TDSCDMA
 ) {
-    override val arfcnInfo = ARFCNTools.tdscdmaArfcnToInfo(uarfcn)
-
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityTdscdma) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.lac else CellInfo.UNAVAILABLE,
@@ -276,8 +259,6 @@ data class CellIdentityWcdmaWrapper(
 ) : CellIdentityWrapper(
     CellInfo.TYPE_WCDMA
 ) {
-    override val arfcnInfo = ARFCNTools.uarfcnToInfo(uarfcn)
-
     constructor(identity: CellIdentityWcdma) : this(
         identity.lac,
         identity.cid,
@@ -338,7 +319,7 @@ data class CellIdentityLteWrapper(
     val tac: Int,
     val earfcn: Int,
     val bandwidth: Int,
-    private val _bands: ArrayList<Int>?,
+    override val realBands: List<String>,
     val additionalPlmns: ArrayList<String>?,
     val csgInfo: ClosedSubscriberGroupInfoWrapper?,
     override val mcc: String?,
@@ -350,15 +331,6 @@ data class CellIdentityLteWrapper(
 ) : CellIdentityWrapper(
     CellInfo.TYPE_LTE
 ) {
-    override val arfcnInfo: List<ARFCNInfo>
-        get() = ARFCNTools.earfcnToInfo(earfcn)
-
-    override val inferringBands: Boolean
-        get() = _bands.isNullOrEmpty()
-
-    override val realBands: List<String>
-        get() = _bands?.map { it.toString() } ?: listOf()
-
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityLte) : this(
         identity.ci,
@@ -367,9 +339,9 @@ data class CellIdentityLteWrapper(
         identity.earfcn,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.bandwidth else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            ArrayList(identity.bands.toList())
+            identity.bands.toList().map { it.toString() }
         } else {
-            null
+            listOf()
         },
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
@@ -430,7 +402,7 @@ data class CellIdentityNrWrapper(
     val pci: Int,
     val tac: Int,
     val nci: Long,
-    private val _bands: ArrayList<Int>?,
+    override val realBands: List<String>,
     val additionalPlmns: ArrayList<String>?,
     override val mcc: String?,
     override val mnc: String?,
@@ -441,14 +413,6 @@ data class CellIdentityNrWrapper(
 ) : CellIdentityWrapper(
     CellInfo.TYPE_NR
 ) {
-    override val arfcnInfo = ARFCNTools.nrArfcnToInfo(nrArfcn)
-
-    override val inferringBands: Boolean
-        get() = _bands.isNullOrEmpty()
-
-    override val realBands: List<String>
-        get() = _bands?.map { it.toString() } ?: listOf()
-
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(identity: CellIdentityNr) : this(
         identity.nrarfcn,
@@ -456,9 +420,9 @@ data class CellIdentityNrWrapper(
         identity.tac,
         identity.nci,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            ArrayList(identity.bands.toList())
+            identity.bands.toList().map { it.toString() }
         } else {
-            null
+            listOf()
         },
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
