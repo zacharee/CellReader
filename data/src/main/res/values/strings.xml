@@ -285,7 +285,7 @@
     <string name="privacy_policy">Privacy Policy</string>
 
     <string name="bands_helper_text">These are the bands you\'re connected to on this cell as reported by Android or inferred by CellReader. If the bands listed are in parentheses, the platform hasn\'t reported them and CellReader is inferring them from the ARFCN.\n\nNote: in Android 13, the 5G bands reported by the system may not be accurate (e.g., n25 may be shown as n2, n41 may be shown as n38, etc.). Check the \"Inferred Bands\" field for all possible bands.</string>
-    <string name="inferred_bands_helper_text">These are the bands CellReader is inferring from the ARFCN. These will also be shown in the \"Bands\" field if Android hasn\'t reported any bands directly.</string>
+    <string name="inferred_bands_helper_text">These are the bands CellReader is inferring from the ARFCN. These will also be shown in the \"Bands\" field if Android hasn\'t reported any bands directly. Because GSM, WCDMA, TDSCDMA, and 5G bands can share ARFCNs, CellReader can\'t infer only a single band for these technologies. The bands listed are all the possible bands.</string>
     <string name="channel_helper_text">This usually is just another name for the ARFCN of the cell. CDMA cells have no channel reported channel number.</string>
     <string name="gci_helper_text">GCI stands for Global Cell ID. This is a unique identifier for the cell.</string>
     <string name="carrier_helper_text">The carrier field shows the names of the cell\'s carrier/operator.</string>
