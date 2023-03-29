@@ -8,7 +8,6 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModelBase
 import dev.zwander.cellreader.data.data.GraphInfo
 import dev.zwander.cellreader.data.data.GraphLineInfo
-import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthCdmaWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthGsmWrapper
 import dev.zwander.cellreader.data.wrappers.CellSignalStrengthLteWrapper
@@ -29,7 +28,7 @@ fun populatePoints(model: CellModelBase, strengthPoints: MutableMap<Int, GraphIn
         val simSlot = model.subInfos.value[subId]?.simSlotIndex?.plus(1) ?: subId
 
         infos.forEach { info ->
-            val typeString = info.typeString(context)
+            val typeString = with (info.type) { context.label }
             val line = strengthPoints[subId]!!
 
             info.onCast<CellSignalStrengthGsmWrapper> {

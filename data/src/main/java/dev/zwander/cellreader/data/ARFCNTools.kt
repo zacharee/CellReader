@@ -2,7 +2,7 @@ package dev.zwander.cellreader.data
 
 
 import android.os.Parcelable
-import android.telephony.CellInfo
+import dev.zwander.cellreader.data.wrappers.CellType
 import kotlinx.parcelize.Parcelize
 import java.util.*
 import kotlin.math.absoluteValue
@@ -55,14 +55,14 @@ object ARFCNTools {
         println(tdscdmaArfcnToInfo(tdscdmaarfcn))
     }
 
-    fun getInfo(arfcn: Int, type: Int): List<ARFCNInfo> {
+    fun getInfo(arfcn: Int, type: CellType): List<ARFCNInfo> {
         return when (type) {
-            CellInfo.TYPE_GSM -> gsmArfcnToInfo(arfcn)
-            CellInfo.TYPE_WCDMA -> uarfcnToInfo(arfcn)
-            CellInfo.TYPE_TDSCDMA -> tdscdmaArfcnToInfo(arfcn)
-            CellInfo.TYPE_LTE -> earfcnToInfo(arfcn)
-            CellInfo.TYPE_NR -> nrArfcnToInfo(arfcn)
-            else -> listOf()
+            CellType.GSM -> gsmArfcnToInfo(arfcn)
+            CellType.WCDMA -> uarfcnToInfo(arfcn)
+            CellType.TDSCDMA -> tdscdmaArfcnToInfo(arfcn)
+            CellType.LTE -> earfcnToInfo(arfcn)
+            CellType.NR -> nrArfcnToInfo(arfcn)
+            CellType.CDMA -> listOf()
         }
     }
 

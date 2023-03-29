@@ -19,7 +19,6 @@ import androidx.wear.tiles.EventBuilders
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModelWear
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
-import dev.zwander.cellreader.data.typeString
 import kotlinx.coroutines.*
 
 class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
@@ -73,7 +72,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
                     it.cellSignalStrength.level,
                     it.cellSignalStrength.dbm,
                     it.cellIdentity.formattedBandString(false),
-                    it.cellIdentity.typeString(this@CellTile),
+                    it.cellIdentity.type.label(),
                     subId
                 )
             } to strength?.get(0)?.let {
@@ -81,7 +80,7 @@ class CellTile : GlanceTileService(), CoroutineScope by MainScope() {
                     it.level,
                     it.dbm,
                     "",
-                    it.typeString(this@CellTile),
+                    it.type.label(),
                     subId
                 )
             }

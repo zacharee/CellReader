@@ -30,7 +30,6 @@ import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
-import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
@@ -287,8 +286,6 @@ class SignalWidget : GlanceAppWidget() {
         backgroundResource: Int,
         items: Map<String, Any?>
     ) {
-        val context = LocalContext.current
-
         Box(
             modifier = modifier
         ) {
@@ -303,7 +300,7 @@ class SignalWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.padding(start = 8.dp, end = 8.dp)
                         .fillMaxWidth(),
                 ) {
-                    val type = strength.typeString(context)
+                    val type = strength.type.label()
 
                     val itemGridArray = run {
                         val grid = hashMapOf<Int, MutableList<Pair<String, Any?>>>()

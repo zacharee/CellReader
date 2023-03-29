@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 sealed class CellIdentityWrapper(
-    val type: Int
+    val type: CellType
 ) {
     open val realBands: List<String> = listOf()
 
@@ -72,7 +72,7 @@ data class CellIdentityGsmWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_GSM
+    CellType.GSM
 ) {
     constructor(identity: CellIdentityGsm) : this(
         identity.lac,
@@ -127,7 +127,7 @@ data class CellIdentityCdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_CDMA
+    CellType.CDMA
 ) {
     override val mcc: String? = null
     override val mnc: String? = null
@@ -182,7 +182,7 @@ data class CellIdentityTdscdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_TDSCDMA
+    CellType.TDSCDMA
 ) {
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityTdscdma) : this(
@@ -257,7 +257,7 @@ data class CellIdentityWcdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_WCDMA
+    CellType.WCDMA
 ) {
     constructor(identity: CellIdentityWcdma) : this(
         identity.lac,
@@ -329,7 +329,7 @@ data class CellIdentityLteWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_LTE
+    CellType.LTE
 ) {
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityLte) : this(
@@ -411,7 +411,7 @@ data class CellIdentityNrWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellInfo.TYPE_NR
+    CellType.NR
 ) {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(identity: CellIdentityNr) : this(

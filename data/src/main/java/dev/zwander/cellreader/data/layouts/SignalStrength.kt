@@ -13,7 +13,6 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.data.CellSignalInfo
 import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.orderOf
-import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.util.FormatText
 import dev.zwander.cellreader.data.wrappers.*
 import kotlinx.coroutines.flow.map
@@ -69,7 +68,7 @@ fun CellSignalStrengthCard(
         onExpand = { expanded = it },
         level = cellSignalStrength.level,
         dBm = cellSignalStrength.dbm,
-        type = cellSignalStrength.typeString(context),
+        type = cellSignalStrength.type.label(),
         colors = listOf(
             0.0f to colorResource(id = R.color.signal_strength),
             1.0f to colorResource(id = R.color.signal_strength_1)

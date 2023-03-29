@@ -10,7 +10,6 @@ import androidx.compose.ui.res.colorResource
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellSignalInfo
 import dev.zwander.cellreader.data.data.CellSignalInfo.Orderer.orderOf
-import dev.zwander.cellreader.data.typeString
 import dev.zwander.cellreader.data.wrappers.CellInfoWrapper
 import kotlinx.coroutines.flow.map
 
@@ -48,7 +47,7 @@ fun SignalCard(
         onExpand = onExpand,
         level = cellInfo.cellSignalStrength.level,
         dBm = cellInfo.cellSignalStrength.dbm,
-        type = cellInfo.cellIdentity.typeString(context),
+        type = cellInfo.cellIdentity.type.label(),
         colors = listOf(
             0.0f to colorResource(id = R.color.cell_info),
             1.0f to colorResource(id = R.color.cell_info_1)

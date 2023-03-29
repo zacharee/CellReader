@@ -8,7 +8,7 @@ import dev.zwander.cellreader.data.bitErrorRateCompat
 import dev.zwander.cellreader.data.isValidCompat
 import java.util.*
 
-sealed class CellSignalStrengthWrapper {
+sealed class CellSignalStrengthWrapper(val type: CellType) {
     companion object {
         fun newInstance(strength: CellSignalStrength): CellSignalStrengthWrapper {
             return when {
@@ -40,7 +40,7 @@ data class CellSignalStrengthGsmWrapper(
     override val dbm: Int,
     override val valid: Boolean?,
     override val asuLevel: Int,
-) : CellSignalStrengthWrapper() {
+) : CellSignalStrengthWrapper(CellType.GSM) {
     @SuppressLint("NewApi")
     constructor(strength: CellSignalStrengthGsm) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
@@ -79,7 +79,7 @@ data class CellSignalStrengthCdmaWrapper(
     override val dbm: Int,
     override val valid: Boolean?,
     override val asuLevel: Int
-) : CellSignalStrengthWrapper() {
+) : CellSignalStrengthWrapper(CellType.CDMA) {
     val evdoAsuLevel: Int
         get() {
             val evdoDbm: Int = evdoDbm
@@ -136,7 +136,7 @@ data class CellSignalStrengthTdscdmaWrapper(
     override val dbm: Int,
     override val valid: Boolean?,
     override val asuLevel: Int
-) : CellSignalStrengthWrapper() {
+) : CellSignalStrengthWrapper(CellType.TDSCDMA) {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(strength: CellSignalStrengthTdscdma) : this(
         strength.rssi,
@@ -175,7 +175,7 @@ data class CellSignalStrengthWcdmaWrapper(
     override val dbm: Int,
     override val valid: Boolean?,
     override val asuLevel: Int
-) : CellSignalStrengthWrapper() {
+) : CellSignalStrengthWrapper(CellType.WCDMA) {
     @SuppressLint("NewApi")
     constructor(strength: CellSignalStrengthWcdma) : this(
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.rssi else CellInfo.UNAVAILABLE,
@@ -219,7 +219,7 @@ data class CellSignalStrengthLteWrapper(
     override val dbm: Int,
     override val valid: Boolean?,
     override val asuLevel: Int
-) : CellSignalStrengthWrapper() {
+) : CellSignalStrengthWrapper(CellType.LTE) {
     @SuppressLint("InlinedApi", "PrivateApi")
     constructor(strength: CellSignalStrengthLte) : this(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
@@ -277,7 +277,7 @@ data class CellSignalStrengthNrWrapper(
     override val dbm: Int,
     override val valid: Boolean?,
     override val asuLevel: Int
-) : CellSignalStrengthWrapper() {
+) : CellSignalStrengthWrapper(CellType.NR) {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(strength: CellSignalStrengthNr) : this(
         strength.csiRsrp,
