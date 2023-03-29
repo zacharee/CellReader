@@ -79,7 +79,6 @@ dependencies {
     api 'dev.rikka.shizuku:api:13.1.0'
     api 'dev.rikka.shizuku:provider:13.1.0'
 
-    api "org.burnoutcrew.composereorderable:reorderable:0.9.6"
     api 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 
     api "com.bugsnag:bugsnag-android:5.29.0"

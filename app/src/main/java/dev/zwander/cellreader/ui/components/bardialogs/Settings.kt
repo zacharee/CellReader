@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,16 +56,15 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellSignalInfo
 import dev.zwander.cellreader.data.data.ReorderSettingsItemData
 import dev.zwander.cellreader.data.data.SettingsItemData
+import dev.zwander.cellreader.data.util.DraggableItem
 import dev.zwander.cellreader.data.util.PrefManager
+import dev.zwander.cellreader.data.util.dragContainer
 import dev.zwander.cellreader.data.util.preferences
+import dev.zwander.cellreader.data.util.rememberDragDropState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
 
 val settings = listOf(
     SettingsItemData(
@@ -374,6 +376,7 @@ private fun SwitchGuts(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReorderDialog(
     setting: ReorderSettingsItemData,
@@ -385,8 +388,10 @@ fun ReorderDialog(
     val currentOrder = remember {
         mutableStateListOf<CellSignalInfo.Keys<*>>()
     }
-    val state = rememberReorderableLazyListState(onMove = { from, to ->
-        currentOrder.add(to.index, currentOrder.removeAt(from.index))
+
+    val listState = rememberLazyListState()
+    val state = rememberDragDropState(lazyListState = listState, onMove = { from, to ->
+        currentOrder.add(to, currentOrder.removeAt(from))
     })
 
     val initialValue by setting.initialValue(context).collectAsState(initial = listOf())
@@ -409,21 +414,20 @@ fun ReorderDialog(
         },
         text = {
             LazyColumn(
-                state = state.listState,
+                state = listState,
                 modifier = Modifier
-                    .reorderable(state)
-                    .detectReorderAfterLongPress(state)
+                    .dragContainer(state)
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(currentOrder, { it.key }) {
-                    ReorderableItem(
-                        reorderableState = state,
-                        key = it.key
+                itemsIndexed(currentOrder, { _, item -> item.key }) { index, item ->
+                    DraggableItem(
+                        dragDropState = state,
+                        index = index,
                     ) { isDragging ->
-                        val elevation by animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                        val isAdvancedSeparator = it is CellSignalInfo.Keys.AdvancedSeparator
+                        val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "ItemElevation${item}")
+                        val isAdvancedSeparator = item is CellSignalInfo.Keys.AdvancedSeparator
 
                         Card(
                             modifier = Modifier
@@ -446,7 +450,7 @@ fun ReorderDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = stringResource(id = it.label),
+                                    text = stringResource(id = item.label),
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     fontWeight = if (isAdvancedSeparator) FontWeight.Bold else FontWeight.Normal
                                 )
@@ -454,7 +458,7 @@ fun ReorderDialog(
                                 Spacer(modifier = Modifier.weight(1f))
 
                                 if (!isAdvancedSeparator) {
-                                    val helpText = it.retrieveHelpText(info = it.retrieveHelpText(info = null))
+                                    val helpText = item.retrieveHelpText(info = item.retrieveHelpText(info = null))
 
                                     IconButton(onClick = { infoDialogText = helpText }) {
                                         Icon(
