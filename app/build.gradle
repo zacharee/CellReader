@@ -57,7 +57,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0-beta01'
     implementation 'androidx.activity:activity-compose:1.7.0'
 
-    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.28.0'
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.30.0'
 
     implementation "com.google.android.gms:play-services-wearable:18.0.0"
 
