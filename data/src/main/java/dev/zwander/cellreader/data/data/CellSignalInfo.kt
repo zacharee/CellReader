@@ -165,9 +165,9 @@ object CellSignalInfo {
             }
 
             object GCI : IdentityKeys<CellIdentityWrapper>(
-                R.string.gci_format,
+                R.string.cgi_format,
                 "gci",
-                { R.string.gci_helper_text },
+                { R.string.cgi_helper_text },
                 { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && globalCellId != null },
                 { globalCellId }
             ) {
