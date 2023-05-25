@@ -19,6 +19,13 @@ View more information in the [Privacy Policy](/privacy.md)
 [Google Play Store](https://play.google.com/store/apps/details?id=dev.zwander.cellreader).  
 [Patreon](https://www.patreon.com/zacharywander).
 
+# Building
+In order to build CellReader yourself, you'll need to use a modified SDK that exposes hidden APIs.
+
+First, check the [`target_sdk` field in the project build.gradle](https://github.com/zacharee/CellReader/blob/master/build.gradle) to see which SDK CellReader is targeting.
+
+Then, download the appropriate JAR from [this repo](https://github.com/Reginer/aosp-android-jar) and follow the instructions there for using it.
+
 # Error Reporting
 CellReader uses Bugsnag for error reporting as of version 0.22. Previous versions use Firebase Crashlytics.
 
