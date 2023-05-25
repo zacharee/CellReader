@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package dev.zwander.cellreader.ui.components.bardialogs
 
 import android.view.MotionEvent
@@ -45,11 +47,10 @@ import dev.zwander.cellreader.data.data.SelectableLineDataSet
 import dev.zwander.cellreader.data.util.instantCombine
 import dev.zwander.cellreader.data.util.toColorInt
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flatMapMerge
 
-@OptIn(FlowPreview::class)
 @Composable
 fun Graph(points: Map<Int, GraphInfo>) {
     val cellModel = LocalCellModel.current
