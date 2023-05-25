@@ -1,11 +1,21 @@
 buildscript {
     ext {
-        compose_version = '1.5.0-alpha04'
-        compose_compiler_version = '1.4.7'
-        glance_version = "1.0.0-beta01"
         version_code = 31
         version_name = "0.21"
+
         kotlin_version = "1.8.21"
+
+        compose_version = '1.5.0-beta01'
+        compose_wear_version = '1.2.0-beta01'
+        compose_compiler_version = '1.4.7'
+        glance_version = "1.0.0-beta01"
+
+        coroutines_version = '1.7.1'
+        shizuku_version = '13.1.1'
+        savedstate_version = '1.2.1'
+
+        androidx_core_version = '1.10.1'
+        lifecycle_version = '2.6.1'
     }
 
     dependencies {
@@ -13,8 +23,8 @@ buildscript {
     }
 }
 plugins {
-    id 'com.android.application' version '8.2.0-alpha03' apply false
-    id 'com.android.library' version '8.2.0-alpha03' apply false
+    id 'com.android.application' version '8.2.0-alpha04' apply false
+    id 'com.android.library' version '8.2.0-alpha04' apply false
     id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
 }
 
