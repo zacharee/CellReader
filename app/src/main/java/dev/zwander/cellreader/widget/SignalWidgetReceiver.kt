@@ -69,6 +69,7 @@ class SignalWidget : GlanceAppWidget() {
         }
     }
 
+    @SuppressLint("InlinedApi")
     @Composable
     private fun Content() {
         val context = LocalContext.current
@@ -86,10 +87,6 @@ class SignalWidget : GlanceAppWidget() {
                 .appWidgetBackground()
                 .fillMaxSize(),
         ) {
-            // We need this text so the widget actually updates.
-            // If the LazyColumn is first, updates aren't always rendered.
-            // TODO: Revisit this once Glance is more stable.
-            Text("")
             LazyColumn(
                 modifier = GlanceModifier.fillMaxSize()
             ) {
