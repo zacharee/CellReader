@@ -8,6 +8,7 @@ import android.telephony.AccessNetworkConstants
 import android.telephony.TelephonyManager
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -59,135 +60,146 @@ class SignalWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val size = LocalSize.current
-
-            val cellModel = CellModel.getInstance()
-            val subIds by cellModel.subIds.collectAsState()
-            val subInfos by cellModel.subInfos.collectAsState()
-            val serviceStates by cellModel.serviceStates.collectAsState()
-            val strengthInfos by cellModel.strengthInfos.collectAsState()
-            val cellInfos by cellModel.cellInfos.collectAsState()
-
-            Box(
-                modifier = GlanceModifier.cornerRadius(8.dp)
-                    .appWidgetBackground()
-                    .fillMaxSize(),
+            CompositionLocalProvider(
+                LocalConfiguration provides context.resources.configuration,
+                androidx.compose.ui.platform.LocalContext provides context,
             ) {
-                // We need this text so the widget actually updates.
-                // If the LazyColumn is first, updates aren't always rendered.
-                // TODO: Revisit this once Glance is more stable.
-                Text("")
-                LazyColumn(
-                    modifier = GlanceModifier.fillMaxSize()
-                ) {
-                    subIds.forEachIndexed { _, t ->
-                        item(t.toLong()) {
-                            Box(
-                                modifier = GlanceModifier.padding(bottom = 4.dp)
+                Content()
+            }
+        }
+    }
+
+    @Composable
+    private fun Content() {
+        val context = LocalContext.current
+        val size = LocalSize.current
+
+        val cellModel = CellModel.getInstance()
+        val subIds by cellModel.subIds.collectAsState()
+        val subInfos by cellModel.subInfos.collectAsState()
+        val serviceStates by cellModel.serviceStates.collectAsState()
+        val strengthInfos by cellModel.strengthInfos.collectAsState()
+        val cellInfos by cellModel.cellInfos.collectAsState()
+
+        Box(
+            modifier = GlanceModifier.cornerRadius(8.dp)
+                .appWidgetBackground()
+                .fillMaxSize(),
+        ) {
+            // We need this text so the widget actually updates.
+            // If the LazyColumn is first, updates aren't always rendered.
+            // TODO: Revisit this once Glance is more stable.
+            Text("")
+            LazyColumn(
+                modifier = GlanceModifier.fillMaxSize()
+            ) {
+                subIds.forEachIndexed { _, t ->
+                    item(t.toLong()) {
+                        Box(
+                            modifier = GlanceModifier.padding(bottom = 4.dp)
+                        ) {
+                            Column(
+                                modifier = GlanceModifier.wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .background(ImageProvider(R.drawable.sim_card_widget_background))
+                                    .cornerRadius(12.dp)
+                                    .padding(bottom = 4.dp, top = 4.dp),
+                                horizontalAlignment = Alignment.Horizontal.CenterHorizontally
                             ) {
-                                Column(
-                                    modifier = GlanceModifier.wrapContentHeight()
-                                        .fillMaxWidth()
-                                        .background(ImageProvider(R.drawable.sim_card_widget_background))
-                                        .cornerRadius(12.dp)
-                                        .padding(bottom = 4.dp, top = 4.dp),
-                                    horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+                                val subInfo = subInfos[t]
+
+                                Row(
+                                    verticalAlignment = Alignment.Vertical.CenterVertically
                                 ) {
-                                    val subInfo = subInfos[t]
-
-                                    Row(
-                                        verticalAlignment = Alignment.Vertical.CenterVertically
-                                    ) {
-                                        subInfo?.iconBitmapBmp?.let { bmp ->
-                                            Image(
-                                                provider = ImageProvider(bmp),
-                                                contentDescription = null,
-                                                modifier = GlanceModifier.size(16.dp)
-                                            )
-                                        }
-
-                                        Spacer(GlanceModifier.size(8.dp))
-
-                                        Text(
-                                            text = (subInfo?.carrierName ?: t.toString()),
-                                            style = TextStyle(
-                                                color = ColorProvider(Color.White)
-                                            )
+                                    subInfo?.iconBitmapBmp?.let { bmp ->
+                                        Image(
+                                            provider = ImageProvider(bmp),
+                                            contentDescription = null,
+                                            modifier = GlanceModifier.size(16.dp)
                                         )
                                     }
 
-                                    val rplmn =
-                                        serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
-                                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                                    Spacer(GlanceModifier.size(8.dp))
+
+                                    Text(
+                                        text = (subInfo?.carrierName ?: t.toString()),
+                                        style = TextStyle(
+                                            color = ColorProvider(Color.White)
                                         )
-                                            ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
-                                            ?.rplmn.asMccMnc
+                                    )
+                                }
 
-                                    Row(
-                                        verticalAlignment = Alignment.Vertical.CenterVertically,
-                                        modifier = GlanceModifier.fillMaxWidth()
-                                    ) {
-                                        Spacer(GlanceModifier.defaultWeight())
+                                val rplmn =
+                                    serviceStates[subInfo?.id]?.getNetworkRegistrationInfoListForTransportType(
+                                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN
+                                    )
+                                        ?.firstOrNull { it.accessNetworkTechnology != TelephonyManager.NETWORK_TYPE_IWLAN }
+                                        ?.rplmn.asMccMnc
 
-                                        FormatWidgetText(
-                                            name = context.resources.getString(R.string.rplmn_format),
-                                            value = rplmn
-                                        )
+                                Row(
+                                    verticalAlignment = Alignment.Vertical.CenterVertically,
+                                    modifier = GlanceModifier.fillMaxWidth()
+                                ) {
+                                    Spacer(GlanceModifier.defaultWeight())
 
-                                        Spacer(GlanceModifier.defaultWeight())
+                                    FormatWidgetText(
+                                        name = context.resources.getString(R.string.rplmn_format),
+                                        value = rplmn
+                                    )
 
-                                        FormatWidgetText(
-                                            name = context.resources.getString(R.string.carrier_aggregation_format),
-                                            value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
-                                        )
+                                    Spacer(GlanceModifier.defaultWeight())
 
-                                        Spacer(GlanceModifier.defaultWeight())
-                                    }
+                                    FormatWidgetText(
+                                        name = context.resources.getString(R.string.carrier_aggregation_format),
+                                        value = serviceStates[subInfo?.id]?.isUsingCarrierAggregation
+                                    )
+
+                                    Spacer(GlanceModifier.defaultWeight())
                                 }
                             }
                         }
-
-                        itemsIndexed(
-                            strengthInfos[t]!!,
-                            { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
-                            StrengthCard(
-                                strength = item,
-                                size = size,
-                                modifier = GlanceModifier.padding(bottom = 4.dp)
-                            )
-                        }
-
-                        itemsIndexed(
-                            cellInfos[t]!!,
-                            { _, item ->
-                                "$t:${item.cellIdentity}".hashCode().toLong()
-                            }) { _, item ->
-                            SignalCard(
-                                cellInfo = item, size = size,
-                                modifier = GlanceModifier.padding(bottom = 4.dp)
-                            )
-                        }
                     }
 
-                    item {
+                    itemsIndexed(
+                        strengthInfos[t]!!,
+                        { index, _ -> "$t:$index".hashCode().toLong() }) { _, item ->
+                        StrengthCard(
+                            strength = item,
+                            size = size,
+                            modifier = GlanceModifier.padding(bottom = 4.dp)
+                        )
+                    }
+
+                    itemsIndexed(
+                        cellInfos[t]!!,
+                        { _, item ->
+                            "$t:${item.cellIdentity}".hashCode().toLong()
+                        }) { _, item ->
+                        SignalCard(
+                            cellInfo = item, size = size,
+                            modifier = GlanceModifier.padding(bottom = 4.dp)
+                        )
+                    }
+                }
+
+                item {
+                    Box(
+                        modifier = GlanceModifier.cornerRadius(12.dp)
+                    ) {
                         Box(
-                            modifier = GlanceModifier.cornerRadius(12.dp)
+                            modifier = GlanceModifier.fillMaxWidth()
+                                .background(ImageProvider(R.drawable.open_app_widget_background))
+                                .cornerRadius(12.dp)
+                                .padding(bottom = 8.dp, top = 8.dp)
+                                .clickable(onClick = actionStartActivity<MainActivity>()),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = GlanceModifier.fillMaxWidth()
-                                    .background(ImageProvider(R.drawable.open_app_widget_background))
-                                    .cornerRadius(12.dp)
-                                    .padding(bottom = 8.dp, top = 8.dp)
-                                    .clickable(onClick = actionStartActivity<MainActivity>()),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = context.resources.getString(R.string.open_app),
-                                    style = TextStyle(
-                                        color = ColorProvider(Color.White)
-                                    )
+                            Text(
+                                text = context.resources.getString(R.string.open_app),
+                                style = TextStyle(
+                                    color = ColorProvider(Color.White)
                                 )
-                            }
+                            )
                         }
                     }
                 }
