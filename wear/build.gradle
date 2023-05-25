@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk compile_sdk
 
     defaultConfig {
         applicationId "dev.zwander.cellreader"
-        minSdk 24
-        targetSdk 33
+        minSdk min_sdk
+        targetSdk target_sdk
         versionCode version_code
         versionName version_name
     }

@@ -3,6 +3,10 @@ buildscript {
         version_code = 31
         version_name = "0.21"
 
+        target_sdk = 33
+        compile_sdk = 33
+        min_sdk = 24
+
         kotlin_version = "1.8.21"
 
         compose_version = '1.5.0-beta01'
