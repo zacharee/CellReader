@@ -52,7 +52,7 @@ dependencies {
     api "androidx.compose.foundation:foundation:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
     api 'androidx.activity:activity-compose:1.7.2'
-    api 'com.google.accompanist:accompanist-flowlayout:0.30.0'
+    api 'com.google.accompanist:accompanist-flowlayout:0.30.1'
     api "androidx.glance:glance:$glance_version"
     api "androidx.glance:glance-appwidget:$glance_version"
     api "androidx.glance:glance-wear-tiles:1.0.0-alpha05"
