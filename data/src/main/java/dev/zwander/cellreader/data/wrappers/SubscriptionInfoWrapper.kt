@@ -51,10 +51,17 @@ data class SubscriptionInfoWrapper(
         info.displayName?.toString(),
         info.carrierName?.toString(),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.carrierId else CellInfo.UNAVAILABLE,
-        info.nameSource,
+        try {
+            info.nameSource
+        } catch (e: NoSuchMethodError) {
+            info::class.java.getDeclaredMethod("getDisplayNameSource").invoke(info)?.toString()?.toIntOrNull()
+                ?: CellInfo.UNAVAILABLE
+        },
         info.iconTint,
         if (Build.VERSION.SDK_INT >= 33) {
-            (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(info.subscriptionId)
+            (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(
+                info.subscriptionId
+            )
         } else {
             @Suppress("DEPRECATION")
             info.number

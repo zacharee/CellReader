@@ -3,7 +3,6 @@ package dev.zwander.cellreader.data
 import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
-import dev.zwander.cellreader.data.wrappers.*
 
 val CellConfigLte.endcAvailable: Boolean
     get() = this::class.java
@@ -51,9 +50,9 @@ val SubscriptionInfo.cardIdCompat: String?
     }
 
 val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    get() = try {
         allAccessRules ?: listOf()
-    } else {
+    } catch (e: Throwable) {
         try {
             accessRules
         } catch (e: Throwable) {
