@@ -48,8 +48,7 @@ dependencies {
     api "androidx.savedstate:savedstate:$savedstate_version"
     api "androidx.savedstate:savedstate-ktx:$savedstate_version"
 
-    api "androidx.compose.runtime:runtime:$compose_version"
-    api "androidx.compose.foundation:foundation:$compose_version"
+    api "androidx.compose.ui:ui:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
     api 'androidx.activity:activity-compose:1.7.2'
     api 'com.google.accompanist:accompanist-flowlayout:0.30.1'
@@ -58,7 +57,7 @@ dependencies {
     api "androidx.glance:glance-wear-tiles:1.0.0-alpha05"
 
     api "androidx.compose.material:material:$compose_version"
-    api 'androidx.compose.material3:material3:1.2.0-alpha02'
+    api 'androidx.compose.material3:material3:1.1.1'
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api "androidx.wear.compose:compose-material:$compose_wear_version"
     api "androidx.wear.compose:compose-foundation:$compose_wear_version"
@@ -83,7 +82,7 @@ dependencies {
 
     api 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 
-    api "com.bugsnag:bugsnag-android:5.30.0"
+    api 'com.bugsnag:bugsnag-android:5.31.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
