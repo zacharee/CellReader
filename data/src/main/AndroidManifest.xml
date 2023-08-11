@@ -7,7 +7,10 @@
     androidx.wear.compose.foundation,
     androidx.glance.wear.tiles,
     androidx.wear.tiles,
-    androidx.wear.tiles.renderer" />
+    androidx.wear.tiles.renderer,
+    androidx.wear.protolayout.expression,
+    androidx.wear.protolayout.expression.pipeline,
+    androidx.wear.protolayout.renderer" />
 
     <application>
         <provider

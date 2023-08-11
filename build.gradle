@@ -8,11 +8,11 @@ buildscript {
         compile_sdk = 33
         min_sdk = 24
 
-        kotlin_version = '1.9.0'
+        kotlin_version = '1.8.21'
 
         compose_version = '1.5.0-beta01'
         compose_wear_version = '1.2.0-beta01'
-        compose_compiler_version = '1.5.1'
+        compose_compiler_version = '1.4.7'
         glance_version = '1.0.0-beta01'
 
         coroutines_version = '1.7.3'

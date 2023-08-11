@@ -54,13 +54,13 @@ dependencies {
     api 'com.google.accompanist:accompanist-flowlayout:0.30.1'
     api "androidx.glance:glance:$glance_version"
     api "androidx.glance:glance-appwidget:$glance_version"
-    api "androidx.glance:glance-wear-tiles:1.0.0-alpha05"
-
     api "androidx.compose.material:material:$compose_version"
-    api 'androidx.compose.material3:material3:1.1.1'
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
+    api 'androidx.compose.material3:material3:1.1.1'
+
     api "androidx.wear.compose:compose-material:$compose_wear_version"
     api "androidx.wear.compose:compose-foundation:$compose_wear_version"
+    api "androidx.glance:glance-wear-tiles:1.0.0-alpha05"
 
     api "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
