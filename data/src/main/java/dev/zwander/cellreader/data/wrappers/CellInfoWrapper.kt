@@ -55,8 +55,8 @@ data class CellInfoGsmWrapper(
         info.isRegistered,
         info.timeStampMillisCompat,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityGsmWrapper(info.cellIdentity),
-        CellSignalStrengthGsmWrapper(info.cellSignalStrength)
+        CellIdentityWrapper.newInstance(info.cellIdentity),
+        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength)
     )
 }
 
@@ -71,8 +71,8 @@ data class CellInfoCdmaWrapper(
         info.isRegistered,
         info.timeStampMillisCompat,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityCdmaWrapper(info.cellIdentity),
-        CellSignalStrengthCdmaWrapper(info.cellSignalStrength)
+        CellIdentityWrapper.newInstance(info.cellIdentity),
+        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength)
     )
 }
 
@@ -88,8 +88,8 @@ data class CellInfoTdscdmaWrapper(
         info.isRegistered,
         info.timeStampMillisCompat,
         info.cellConnectionStatus,
-        CellIdentityTdscdmaWrapper(info.cellIdentity),
-        CellSignalStrengthTdscdmaWrapper(info.cellSignalStrength)
+        CellIdentityWrapper.newInstance(info.cellIdentity),
+        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }
 
@@ -104,8 +104,8 @@ data class CellInfoWcdmaWrapper(
         info.isRegistered,
         info.timeStampMillisCompat,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityWcdmaWrapper(info.cellIdentity),
-        CellSignalStrengthWcdmaWrapper(info.cellSignalStrength)
+        CellIdentityWrapper.newInstance(info.cellIdentity),
+        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }
 
@@ -121,9 +121,9 @@ data class CellInfoLteWrapper(
         info.isRegistered,
         info.timeStampMillisCompat,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityLteWrapper(info.cellIdentity),
-        CellSignalStrengthLteWrapper(info.cellSignalStrength),
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null
+        CellIdentityWrapper.newInstance(info.cellIdentity),
+        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null,
     )
 
     override fun hashCode(): Int {
@@ -149,7 +149,7 @@ data class CellInfoNrWrapper(
         info.isRegistered,
         info.timeStampMillisCompat,
         info.cellConnectionStatus,
-        CellIdentityNrWrapper(info.cellIdentity as CellIdentityNr),
-        CellSignalStrengthNrWrapper(info.cellSignalStrength as CellSignalStrengthNr)
+        CellIdentityWrapper.newInstance(info.cellIdentity),
+        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }

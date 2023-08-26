@@ -1,8 +1,17 @@
+@file:Suppress("DEPRECATION")
+
 package dev.zwander.cellreader.data.data
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.telephony.*
+import android.telephony.CellInfo
+import android.telephony.PhoneStateListener
+import android.telephony.PhysicalChannelConfig
+import android.telephony.ServiceState
+import android.telephony.SignalStrength
+import android.telephony.TelephonyCallback
+import android.telephony.TelephonyDisplayInfo
+import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.IPrivilegedListener
 import dev.zwander.cellreader.data.IShizukuUserService
@@ -31,7 +40,7 @@ class CellModel private constructor() : CellModelBase() {
     fun destroy() {
         telephonies.forEach { (subId, telephony) ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                telephony.unregisterTelephonyCallback(telephonyCallbacks[subId])
+                telephonyCallbacks[subId]?.let { telephony.unregisterTelephonyCallback(it) }
             } else {
                 @Suppress("DEPRECATION")
                 telephony.listen(telephonyListeners[subId], PhoneStateListener.LISTEN_NONE)
@@ -64,19 +73,19 @@ class TelephonyListener(
     TelephonyCallback.ServiceStateListener, TelephonyCallback.DisplayInfoListener,
     TelephonyCallback.DataConnectionStateListener {
     @SuppressLint("MissingPermission")
-    override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
-        listenerCallback.updateCellInfo(subId, cellInfo ?: mutableListOf())
+    override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>) {
+        listenerCallback.updateCellInfo(subId, cellInfo)
     }
 
-    override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
+    override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
         listenerCallback.updateSignal(subId, signalStrength)
     }
 
-    override fun onServiceStateChanged(serviceState: ServiceState?) {
+    override fun onServiceStateChanged(serviceState: ServiceState) {
         listenerCallback.updateServiceState(subId, serviceState)
     }
 
-    override fun onDisplayInfoChanged(telephonyDisplayInfo: TelephonyDisplayInfo?) {
+    override fun onDisplayInfoChanged(telephonyDisplayInfo: TelephonyDisplayInfo) {
         listenerCallback.updateDisplayInfo(subId, telephonyDisplayInfo)
     }
 
@@ -117,7 +126,7 @@ class StateListener(
 
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingPermission")
-    override fun onDisplayInfoChanged(telephonyDisplayInfo: TelephonyDisplayInfo?) {
+    override fun onDisplayInfoChanged(telephonyDisplayInfo: TelephonyDisplayInfo) {
         listenerCallback.updateDisplayInfo(subId, telephonyDisplayInfo)
     }
 

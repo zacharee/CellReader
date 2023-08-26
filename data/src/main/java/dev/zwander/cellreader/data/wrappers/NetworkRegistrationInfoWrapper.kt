@@ -74,7 +74,7 @@ data class NetworkRegistrationInfoWrapper(
         info.rejectCause,
         info.isEmergencyEnabled,
         ArrayList(info.availableServices),
-        CellIdentityWrapper.newInstance(info.cellIdentity),
+        info.cellIdentity?.let { CellIdentityWrapper.newInstance(it) },
         info.voiceSpecificInfo?.let { VoiceSpecificRegistrationInfoWrapper(it) },
         info.dataSpecificInfo?.let { DataSpecificRegistrationInfoWrapper(it) },
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.registeredPlmn else null,

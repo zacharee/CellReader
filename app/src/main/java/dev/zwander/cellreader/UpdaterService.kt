@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.*
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -22,7 +21,6 @@ import dev.zwander.cellreader.data.util.CellUtils
 import dev.zwander.cellreader.data.util.asExecutor
 import dev.zwander.cellreader.data.util.update
 import dev.zwander.cellreader.data.wrappers.*
-import dev.zwander.cellreader.utils.PermissionUtils
 import dev.zwander.cellreader.widget.SignalWidget
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -362,30 +360,32 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     override fun updateSignal(subId: Int, strength: SignalStrength?) {
         @Suppress("DEPRECATION")
         val newInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            (strength?.cellSignalStrengths?.map { CellSignalStrengthWrapper.newInstance(it) }?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
+            (strength?.cellSignalStrengths?.mapNotNull { CellSignalStrengthWrapper.newInstance(it) }?.sortedWith(CellUtils.CellSignalStrengthComparator) ?: listOf())
         } else {
             mutableListOf<CellSignalStrengthWrapper>().apply {
                 strength?.let { strength ->
                     if (strength.gsmSignalStrength != Int.MAX_VALUE) {
-                        add(CellSignalStrengthGsmWrapper(
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                                CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE)
-                            } else {
-                                CellSignalStrengthGsm::class.java.getConstructor(Int::class.java, Int::class.java)
-                                    .newInstance(strength.gsmSignalStrength, strength.gsmBitErrorRate)
-                            }
-                        ))
+                        add(
+                            CellSignalStrengthWrapper.newInstance<CellSignalStrengthGsmWrapper>(
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                    CellSignalStrengthGsm(strength.gsmSignalStrength, strength.gsmBitErrorRate, Int.MAX_VALUE)
+                                } else {
+                                    CellSignalStrengthGsm::class.java.getConstructor(Int::class.java, Int::class.java)
+                                        .newInstance(strength.gsmSignalStrength, strength.gsmBitErrorRate)
+                                }
+                            )
+                        )
                     }
                     if (strength.cdmaDbm != Int.MAX_VALUE) {
-                        add(CellSignalStrengthCdmaWrapper(CellSignalStrengthCdma(-strength.cdmaDbm, -strength.cdmaEcio, -strength.evdoDbm, -strength.evdoEcio, -strength.evdoSnr)))
+                        add(CellSignalStrengthWrapper.newInstance(CellSignalStrengthCdma(-strength.cdmaDbm, -strength.cdmaEcio, -strength.evdoDbm, -strength.evdoEcio, -strength.evdoSnr)))
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         if (strength.wcdmaAsuLevel != 255) {
-                            add(CellSignalStrengthWcdmaWrapper(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE)))
+                            add(CellSignalStrengthWrapper.newInstance(CellSignalStrengthWcdma::class.java.getConstructor(Int::class.java, Int::class.java).newInstance(strength.wcdmaAsuLevel, Int.MAX_VALUE)))
                         }
                     }
                     if (strength.lteSignalStrength != Int.MAX_VALUE) {
-                        add(CellSignalStrengthLteWrapper(CellSignalStrengthLte::class.java.getConstructor(Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java)
+                        add(CellSignalStrengthWrapper.newInstance(CellSignalStrengthLte::class.java.getConstructor(Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java, Int::class.java)
                             .newInstance(strength.lteSignalStrength, strength.lteRsrp, strength.lteRsrq, strength.lteRssnr, strength.lteCqi, Int.MAX_VALUE)))
                     }
                 }

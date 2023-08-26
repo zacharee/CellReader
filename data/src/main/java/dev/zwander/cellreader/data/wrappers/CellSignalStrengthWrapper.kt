@@ -10,7 +10,8 @@ import java.util.*
 
 sealed class CellSignalStrengthWrapper(val type: CellType) {
     companion object {
-        fun newInstance(strength: CellSignalStrength): CellSignalStrengthWrapper {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : CellSignalStrengthWrapper> newInstance(strength: CellSignalStrength): T {
             return when {
                 strength is CellSignalStrengthGsm -> CellSignalStrengthGsmWrapper(strength)
                 strength is CellSignalStrengthCdma -> CellSignalStrengthCdmaWrapper(strength)
@@ -19,7 +20,7 @@ sealed class CellSignalStrengthWrapper(val type: CellType) {
                 strength is CellSignalStrengthLte -> CellSignalStrengthLteWrapper(strength)
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && strength is CellSignalStrengthNr -> CellSignalStrengthNrWrapper(strength)
                 else -> throw IllegalArgumentException("Unknown CellSignalStrength class ${strength.javaClass.canonicalName}")
-            }
+            } as T
         }
     }
 

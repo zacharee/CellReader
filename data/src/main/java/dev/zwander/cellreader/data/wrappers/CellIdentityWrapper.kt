@@ -32,9 +32,8 @@ sealed class CellIdentityWrapper(
     val arfcnInfo: List<ARFCNInfo> by lazy { ARFCNTools.getInfo(channelNumber, type) }
 
     companion object {
-        fun newInstance(identity: CellIdentity?): CellIdentityWrapper? {
-            if (identity == null) return null
-
+        @Suppress("UNCHECKED_CAST")
+        fun <T : CellIdentityWrapper> newInstance(identity: Any): T {
             return when {
                 identity is CellIdentityGsm -> CellIdentityGsmWrapper(identity)
                 identity is CellIdentityCdma -> CellIdentityCdmaWrapper(identity)
@@ -43,7 +42,7 @@ sealed class CellIdentityWrapper(
                 identity is CellIdentityLte -> CellIdentityLteWrapper(identity)
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && identity is CellIdentityNr -> CellIdentityNrWrapper(identity)
                 else -> throw IllegalArgumentException("Unknown CellIdentity class ${identity.javaClass.canonicalName}")
-            }
+            } as T
         }
     }
 
