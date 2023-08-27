@@ -356,7 +356,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             val realBand = subInfos.value[subId]?.simSlotIndex?.let { bands.getOrNull(it) }
             var firstInfo = sorted.firstOrNull()
 
-            if (realBand != null && firstInfo != null) {
+            if (!realBand.isNullOrBlank() && firstInfo != null) {
                 val firstInfoBand = firstInfo.cellIdentity.realBands.firstOrNull()
 
                 if (firstInfoBand != realBand) {
