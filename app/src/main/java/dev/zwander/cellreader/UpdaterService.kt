@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemProperties
 import android.telephony.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationChannelCompat
@@ -339,12 +340,47 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         with (cellModel) {
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
+            val bands = SystemProperties.get("ril.lteband")?.split(",") ?: listOf()
+
             if (infos.isEmpty() && strengthInfos.value[subId]?.isNotEmpty() == true) {
                 return
             }
 
             val foundIDs = mutableListOf<String>()
-            val newInfo = sorted.filterNot { foundIDs.contains(it.cellIdentity.toString()).also { result -> if (!result) foundIDs.add(it.cellIdentity.toString()) } }
+            val newInfo = sorted.filterNot { info ->
+                foundIDs.contains(info.cellIdentity.toString()).also { result ->
+                    if (!result) foundIDs.add(info.cellIdentity.toString())
+                }
+            }.toMutableList()
+
+            val realBand = subInfos.value[subId]?.simSlotIndex?.let { bands.getOrNull(it) }
+            var firstInfo = sorted.firstOrNull()
+
+            if (realBand != null && firstInfo != null) {
+                val firstInfoBand = firstInfo.cellIdentity.realBands.firstOrNull()
+
+                if (firstInfoBand != realBand) {
+                    if (firstInfo is CellInfoLteWrapper) {
+                        firstInfo = firstInfo.copy(
+                            cellIdentity = firstInfo.cellIdentity.copy(
+                                realBands = listOf(realBand),
+                            ),
+                        )
+                    }
+
+                    if (firstInfo is CellInfoNrWrapper) {
+                        firstInfo = firstInfo.copy(
+                            cellIdentity = firstInfo.cellIdentity.copy(
+                                realBands = listOf(realBand),
+                            ),
+                        )
+                    }
+                }
+            }
+
+            if (firstInfo != null) {
+                newInfo[0] = firstInfo
+            }
 
             cellInfos.update {
                 it[subId] = newInfo
