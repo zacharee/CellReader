@@ -55,7 +55,7 @@ data class SubscriptionInfoWrapper(
             SubscriptionInfo::class.java
                 .getMethod("getNameSource").invoke(info)
                 ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
-        } catch (e: NoSuchMethodError) {
+        } catch (e: NoSuchMethodException) {
             SubscriptionInfo::class.java
                 .getDeclaredMethod("getDisplayNameSource").invoke(info)
                 ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
