@@ -32,8 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.*
@@ -42,6 +40,7 @@ import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.*
 import kotlin.math.absoluteValue
 
+@OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("MissingPermission, InlinedApi")
 @Composable
 fun SIMCard(
@@ -158,7 +157,8 @@ fun SIMCard(
                                 easing = {
                                     AnticipateOvershootInterpolator().getInterpolation(it)
                                 }
-                            )
+                            ),
+                            label = "SIMCardRotation",
                         )
 
                         WearSafeIcon(
@@ -172,8 +172,10 @@ fun SIMCard(
                     }
 
                     FlowRow(
-                        mainAxisSpacing = 16.dp,
-                        mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
+                        horizontalArrangement = SpacedArrangement(
+                            spacing = 16.dp,
+                            arrangement = Arrangement.SpaceEvenly,
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         FormatText(R.string.carrier_aggregation_format, "${serviceStates[subId]?.isUsingCarrierAggregation}")

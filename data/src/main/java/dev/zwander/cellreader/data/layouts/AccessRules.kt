@@ -1,6 +1,9 @@
 package dev.zwander.cellreader.data.layouts
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -10,14 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.util.FormatText
+import dev.zwander.cellreader.data.util.SpacedArrangement
 import dev.zwander.cellreader.data.wrappers.UiccAccessRuleWrapper
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AccessRules(
     accessRules: List<UiccAccessRuleWrapper>
@@ -35,9 +37,10 @@ fun AccessRules(
             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
         ) {
             FlowRow(
-                mainAxisSize = SizeMode.Expand,
-                mainAxisAlignment = MainAxisAlignment.SpaceAround,
-                mainAxisSpacing = 16.dp,
+                horizontalArrangement = SpacedArrangement(
+                    spacing = 16.dp,
+                    arrangement = Arrangement.SpaceAround,
+                ),
                 modifier = Modifier.padding(8.dp)
             ) {
                 FormatText(R.string.package_name_format, rule.packageName ?: "null")

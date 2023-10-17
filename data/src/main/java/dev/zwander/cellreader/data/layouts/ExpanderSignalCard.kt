@@ -9,6 +9,8 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,10 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
 import dev.zwander.cellreader.data.LocalAnimationDuration
 import dev.zwander.cellreader.data.components.Expander
 import dev.zwander.cellreader.data.components.HybridFlowRow
@@ -36,9 +34,11 @@ import dev.zwander.cellreader.data.components.IndenticatorArrow
 import dev.zwander.cellreader.data.components.IndenticatorLine
 import dev.zwander.cellreader.data.components.LevelIndicator
 import dev.zwander.cellreader.data.components.PaddedDivider
+import dev.zwander.cellreader.data.util.SpacedArrangement
 import dev.zwander.cellreader.data.util.angledGradient
 import dev.zwander.cellreader.data.util.anticipateDecelerateInterpolator
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ExpanderSignalCard(
     isFinal: Boolean,
@@ -49,8 +49,8 @@ fun ExpanderSignalCard(
     type: String,
     colors: List<Pair<Float, Color>>,
     modifier: Modifier = Modifier,
-    basicInfo: @Composable() (() -> Unit)? = null,
-    expandedInfo: @Composable() (() -> Unit)? = null
+    basicInfo: @Composable (() -> Unit)? = null,
+    expandedInfo: @Composable (() -> Unit)? = null,
 ) {
     var size by remember {
         mutableStateOf(IntSize.Zero)
@@ -91,17 +91,16 @@ fun ExpanderSignalCard(
                         ) {
                             HybridFlowRow(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                mainAxisSpacing = 8.dp,
-                                mainAxisAlignment = FlowMainAxisAlignment.Center,
-                                crossAxisAlignment = FlowCrossAxisAlignment.Center
+                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                             ) {
                                 LevelIndicator(level, dBm, type)
 
                                 FlowRow(
-                                    mainAxisSpacing = 16.dp,
-                                    mainAxisAlignment = FlowMainAxisAlignment.SpaceAround,
-                                    mainAxisSize = com.google.accompanist.flowlayout.SizeMode.Expand
+                                    horizontalArrangement = SpacedArrangement(
+                                        spacing = 16.dp,
+                                        arrangement = Arrangement.SpaceAround,
+                                    ),
+                                    modifier = Modifier.weight(1f),
                                 ) {
                                     basicInfo?.invoke()
                                 }
@@ -131,9 +130,10 @@ fun ExpanderSignalCard(
                                         PaddedDivider()
 
                                         FlowRow(
-                                            mainAxisSpacing = 16.dp,
-                                            mainAxisAlignment = MainAxisAlignment.SpaceAround,
-                                            mainAxisSize = com.google.accompanist.flowlayout.SizeMode.Expand,
+                                            horizontalArrangement = SpacedArrangement(
+                                                spacing = 16.dp,
+                                                arrangement = Arrangement.SpaceAround,
+                                            ),
                                         ) {
                                             expandedInfo()
                                         }

@@ -1,7 +1,10 @@
 package dev.zwander.cellreader.data.layouts
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,12 +17,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.components.PaddedDivider
 import dev.zwander.cellreader.data.data.LocalCellModel
+import dev.zwander.cellreader.data.util.SpacedArrangement
 
+@OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("MissingPermission")
 @Composable
 fun AdvancedSubInfo(
@@ -44,9 +46,10 @@ fun AdvancedSubInfo(
                 displayInfos[subId]?.let {
                     item {
                         FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                            mainAxisSize = SizeMode.Expand
+                            horizontalArrangement = SpacedArrangement(
+                                spacing = 16.dp,
+                                arrangement = Arrangement.SpaceEvenly,
+                            ),
                         ) {
                             DisplayInfo(info = it)
                         }
@@ -64,9 +67,10 @@ fun AdvancedSubInfo(
                 signalStrength?.let {
                     item {
                         FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                            mainAxisSize = SizeMode.Expand
+                            horizontalArrangement = SpacedArrangement(
+                                spacing = 16.dp,
+                                arrangement = Arrangement.SpaceEvenly,
+                            ),
                         ) {
                             SignalStrength(signalStrength = it)
                         }
@@ -84,9 +88,10 @@ fun AdvancedSubInfo(
                 serviceStates[subId]?.let {
                     item {
                         FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                            mainAxisSize = SizeMode.Expand
+                            horizontalArrangement = SpacedArrangement(
+                                spacing = 16.dp,
+                                arrangement = Arrangement.SpaceEvenly,
+                            ),
                         ) {
                             ServiceState(serviceState = it)
                         }
@@ -96,9 +101,10 @@ fun AdvancedSubInfo(
                 subInfos[subId]?.let {
                     item {
                         FlowRow(
-                            mainAxisSpacing = 16.dp,
-                            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                            mainAxisSize = SizeMode.Expand
+                            horizontalArrangement = SpacedArrangement(
+                                spacing = 16.dp,
+                                arrangement = Arrangement.SpaceEvenly,
+                            ),
                         ) {
                             SubInfo(subscriptionInfo = it)
                         }

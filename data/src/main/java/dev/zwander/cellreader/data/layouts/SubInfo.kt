@@ -2,6 +2,9 @@ package dev.zwander.cellreader.data.layouts
 
 import android.os.Build
 import android.telephony.PhoneNumberUtils
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -10,15 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.PaddedDivider
 import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.SubscriptionInfoWrapper
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SubInfo(
     subscriptionInfo: SubscriptionInfoWrapper
@@ -39,9 +40,10 @@ fun SubInfo(
         )
 
         FlowRow(
-            mainAxisSpacing = 16.dp,
-            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-            mainAxisSize = SizeMode.Expand,
+            horizontalArrangement = SpacedArrangement(
+                spacing = 16.dp,
+                arrangement = Arrangement.SpaceEvenly,
+            ),
             modifier = Modifier.padding(8.dp)
         ) {
             FormatText(R.string.sim_slot_format, "$simSlotIndex")
@@ -84,10 +86,10 @@ fun SubInfo(
                     FormatText(R.string.ehplmns_format, ehplmns.joinToString(", ") { it.asMccMnc })
                 }
                 FormatText(R.string.group_disabled_format, "$groupDisabled")
-                this.groupUuid?.apply {
+                groupUuid?.apply {
                     FormatText(R.string.group_uuid_format, this)
                 }
-                this.groupOwner?.apply {
+                groupOwner?.apply {
                     FormatText(R.string.group_owner_format, this)
                 }
             }

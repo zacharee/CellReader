@@ -2,6 +2,9 @@ package dev.zwander.cellreader.data.layouts
 
 import android.os.Build
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -12,9 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.components.WearSafeText
 import dev.zwander.cellreader.data.data.CellSignalInfo
@@ -22,6 +22,7 @@ import dev.zwander.cellreader.data.util.*
 import dev.zwander.cellreader.data.wrappers.NetworkRegistrationInfoWrapper
 import dev.zwander.cellreader.data.wrappers.ServiceStateWrapper
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NetworkRegInfo(
     networkRegistrationInfoList: List<NetworkRegistrationInfoWrapper>
@@ -36,16 +37,18 @@ fun NetworkRegInfo(
             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
         ) {
             FlowRow(
-                mainAxisSize = SizeMode.Expand,
-                mainAxisAlignment = MainAxisAlignment.SpaceBetween,
-                mainAxisSpacing = 16.dp,
+                horizontalArrangement = SpacedArrangement(
+                    spacing = 16.dp,
+                    arrangement = Arrangement.SpaceBetween,
+                ),
                 modifier = Modifier.padding(8.dp)
             ) {
                 with(networkRegistrationInfo) {
                     FlowRow(
-                        mainAxisSize = SizeMode.Expand,
-                        mainAxisAlignment = MainAxisAlignment.SpaceAround,
-                        mainAxisSpacing = 16.dp,
+                        horizontalArrangement = SpacedArrangement(
+                            spacing = 16.dp,
+                            arrangement = Arrangement.SpaceAround,
+                        ),
                     ) {
                         FormatText(
                             textId = R.string.domain_format,
