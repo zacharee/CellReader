@@ -52,10 +52,13 @@ data class SubscriptionInfoWrapper(
         info.carrierName?.toString(),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.carrierId else CellInfo.UNAVAILABLE,
         try {
-            info.nameSource
+            SubscriptionInfo::class.java
+                .getMethod("getNameSource").invoke(info)
+                ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
         } catch (e: NoSuchMethodError) {
-            info::class.java.getDeclaredMethod("getDisplayNameSource").invoke(info)?.toString()?.toIntOrNull()
-                ?: CellInfo.UNAVAILABLE
+            SubscriptionInfo::class.java
+                .getDeclaredMethod("getDisplayNameSource").invoke(info)
+                ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
         },
         info.iconTint,
         if (Build.VERSION.SDK_INT >= 33) {

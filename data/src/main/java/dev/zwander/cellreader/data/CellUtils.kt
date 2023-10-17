@@ -51,7 +51,10 @@ val SubscriptionInfo.cardIdCompat: String?
 
 val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
     get() = try {
-        allAccessRules ?: listOf()
+        @Suppress("UNCHECKED_CAST")
+        SubscriptionInfo::class.java
+            .getMethod("getAllAccessRules")
+            .invoke(this) as? List<UiccAccessRule>? ?: listOf()
     } catch (e: Throwable) {
         try {
             accessRules

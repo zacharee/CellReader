@@ -3,9 +3,9 @@ buildscript {
         version_code = 31
         version_name = "0.21"
 
-        target_sdk = 33
+        target_sdk = 34
         // This is the number you want to match when downloading the modified SDK JAR.
-        compile_sdk = 33
+        compile_sdk = 34
         min_sdk = 24
 
         kotlin_version = '1.9.10'
