@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
+import com.google.gson.annotations.SerializedName
 import dev.zwander.cellreader.data.ARFCNInfo
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.util.onAvail
@@ -11,8 +12,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 sealed class CellIdentityWrapper(
-    val type: CellType
+    val type: CellType,
 ) {
+    @SerializedName("realBandsBase")
     open val realBands: List<String> = listOf()
 
     val plmn: String? by lazy { if (mcc.isNullOrBlank()) null else (mcc + mnc) }

@@ -73,8 +73,8 @@ class TelephonyListener(
     TelephonyCallback.ServiceStateListener, TelephonyCallback.DisplayInfoListener,
     TelephonyCallback.DataConnectionStateListener {
     @SuppressLint("MissingPermission")
-    override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>) {
-        listenerCallback.updateCellInfo(subId, cellInfo)
+    override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>?) {
+        listenerCallback.updateCellInfo(subId, cellInfo ?: mutableListOf())
     }
 
     override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
