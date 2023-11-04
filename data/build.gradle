@@ -55,7 +55,7 @@ dependencies {
     api "androidx.glance:glance-appwidget:$glance_version"
     api "androidx.compose.material:material:$compose_version"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api 'androidx.compose.material3:material3:1.2.0-alpha09'
+    api 'androidx.compose.material3:material3:1.2.0-alpha10'
 
     api "androidx.wear.compose:compose-material:$compose_wear_version"
     api "androidx.wear.compose:compose-foundation:$compose_wear_version"
