@@ -62,6 +62,9 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         PermissionRationaleBottomSheetDialog(
             this,
             PermissionRationaleBottomSheetDialog.PermissionInfo(
+                dev.zwander.cellreader.data.R.string.foreground_service_use_user,
+            ),
+            PermissionRationaleBottomSheetDialog.PermissionInfo(
                 dev.zwander.cellreader.data.R.string.required_permission_notifications,
                 Build.VERSION_CODES.TIRAMISU
             ),

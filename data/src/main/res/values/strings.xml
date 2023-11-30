@@ -329,4 +329,7 @@
     <string name="status_helper_text">Denotes the current connection status of the phone or client device to this cell.</string>
     <string name="timestamp_helper_text">Represents the approximate time since boot in milliseconds the information this cell was retrieved from the modem.</string>
     <string name="endc_helper_text">ENDC stands for E-UTRAN New Radio - Dual Connectivity and indicates whether the phone or client device is connected to both LTE and 5G at once (5G NSA).</string>
+
+    <string name="foreground_service_use">CellReader uses a foreground service to monitor cellular statistics and record their history and current values for presenting to the user. The foreground service is required in order to keep widgets and the app UI up-to-date.</string>
+    <string name="foreground_service_use_user">CellReader uses a foreground service to monitor and record cellular statistics both when the app is in the foreground and when it\'s closed. It\'s also used to keep widgets up-to-date. While running, a notification will display letting you know. You can use the \"Exit\" button on the notification to close CellReader, or long-press the notification to hide it.</string>
 </resources>

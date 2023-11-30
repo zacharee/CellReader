@@ -41,8 +41,10 @@
 
         <service android:name=".UpdaterService"
             android:exported="false"
-            android:foregroundServiceType="specialUse"
-            />
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="@string/foreground_service_use" />
+        </service>
 
         <receiver android:name=".widget.SignalWidgetReceiver"
             android:exported="true">
