@@ -23,7 +23,10 @@ data class NetworkRegistrationInfoWrapper(
     val isUsingCarrierAggregation: Boolean,
 ) {
     companion object {
-        fun registrationStateToString(context: Context, @RegistrationState registrationState: Int): String {
+        fun registrationStateToString(
+            context: Context,
+            @RegistrationState registrationState: Int
+        ): String {
             return context.resources.getString(
                 when (registrationState) {
                     NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING -> R.string.not_registered
@@ -36,7 +39,10 @@ data class NetworkRegistrationInfoWrapper(
             )
         }
 
-        fun serviceTypeToString(context: Context, @NetworkRegistrationInfo.ServiceType serviceType: Int): String {
+        fun serviceTypeToString(
+            context: Context,
+            @NetworkRegistrationInfo.ServiceType serviceType: Int
+        ): String {
             return context.resources.getString(
                 when (serviceType) {
                     NetworkRegistrationInfo.SERVICE_TYPE_VOICE -> R.string.voice
@@ -67,7 +73,11 @@ data class NetworkRegistrationInfoWrapper(
     constructor(info: NetworkRegistrationInfo) : this(
         info.domain,
         info.transportType,
-        info.registrationState,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            info.networkRegistrationState
+        } else {
+            info.registrationState
+        },
         info.roamingType,
         info.accessNetworkTechnology,
         info.nrState,

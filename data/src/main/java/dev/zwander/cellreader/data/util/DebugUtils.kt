@@ -11,7 +11,7 @@ fun Class<*>.printAllMethods() {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             it.parameters.joinToString(
                                 ", "
-                            ) { it.type.canonicalName }
+                            ) { param -> param.type.canonicalName ?: param.type.name }
                         } else {
                             "UNKNOWN PARAMETERS"
                         }
