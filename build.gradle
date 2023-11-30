@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        version_code = 32
-        version_name = "0.22"
+        version_code = 33
+        version_name = "0.22.1"
 
         target_sdk = 34
         // This is the number you want to match when downloading the modified SDK JAR.
