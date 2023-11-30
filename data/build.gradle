@@ -50,12 +50,12 @@ dependencies {
 
     api "androidx.compose.ui:ui:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    api 'androidx.activity:activity-compose:1.8.0'
+    api 'androidx.activity:activity-compose:1.8.1'
     api "androidx.glance:glance:$glance_version"
     api "androidx.glance:glance-appwidget:$glance_version"
     api "androidx.compose.material:material:$compose_version"
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api 'androidx.compose.material3:material3:1.2.0-alpha10'
+    api 'androidx.compose.material3:material3:1.2.0-alpha12'
 
     api "androidx.wear.compose:compose-material:$compose_wear_version"
     api "androidx.wear.compose:compose-foundation:$compose_wear_version"
@@ -66,7 +66,7 @@ dependencies {
 
     api 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
 
-    api 'io.gsonfire:gson-fire:1.8.5'
+    api 'io.gsonfire:gson-fire:1.9.0'
 
     api 'com.github.madrapps:plot:0.1.2'
     api 'com.github.PhilJay:MPAndroidChart:v3.1.0'
@@ -81,7 +81,7 @@ dependencies {
 
     api 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 
-    api 'com.bugsnag:bugsnag-android:5.31.2'
+    api 'com.bugsnag:bugsnag-android:6.0.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
