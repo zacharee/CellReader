@@ -25,25 +25,25 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_compiler_version
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
     namespace 'dev.zwander.cellreader.wear'
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
 }
 
 dependencies {
-    implementation "androidx.core:core-ktx:$androidx_core_version"
-    implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.wear:wear:1.3.0'
-    implementation 'androidx.wear.tiles:tiles-renderer:1.2.0'
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.percentlayout
+    implementation libs.androidx.legacy.support.v4
+    implementation libs.androidx.wear
+    implementation libs.androidx.tiles.renderer
 
     implementation project(":data")
 }
