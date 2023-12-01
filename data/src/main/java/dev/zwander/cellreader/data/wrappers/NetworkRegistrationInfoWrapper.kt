@@ -73,9 +73,9 @@ data class NetworkRegistrationInfoWrapper(
     constructor(info: NetworkRegistrationInfo) : this(
         info.domain,
         info.transportType,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        try {
             info.networkRegistrationState
-        } else {
+        } catch (e: Exception) {
             info.registrationState
         },
         info.roamingType,
