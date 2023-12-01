@@ -30,11 +30,11 @@ android {
     namespace 'dev.zwander.cellreader.wear'
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.toVersion(libs.versions.jdk.get())
+        targetCompatibility JavaVersion.toVersion(libs.versions.jdk.get())
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = libs.versions.jdk.get()
     }
 }
 

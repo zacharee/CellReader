@@ -28,6 +28,7 @@ playServicesWearable = "18.1.0"
 savedstate = "1.2.1"
 tilesRenderer = "1.2.0"
 wear = "1.3.0"
+jdk = "17"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
