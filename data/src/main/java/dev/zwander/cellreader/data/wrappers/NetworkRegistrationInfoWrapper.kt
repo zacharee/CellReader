@@ -75,7 +75,7 @@ data class NetworkRegistrationInfoWrapper(
         info.transportType,
         try {
             info.networkRegistrationState
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             info.registrationState
         },
         info.roamingType,
