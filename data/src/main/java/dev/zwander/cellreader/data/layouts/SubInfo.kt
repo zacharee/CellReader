@@ -52,7 +52,7 @@ fun SubInfo(
                 FormatText(R.string.number_format, it)
 
             }
-            displayName?.let {
+            displayName?.takeIf { it.isNotBlank() }?.let {
                 FormatText(R.string.display_name_format, "$displayName")
             }
             FormatText(R.string.carrier_name_format, "$carrierName")
@@ -89,7 +89,7 @@ fun SubInfo(
                 groupUuid?.apply {
                     FormatText(R.string.group_uuid_format, this)
                 }
-                groupOwner?.apply {
+                groupOwner?.takeIf { it.isNotBlank() }?.apply {
                     FormatText(R.string.group_owner_format, this)
                 }
             }

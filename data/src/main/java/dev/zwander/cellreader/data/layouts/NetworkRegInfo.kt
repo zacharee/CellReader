@@ -41,33 +41,26 @@ fun NetworkRegInfo(
                     spacing = 16.dp,
                     arrangement = Arrangement.SpaceBetween,
                 ),
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp).fillMaxWidth(),
             ) {
                 with(networkRegistrationInfo) {
-                    FlowRow(
-                        horizontalArrangement = SpacedArrangement(
-                            spacing = 16.dp,
-                            arrangement = Arrangement.SpaceAround,
-                        ),
-                    ) {
-                        FormatText(
-                            textId = R.string.domain_format,
-                            textFormat = domainToString(context, domain),
-                        )
+                    FormatText(
+                        textId = R.string.domain_format,
+                        textFormat = domainToString(context, domain),
+                    )
 
-                        FormatText(
-                            R.string.access_format,
-                            ServiceStateWrapper.rilRadioTechnologyToString(
-                                context,
-                                ServiceStateWrapper.networkTypeToRilRadioTechnology(
-                                    accessNetworkTechnology
-                                )
+                    FormatText(
+                        R.string.access_format,
+                        ServiceStateWrapper.rilRadioTechnologyToString(
+                            context,
+                            ServiceStateWrapper.networkTypeToRilRadioTechnology(
+                                accessNetworkTechnology
                             )
                         )
+                    )
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            FormatText(R.string.rplmn_format, rplmn.asMccMnc)
-                        }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        FormatText(R.string.rplmn_format, rplmn.asMccMnc)
                     }
 
                     FormatText(
