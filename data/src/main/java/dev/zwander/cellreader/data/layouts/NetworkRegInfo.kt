@@ -34,7 +34,7 @@ fun NetworkRegInfo(
             elevation = CardDefaults.outlinedCardElevation(),
             colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, Color.White),
-            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp).fillMaxWidth(),
         ) {
             FlowRow(
                 horizontalArrangement = SpacedArrangement(
