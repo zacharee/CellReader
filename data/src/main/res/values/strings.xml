@@ -90,7 +90,7 @@
     <string name="services_format">Services</string>
     <string name="domain_format">Domain</string>
     <string name="carrier_aggregation_format">CA</string>
-    <string name="nr_state_format">NR</string>
+    <string name="nr_state_format">ENDC</string>
     <string name="cgi_format">CGI</string>
     <string name="plmn_format">PLMN</string>
     <string name="type_format">Type</string>
