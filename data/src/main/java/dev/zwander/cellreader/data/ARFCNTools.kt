@@ -2,6 +2,7 @@ package dev.zwander.cellreader.data
 
 
 import android.os.Parcelable
+import dev.zwander.cellreader.data.util.roundTo
 import dev.zwander.cellreader.data.wrappers.CellType
 import kotlinx.parcelize.Parcelize
 import java.util.*
@@ -153,14 +154,14 @@ object ARFCNTools {
             val fdl = if (firstDl != -1) {
                 refContainer.fRefOff.toDouble() + refContainer.dfGlobal.toDouble() * (nrarfcn - refContainer.nRefOff.toDouble())
             } else {
-                -1
+                -1.0
             }
             val ful = if (firstUl != -1) {
                 val realDl = if (firstDl == -1) firstUl else firstDl
 
                 refContainer.fRefOff.toDouble() + refContainer.dfGlobal.toDouble() * ((realDl - firstUl).absoluteValue + nrarfcn - refContainer.nRefOff.toDouble())
             } else {
-                -1
+                -1.0
             }
 
             ARFCNInfo(
@@ -183,11 +184,21 @@ object ARFCNTools {
 }
 
 @Parcelize
-data class ARFCNInfo(
+data class ARFCNInfo private constructor(
     val band: String,
     val dlFreq: Number,
-    val ulFreq: Number
-) : Parcelable
+    val ulFreq: Number,
+) : Parcelable {
+    companion object {
+        operator fun invoke(band: String, dlFreq: Number, ulFreq: Number): ARFCNInfo {
+            return ARFCNInfo(
+                band = band,
+                dlFreq = dlFreq.roundTo(2),
+                ulFreq = ulFreq.roundTo(2),
+            )
+        }
+    }
+}
 
 data class ARFCNContainer(
     val dlLow: Number = 0,

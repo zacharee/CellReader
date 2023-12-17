@@ -14,11 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dev.zwander.cellreader.data.CellReaderTheme
 import dev.zwander.cellreader.data.data.CellModel
 import dev.zwander.cellreader.data.data.ProvideCellModel
 import dev.zwander.cellreader.data.util.preferences
+import dev.zwander.cellreader.data.util.toColorInt
 import dev.zwander.cellreader.ui.components.BottomBarScrimContainer
 import dev.zwander.cellreader.ui.components.MainContent
 import dev.zwander.cellreader.ui.view.PermissionRationaleBottomSheetDialog
@@ -168,12 +168,19 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             false
         )
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+
         setContent {
-            val sysUiController = rememberSystemUiController()
-            sysUiController.setStatusBarColor(Color.Transparent)
-            sysUiController.setNavigationBarColor(Color.Transparent)
-            sysUiController.statusBarDarkContentEnabled = !isSystemInDarkTheme()
-            sysUiController.navigationBarDarkContentEnabled = !isSystemInDarkTheme()
+            controller.isAppearanceLightStatusBars = !isSystemInDarkTheme()
+            controller.isAppearanceLightNavigationBars = !isSystemInDarkTheme()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isStatusBarContrastEnforced = false
+                window.isNavigationBarContrastEnforced = false
+            }
+            window.statusBarColor = Color.Transparent.toColorInt()
+            window.navigationBarColor = Color.Transparent.toColorInt()
 
             Content()
         }
