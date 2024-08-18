@@ -1,34 +1,32 @@
 [versions]
 accompanist = "0.34.0"
-activityCompose = "1.8.2"
-android-gradle-plugin = "8.3.0"
-bugsnagAndroid = "6.2.0"
+activityCompose = "1.9.1"
+android-gradle-plugin = "8.5.2"
+bugsnagAndroid = "6.7.0"
 bugsnagAndroidGradlePlugin = "8.1.0"
 hiddenapibypass = "4.3"
 legacySupportV4 = "1.0.0"
 percentlayout = "1.0.0"
 shizuku = "13.1.5"
-appcompat = "1.6.1"
+appcompat = "1.7.0"
 gsonFire = "1.9.0"
-kotlin = "1.9.22"
-coroutines = "1.8.0"
-lifecycleViewmodelCompose = "2.7.0"
+kotlin = "2.0.10"
+coroutines = "1.9.0-RC.2"
+lifecycleViewmodelCompose = "2.8.4"
 mpandroidchart = "v3.1.0"
 patreonsupportersretrieval = "8436bbdbdc"
 plot = "0.1.2"
-compose = "1.6.2"
-compose-compiler = "1.5.10"
-compose-wear = "1.3.0"
-coreKtx = "1.12.0"
-glance = "1.0.0"
+compose = "1.6.8"
+compose-wear = "1.3.1"
+coreKtx = "1.13.1"
+glance = "1.1.0"
 glance-wear-tiles = "1.0.0-alpha05"
-material = "1.11.0"
-material3 = "1.2.0"
-playServicesWearable = "18.1.0"
+material = "1.12.0"
+material3 = "1.2.1"
+playServicesWearable = "18.2.0"
 savedstate = "1.2.1"
-tilesRenderer = "1.3.0"
+tilesRenderer = "1.4.0"
 wear = "1.3.0"
-jdk = "17"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
@@ -45,7 +43,6 @@ androidx-tiles-renderer = { module = "androidx.wear.tiles:tiles-renderer", versi
 androidx-wear = { module = "androidx.wear:wear", version.ref = "wear" }
 androidx-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "compose-wear" }
 androidx-wear-compose-material = { module = "androidx.wear.compose:compose-material", version.ref = "compose-wear" }
-androidx-compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose-compiler" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 androidx-glance = { module = "androidx.glance:glance", version.ref = "glance" }
@@ -73,4 +70,5 @@ plot = { module = "com.github.madrapps:plot", version.ref = "plot" }
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 bugsnag-android = { id = "com.bugsnag.android.gradle", version.ref = "bugsnagAndroidGradlePlugin" }

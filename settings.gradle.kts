@@ -5,18 +5,17 @@ pluginManagement {
         mavenCentral()
     }
 }
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven {
-            url 'https://jitpack.io'
-        }
-        maven { url 'https://androidx.dev/snapshots/builds/9564757/artifacts/repository' }
+        maven("https://jitpack.io")
+        maven("https://androidx.dev/snapshots/builds/9564757/artifacts/repository")
     }
 }
 rootProject.name = "CellReader"
-include ':app'
-include ':wear'
-include ':data'
+include(":app")
+include(":wear")
+include(":data")
