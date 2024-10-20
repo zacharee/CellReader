@@ -32,7 +32,9 @@ class UpdatableTreeSet<E> : TreeSet<E> {
     }
 
     fun updateComparator(newComparator: Comparator<in E>) {
-        wrapped = TreeSet(newComparator).also { it.addAll(wrapped) }
+        val newSet = TreeSet(newComparator)
+        newSet.addAll(wrapped)
+        wrapped = newSet
     }
 
     override fun clear() {
@@ -136,7 +138,7 @@ class UpdatableTreeSet<E> : TreeSet<E> {
     }
 
     override fun removeAll(elements: Collection<E>): Boolean {
-        return wrapped.removeAll(elements)
+        return wrapped.removeAll(elements.toSet())
     }
 
     override fun removeIf(filter: Predicate<in E>): Boolean {
@@ -192,14 +194,14 @@ class UpdatableTreeSet<E> : TreeSet<E> {
         return wrapped.tailSet(fromElement, inclusive)
     }
 
-    @Suppress("DEPRECATION")
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Deprecated(
         "This member is not fully supported by Kotlin compiler, so it may be absent or have different signature in next major version",
         replaceWith = ReplaceWith(""),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override fun <T : Any?> toArray(generator: IntFunction<Array<T>>): Array<T> {
-        return wrapped.toArray(generator)
+        val array = generator.apply(0)
+        return wrapped.toArray(array)
     }
 }
