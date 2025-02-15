@@ -13,7 +13,7 @@ gsonFire = "1.9.0"
 kotlin = "2.1.10"
 coroutines = "1.10.1"
 lifecycleViewmodelCompose = "2.8.7"
-mpandroidchart = "v3.1.0"
+mpandroidchart = "3.1.0.25"
 patreonsupportersretrieval = "8436bbdbdc"
 plot = "0.1.2"
 compose = "1.7.8"
@@ -61,7 +61,7 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-androidChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
+androidChart = { module = "com.github.AppDevNext:AndroidChart", version.ref = "mpandroidchart" }
 patreonSupportersRetrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
 play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
 plot = { module = "com.github.madrapps:plot", version.ref = "plot" }
