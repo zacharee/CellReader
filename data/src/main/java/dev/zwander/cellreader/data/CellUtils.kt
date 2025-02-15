@@ -57,7 +57,7 @@ val SubscriptionInfo.allAccessRulesCompat: List<UiccAccessRule>
             .invoke(this) as? List<UiccAccessRule>? ?: listOf()
     } catch (e: Throwable) {
         try {
-            accessRules
+            accessRules ?: listOf()
         } catch (e: Throwable) {
             listOf()
         }

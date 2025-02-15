@@ -121,14 +121,14 @@ fun Graph(points: Map<Int, GraphInfo>) {
 
                     setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                         override fun onNothingSelected() {
-                            data.dataSets.forEach { set ->
+                            data?.dataSets?.forEach { set ->
                                 (set as SelectableLineDataSet).isSelected.value = false
                             }
                             notifyDataSetChanged()
                         }
 
                         override fun onValueSelected(e: Entry, h: Highlight) {
-                            data.dataSets.forEachIndexed { index, set ->
+                            data?.dataSets?.forEachIndexed { index, set ->
                                 (set as SelectableLineDataSet).isSelected.value = index == h.dataSetIndex
                             }
                             notifyDataSetChanged()
@@ -169,16 +169,18 @@ fun Graph(points: Map<Int, GraphInfo>) {
             update = {
                 Utils.init(it.context)
 
-                it.data = LineData(
+                val data = LineData(
                     flatDataSets
                 ).apply {
                     setDrawValues(false)
                 }
 
+                it.data = data
+
                 if (followData) {
                     @Suppress("DeferredResultUnused")
                     scope.async(Dispatchers.Main) {
-                        it.moveViewTo(it.data.xMax, 0f, YAxis.AxisDependency.LEFT)
+                        it.moveViewTo(data.xMax, 0f, YAxis.AxisDependency.LEFT)
                     }
                 } else {
                     it.invalidate()

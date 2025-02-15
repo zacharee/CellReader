@@ -169,6 +169,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                @Suppress("DEPRECATION")
                 window.isStatusBarContrastEnforced = false
                 window.isNavigationBarContrastEnforced = false
             }

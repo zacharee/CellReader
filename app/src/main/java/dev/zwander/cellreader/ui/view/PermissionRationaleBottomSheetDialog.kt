@@ -3,6 +3,8 @@ package dev.zwander.cellreader.ui.view
 import android.content.Context
 import android.os.Build
 import android.os.Parcelable
+import android.view.LayoutInflater
+import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,9 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ComponentActivity
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.zwander.cellreader.data.CellReaderTheme
@@ -31,16 +33,16 @@ class PermissionRationaleBottomSheetDialog(
     @StringRes private val titleRes: Int = R.string.required_permissions,
     @StringRes private val negativeRes: Int = R.string.close_app,
 ) : BottomSheetDialog(context) {
-    private val layout = PermissionDialogLayoutBinding.inflate(window.layoutInflater)
+    private val layout = PermissionDialogLayoutBinding.inflate(LayoutInflater.from(context))
 
     init {
         setCancelable(false)
         setTitle(titleRes)
         setContentView(layout.root)
 
-        window.decorView.setViewTreeLifecycleOwner(context as ComponentActivity)
-        window.decorView.setViewTreeViewModelStoreOwner(context as androidx.activity.ComponentActivity)
-        window.decorView.setViewTreeSavedStateRegistryOwner(context)
+        window?.decorView?.setViewTreeLifecycleOwner(context as ComponentActivity)
+        window?.decorView?.setViewTreeViewModelStoreOwner(context as ComponentActivity)
+        window?.decorView?.setViewTreeSavedStateRegistryOwner(context as SavedStateRegistryOwner)
     }
 
     fun show(positiveListener: () -> Unit, negativeListener: () -> Unit) {

@@ -67,7 +67,7 @@ class ShizukuUserService : IShizukuUserService.Stub {
         updateListenerState(subId)
     }
 
-    @SuppressLint("SoonBlockedPrivateApi", "MissingPermission")
+    @SuppressLint("SoonBlockedPrivateApi", "MissingPermission", "NewApi")
     override fun requestNetworkScan(subId: Int, request: NetworkScanRequest?, callback: INetworkScanCallback?): MutableList<Any?> {
         ITelephony.Stub.asInterface(
             TelephonyFrameworkInitializer
@@ -108,6 +108,7 @@ class ShizukuUserService : IShizukuUserService.Stub {
         }
     }
 
+    @SuppressLint("NewApi")
     override fun cancelNetworkScan(subId: Int, scanId: Int) {
         NetworkScan(subId, scanId).stopScan()
     }
@@ -120,7 +121,7 @@ class ShizukuUserService : IShizukuUserService.Stub {
                     subId,
                     "com.android.shell",
                     null,
-                    listeners[subId],
+                    listeners[subId]!!,
                     true
                 )
             }
@@ -157,7 +158,7 @@ class ShizukuUserService : IShizukuUserService.Stub {
                         subId,
                         "com.android.shell",
                         null,
-                        listener,
+                        listener!!,
                         true
                     )
                 }

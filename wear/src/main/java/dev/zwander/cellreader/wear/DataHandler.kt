@@ -173,7 +173,7 @@ class DataHandler private constructor(private val context: Context) {
         }
     }
 
-    private fun updateHandlers(path: String) {
+    private fun updateHandlers(path: String?) {
         val callback: ((IDataHandler) -> Unit) = {
             when (path) {
                 BetweenUtils.CELL_INFOS_PATH -> {
