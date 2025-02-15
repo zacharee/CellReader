@@ -21,6 +21,7 @@ data class NetworkRegistrationInfoWrapper(
     val dataSpecificInfo: DataSpecificRegistrationInfoWrapper?,
     val rplmn: String?,
     val isUsingCarrierAggregation: Boolean,
+    val isNonTerrestrialNetwork: Boolean?,
 ) {
     companion object {
         fun registrationStateToString(
@@ -92,6 +93,7 @@ data class NetworkRegistrationInfoWrapper(
             info.isUsingCarrierAggregation
         } catch (e: Throwable) {
             false
-        }
+        },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isNonTerrestrialNetwork else null,
     )
 }

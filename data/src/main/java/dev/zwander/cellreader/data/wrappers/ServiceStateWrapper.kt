@@ -33,7 +33,8 @@ data class ServiceStateWrapper(
     val dataRoamingFromRegistration: Boolean,
     val iWlanPreferred: Boolean?,
     val dataRegState: Int,
-    val voiceRegState: Int
+    val voiceRegState: Int,
+    val isUsingNonTerrestrialNetwork: Boolean?,
 ) {
     companion object {
         fun isPsOnlyTech(radioTechnology: Int): Boolean {
@@ -272,6 +273,7 @@ data class ServiceStateWrapper(
         state.dataRoamingFromRegistration,
         state.isIwlanPreferredCompat,
         state.dataRegState,
-        state.voiceRegState
+        state.voiceRegState,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) state.isUsingNonTerrestrialNetwork else null,
     )
 }

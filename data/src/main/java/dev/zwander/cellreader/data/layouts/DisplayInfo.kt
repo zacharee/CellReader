@@ -29,5 +29,9 @@ fun DisplayInfo(info: TelephonyDisplayInfoWrapper) {
         )
 
         FormatText(R.string.override_type_format, TelephonyDisplayInfoWrapper.overrideNetworkTypeToString(context, overrideNetworkType))
+
+        isRoaming?.let {
+            FormatText(R.string.roaming_format, it)
+        }
     }
 }

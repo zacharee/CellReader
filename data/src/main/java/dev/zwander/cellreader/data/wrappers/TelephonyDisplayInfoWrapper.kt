@@ -10,12 +10,14 @@ import dev.zwander.cellreader.data.R
 
 data class TelephonyDisplayInfoWrapper(
     val networkType: Int = CellInfo.TYPE_UNKNOWN,
-    val overrideNetworkType: Int = CellInfo.TYPE_UNKNOWN
+    val overrideNetworkType: Int = CellInfo.TYPE_UNKNOWN,
+    val isRoaming: Boolean?,
 ) {
     @TargetApi(Build.VERSION_CODES.R)
     constructor(info: TelephonyDisplayInfo) : this(
         info.networkType,
         info.overrideNetworkType,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.isRoaming else null,
     )
 
     companion object {

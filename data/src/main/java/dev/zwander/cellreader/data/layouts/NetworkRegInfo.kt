@@ -124,6 +124,10 @@ fun NetworkRegInfo(
                         )
                     }
 
+                    isNonTerrestrialNetwork?.let {
+                        FormatText(R.string.is_non_terrestrial_network, it)
+                    }
+
                     this.dataSpecificInfo?.apply {
                         WearSafeText(
                             text = stringResource(id = R.string.data_specific_info),

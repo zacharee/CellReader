@@ -67,6 +67,10 @@ fun ServiceState(
         )
         FormatText(R.string.emergency_only_format, "$emergencyOnly")
 
+        isUsingNonTerrestrialNetwork?.let {
+            FormatText(R.string.is_non_terrestrial_network, it)
+        }
+
         FormatText(
             R.string.network_type_format,
             setOf(dataNetworkType, voiceNetworkType).joinToString("/") {

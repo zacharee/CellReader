@@ -165,9 +165,15 @@
     <string name="dl_freqs_format">DL Freqs</string>
     <string name="ul_freqs_format">UL Freqs</string>
     <string name="freqs_format">Freqs</string>
+    <string name="transfer_status">Transfer Status</string>
+    <string name="is_non_terrestrial_network">Satellite</string>
 
     <string name="data_specific_info">Data Specific Info</string>
     <string name="voice_specific_info">Voice Specific Info</string>
+
+    <string name="transfer_status_none">None</string>
+    <string name="transfer_status_transferred_out">Transferred Out</string>
+    <string name="transfer_status_converted">Converted</string>
 
     <string name="legend_rsrp">%1$d: %2$s RSRP</string>
     <string name="legend_rssi">%1$d: %2$s RSSI</string>

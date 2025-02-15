@@ -103,6 +103,10 @@ fun SubInfo(
             FormatText(R.string.data_roaming_format, "$dataRoaming")
             FormatText(R.string.plmn_format, "$mcc-$mnc")
 
+            transferStatus?.let {
+                FormatText(R.string.transfer_status, stringResource(SubscriptionInfoWrapper.transferStatusToStringRes(it)))
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 FormatText(R.string.uicc_apps_format, "$uiccApplicationsEnabled")
             }

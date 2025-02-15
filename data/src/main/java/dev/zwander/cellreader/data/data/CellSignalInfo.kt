@@ -986,6 +986,14 @@ object CellSignalInfo {
                     { ssSinr.avail() },
                     { ssSinr.toString() }
                 )
+
+                object TimingAdvance : LTEKeys(
+                    R.string.timing_advance_format,
+                    "timing-advance",
+                    { R.string.timing_advance_helper_text },
+                    { timingAdvance.avail() },
+                    { timingAdvance.toString() }
+                )
             }
 
             sealed class TDSCDMAKeys(
@@ -1463,6 +1471,7 @@ object CellSignalInfo {
             Keys.StrengthKeys.NRKeys.CSICQIReport,
             Keys.StrengthKeys.NRKeys.CSICQIIndex,
             Keys.StrengthKeys.NRKeys.SSSinR,
+            Keys.StrengthKeys.NRKeys.TimingAdvance,
             Keys.StrengthKeys.ASU,
             Keys.StrengthKeys.Valid
         )
@@ -1473,6 +1482,7 @@ object CellSignalInfo {
             Keys.StrengthKeys.NRKeys.CSICQIReport,
             Keys.StrengthKeys.NRKeys.CSICQIIndex,
             Keys.StrengthKeys.NRKeys.SSSinR,
+            Keys.StrengthKeys.NRKeys.TimingAdvance,
             Keys.StrengthKeys.ASU,
             Keys.StrengthKeys.Valid,
             Keys.AdvancedSeparator

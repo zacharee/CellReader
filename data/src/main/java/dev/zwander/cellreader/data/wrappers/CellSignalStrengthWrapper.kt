@@ -277,7 +277,8 @@ data class CellSignalStrengthNrWrapper(
     override val level: Int,
     override val dbm: Int,
     override val valid: Boolean?,
-    override val asuLevel: Int
+    override val asuLevel: Int,
+    val timingAdvance: Int?,
 ) : CellSignalStrengthWrapper(CellType.NR) {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(strength: CellSignalStrengthNr) : this(
@@ -292,7 +293,8 @@ data class CellSignalStrengthNrWrapper(
         strength.level,
         strength.dbm,
         strength.isValidCompat,
-        strength.asuLevel
+        strength.asuLevel,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) strength.timingAdvanceMicros else null,
     )
 
     override fun hashCode(): Int {
@@ -305,7 +307,8 @@ data class CellSignalStrengthNrWrapper(
             ssRsrp,
             ssRsrq,
             ssSinr,
-            level
+            level,
+            timingAdvance,
         )
     }
 
@@ -319,5 +322,6 @@ data class CellSignalStrengthNrWrapper(
                 && other.ssRsrp == ssRsrp
                 && other.ssRsrq == ssRsrq
                 && other.level == level
+                && other.timingAdvance == timingAdvance
     }
 }

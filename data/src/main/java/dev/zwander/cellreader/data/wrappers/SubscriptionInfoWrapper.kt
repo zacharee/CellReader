@@ -9,6 +9,7 @@ import android.telephony.CellInfo
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.util.Base64
+import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.allAccessRulesCompat
 import dev.zwander.cellreader.data.cardIdCompat
 import dev.zwander.cellreader.data.util.onAvail
@@ -41,7 +42,11 @@ data class SubscriptionInfoWrapper(
     val groupDisabled: Boolean?,
     val profileClass: Int,
     val subscriptionType: Int,
-    val uiccApplicationsEnabled: Boolean?
+    val uiccApplicationsEnabled: Boolean?,
+    val serviceCapabilities: Set<Int>?,
+    val isOnlyNonTerrestrialNetwork: Boolean?,
+    val usageSetting: Int?,
+    val transferStatus: Int?,
 ) {
     @SuppressLint("MissingPermission", "InlinedApi")
     constructor(info: SubscriptionInfo, context: Context) : this(
@@ -93,7 +98,11 @@ data class SubscriptionInfoWrapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.subscriptionType else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.areUiccApplicationsEnabled() else null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.areUiccApplicationsEnabled() else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.serviceCapabilities else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isOnlyNonTerrestrialNetwork else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) info.usageSetting else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) info.transferStatus else null,
     )
 
     val iconBitmapBmp: Bitmap?
@@ -102,4 +111,15 @@ data class SubscriptionInfoWrapper(
                 BitmapFactory.decodeByteArray(this, 0, size)
             }
         }
+
+    companion object {
+        fun transferStatusToStringRes(status: Int): Int {
+            return when (status) {
+                SubscriptionManager.TRANSFER_STATUS_CONVERTED -> R.string.transfer_status_converted
+                SubscriptionManager.TRANSFER_STATUS_NONE -> R.string.transfer_status_none
+                SubscriptionManager.TRANSFER_STATUS_TRANSFERRED_OUT -> R.string.transfer_status_transferred_out
+                else -> R.string.unknown
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.os.Build
 import android.telephony.DataSpecificRegistrationInfo
 
 data class DataSpecificRegistrationInfoWrapper(
@@ -7,7 +8,9 @@ data class DataSpecificRegistrationInfoWrapper(
     val isDcNrRestricted: Boolean,
     val isNrAvailable: Boolean,
     val isEnDcAvailable: Boolean,
-    val vopsSupportInfo: VopsSupportInfoWrapper?
+    val vopsSupportInfo: VopsSupportInfoWrapper?,
+    val lteAttachResultType: Int?,
+    val lteAttachExtraInfo: Int?,
 ) {
     constructor(info: DataSpecificRegistrationInfo) : this(
         info.maxDataCalls,
@@ -19,5 +22,7 @@ data class DataSpecificRegistrationInfoWrapper(
         } catch (e: Throwable) {
             null
         },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.lteAttachResultType else null,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.lteAttachExtraInfo else null,
     )
 }
