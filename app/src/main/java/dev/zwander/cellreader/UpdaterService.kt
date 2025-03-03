@@ -51,6 +51,13 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     private val subs by lazy { getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager }
 
     private val subsListener by lazy { SubscriptionListener(mutableListOf()) }
+    private val opportunisticSubsListener by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            OpportunisticSubsListener()
+        } else {
+            null
+        }
+    }
     private val betweenUtils by lazy { BetweenUtils.getInstance(this) }
 
     private val callbackExecutor = coroutineContext.asExecutor()
@@ -203,6 +210,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
         cellModel.destroy()
         subs.removeOnSubscriptionsChangedListener(subsListener)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            opportunisticSubsListener?.let {
+                subs.addOnOpportunisticSubscriptionsChangedListener(callbackExecutor, it)
+            }
+        }
         cancel()
     }
 
@@ -218,6 +230,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             }
 
             subs.removeOnSubscriptionsChangedListener(subsListener)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                opportunisticSubsListener?.let {
+                    subs.removeOnOpportunisticSubscriptionsChangedListener(it)
+                }
+            }
             subsListener.clear()
 
             betweenUtils.queueClear()
@@ -229,6 +246,11 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 } else {
                     @Suppress("DEPRECATION")
                     subs.addOnSubscriptionsChangedListener(subsListener)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    opportunisticSubsListener?.let {
+                        subs.addOnOpportunisticSubscriptionsChangedListener(callbackExecutor, it)
+                    }
                 }
 
                 try {
@@ -340,7 +362,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         with (cellModel) {
             val sorted = infos.map { CellInfoWrapper.newInstance(it) }.sortedWith(CellUtils.CellInfoComparator)
 
-            val bands = SystemProperties.get("ril.lteband")?.split(",") ?: listOf()
+            val bands = SystemProperties.get("ril.lteband").split(",")
 
             if (infos.isEmpty() && strengthInfos.value[subId]?.isNotEmpty() == true) {
                 return
@@ -505,6 +527,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             currentList.clear()
         }
 
+        @SuppressLint("NewApi")
         override fun onSubscriptionsChanged() {
             try {
                 val newList = subs.allSubscriptionInfoList
@@ -549,6 +572,13 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
             } catch (ignored: SecurityException) {
                 stalledAfterSecurityException.set(true)
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private inner class OpportunisticSubsListener : SubscriptionManager.OnOpportunisticSubscriptionsChangedListener() {
+        override fun onOpportunisticSubscriptionsChanged() {
+            subsListener.onSubscriptionsChanged()
         }
     }
 }
