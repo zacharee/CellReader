@@ -71,7 +71,8 @@ class TelephonyListener(
 ) : TelephonyCallback(),
     TelephonyCallback.CellInfoListener, TelephonyCallback.SignalStrengthsListener,
     TelephonyCallback.ServiceStateListener, TelephonyCallback.DisplayInfoListener,
-    TelephonyCallback.DataConnectionStateListener {
+    TelephonyCallback.DataConnectionStateListener, TelephonyCallback.DataActivationStateListener,
+    TelephonyCallback.ActiveDataSubscriptionIdListener {
     @SuppressLint("MissingPermission")
     override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>) {
         listenerCallback.updateCellInfo(subId, cellInfo)
@@ -91,6 +92,14 @@ class TelephonyListener(
 
     override fun onDataConnectionStateChanged(state: Int, networkType: Int) {
         listenerCallback.updateDataConnectionState(subId, state, networkType)
+    }
+
+    override fun onDataActivationStateChanged(state: Int) {
+        listenerCallback.onDataActivationStateChanged(subId, state)
+    }
+
+    override fun onActiveDataSubscriptionIdChanged(subId: Int) {
+        listenerCallback.onActiveDataSubscriptionIdChanged(this.subId)
     }
 }
 
@@ -134,6 +143,16 @@ class StateListener(
     override fun onDataConnectionStateChanged(state: Int, networkType: Int) {
         listenerCallback.updateDataConnectionState(subId, state, networkType)
     }
+
+    @Deprecated("Deprecated in Java")
+    override fun onDataActivationStateChanged(state: Int) {
+        listenerCallback.onDataActivationStateChanged(subId, state)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActiveDataSubscriptionIdChanged(subId: Int) {
+        listenerCallback.onActiveDataSubscriptionIdChanged(this.subId)
+    }
 }
 
 interface TelephonyListenerCallback {
@@ -143,4 +162,6 @@ interface TelephonyListenerCallback {
     fun updatePhysicalChannelConfigs(subId: Int, configs: List<PhysicalChannelConfig>)
     fun updateDisplayInfo(subId: Int, telephonyDisplayInfo: TelephonyDisplayInfo?)
     fun updateDataConnectionState(subId: Int, state: Int, networkType: Int)
+    fun onDataActivationStateChanged(subId: Int, state: Int)
+    fun onActiveDataSubscriptionIdChanged(subId: Int)
 }

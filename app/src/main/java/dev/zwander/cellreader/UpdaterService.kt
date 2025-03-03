@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.glance.appwidget.updateAll
+import com.bugsnag.android.Bugsnag
 import dev.zwander.cellreader.data.*
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.*
@@ -508,6 +509,14 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         }
     }
 
+    override fun onDataActivationStateChanged(subId: Int, state: Int) {
+        subsListener.onSubscriptionsChanged()
+    }
+
+    override fun onActiveDataSubscriptionIdChanged(subId: Int) {
+        subsListener.onSubscriptionsChanged()
+    }
+
     private var lastUpdate = AtomicLong(0L)
 
     private suspend fun updateWidgets() {
@@ -529,48 +538,51 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
 
         @SuppressLint("NewApi")
         override fun onSubscriptionsChanged() {
-            try {
-                val newList = subs.allSubscriptionInfoList
-                val newIds = newList.map { it.subscriptionId }
-                val currentIds = currentList.map { it.subscriptionId }
+            launch {
+                try {
+                    val newList = subs.allSubscriptionInfoList
+                    val newIds = newList.map { it.subscriptionId }
+                    val currentIds = currentList.map { it.subscriptionId }
 
-                val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
+                    val defaultId = SubscriptionManager.getDefaultDataSubscriptionId()
 
-                if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
-                    clear()
-                    currentList.addAll(newList)
+                    if (newList.size != currentList.size || !(newIds.containsAll(currentIds) && currentIds.containsAll(newIds))) {
+                        clear()
+                        currentList.addAll(newList)
 
-                    refresh(newIds)
-                } else {
-                    launch {
-                        newList.forEach { subInfo ->
-                            cellModel.subInfos.update {
-                                it[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                        refresh(newIds)
+                    } else {
+                        launch {
+                            newList.forEach { subInfo ->
+                                cellModel.subInfos.update {
+                                    it[subInfo.subscriptionId] = SubscriptionInfoWrapper(subInfo, this@UpdaterService)
+                                }
+
+                                withContext(Dispatchers.IO) {
+                                    betweenUtils.queueSubscriptionInfo(cellModel.subInfos.value)
+                                }
+
+                                updateWidgets()
                             }
-
-                            withContext(Dispatchers.IO) {
-                                betweenUtils.queueSubscriptionInfo(cellModel.subInfos.value)
-                            }
-
-                            updateWidgets()
                         }
                     }
-                }
 
-                cellModel.primaryCell.value = defaultId
-                cellModel.subIds.update {
-                    it.updateComparator(SubsComparator(defaultId))
-                }
-
-                launch {
-                    updateWidgets()
-
-                    withContext(Dispatchers.IO) {
-                        betweenUtils.queuePrimaryCell(defaultId)
+                    cellModel.primaryCell.value = defaultId
+                    cellModel.subIds.update {
+                        it.updateComparator(SubsComparator(defaultId))
                     }
+
+                    launch {
+                        updateWidgets()
+
+                        withContext(Dispatchers.IO) {
+                            betweenUtils.queuePrimaryCell(defaultId)
+                        }
+                    }
+                } catch (e: SecurityException) {
+                    Bugsnag.notify(SecurityException("Unable to refresh sub info.", e))
+                    stalledAfterSecurityException.set(true)
                 }
-            } catch (ignored: SecurityException) {
-                stalledAfterSecurityException.set(true)
             }
         }
     }
