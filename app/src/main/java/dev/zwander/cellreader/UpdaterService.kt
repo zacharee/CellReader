@@ -212,7 +212,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
         subs.removeOnSubscriptionsChangedListener(subsListener)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             opportunisticSubsListener?.let {
-                subs.addOnOpportunisticSubscriptionsChangedListener(callbackExecutor, it)
+                subs.removeOnOpportunisticSubscriptionsChangedListener(it)
             }
         }
         cancel()
