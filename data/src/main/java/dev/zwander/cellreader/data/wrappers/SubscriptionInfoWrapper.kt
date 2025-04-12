@@ -60,7 +60,7 @@ data class SubscriptionInfoWrapper(
             SubscriptionInfo::class.java
                 .getMethod("getNameSource").invoke(info)
                 ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
-        } catch (e: NoSuchMethodException) {
+        } catch (_: NoSuchMethodException) {
             SubscriptionInfo::class.java
                 .getDeclaredMethod("getDisplayNameSource").invoke(info)
                 ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
@@ -102,7 +102,15 @@ data class SubscriptionInfoWrapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.serviceCapabilities else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isOnlyNonTerrestrialNetwork else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) info.usageSetting else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) info.transferStatus else null,
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
+            try {
+                info.transferStatus
+            } catch (_: Throwable) {
+                null
+            }
+        } else {
+            null
+        },
     )
 
     val iconBitmapBmp: Bitmap?
