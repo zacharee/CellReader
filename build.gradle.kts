@@ -1,5 +1,5 @@
-val versionCode by extra(35)
-val versionName by extra("0.22.3")
+val versionCode by extra(36)
+val versionName by extra("0.22.4")
 val targetSdk by extra(36)
 // This is the number you want to match when downloading the modified SDK JAR.
 val compileSdk by extra(36)
