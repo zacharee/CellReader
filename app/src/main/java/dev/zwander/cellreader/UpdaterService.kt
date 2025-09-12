@@ -220,7 +220,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
     }
 
     @SuppressLint("InlinedApi")
-    private fun refresh(newIds: List<Int> = emptyList()) {
+    private fun refresh(newIds: List<Int> = emptyList(), refreshSubsListener: Boolean = true) {
         stalledAfterSecurityException.set(false)
         cellModel.isRefreshing.value = true
         val isStarted = isStarted
@@ -230,27 +230,31 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                 delay(100)
             }
 
-            subs.removeOnSubscriptionsChangedListener(subsListener)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                opportunisticSubsListener?.let {
-                    subs.removeOnOpportunisticSubscriptionsChangedListener(it)
+            if (refreshSubsListener) {
+                subs.removeOnSubscriptionsChangedListener(subsListener)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    opportunisticSubsListener?.let {
+                        subs.removeOnOpportunisticSubscriptionsChangedListener(it)
+                    }
                 }
+                subsListener.clear()
             }
-            subsListener.clear()
 
             betweenUtils.queueClear()
             cellModel.destroy()
 
             if (newIds.isEmpty()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    subs.addOnSubscriptionsChangedListener(callbackExecutor, subsListener)
-                } else {
-                    @Suppress("DEPRECATION")
-                    subs.addOnSubscriptionsChangedListener(subsListener)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    opportunisticSubsListener?.let {
-                        subs.addOnOpportunisticSubscriptionsChangedListener(callbackExecutor, it)
+                if (refreshSubsListener) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        subs.addOnSubscriptionsChangedListener(callbackExecutor, subsListener)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        subs.addOnSubscriptionsChangedListener(subsListener)
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        opportunisticSubsListener?.let {
+                            subs.addOnOpportunisticSubscriptionsChangedListener(callbackExecutor, it)
+                        }
                     }
                 }
 
@@ -258,7 +262,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     if (subs.allSubscriptionInfoList.isEmpty()) {
                         init(listOf(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))
                     }
-                } catch (ignored: SecurityException) {
+                } catch (_: SecurityException) {
                     stalledAfterSecurityException.set(true)
                 }
             } else {
@@ -354,7 +358,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                     }
                 )
             }
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             stalledAfterSecurityException.set(true)
         }
     }
@@ -550,7 +554,7 @@ class UpdaterService : Service(), CoroutineScope by MainScope(), TelephonyListen
                         clear()
                         currentList.addAll(newList)
 
-                        refresh(newIds)
+                        refresh(newIds, false)
                     } else {
                         launch {
                             newList.forEach { subInfo ->
