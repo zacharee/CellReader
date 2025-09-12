@@ -71,7 +71,6 @@ dependencies {
 
     api(libs.gson.fire)
 
-    api(libs.plot)
     api(libs.androidChart)
 
     api(libs.kotlinx.coroutines.core)

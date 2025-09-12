@@ -14,7 +14,6 @@ coroutines = "1.10.2"
 lifecycleViewmodelCompose = "2.9.3"
 mpandroidchart = "3.1.0.25"
 patreonsupportersretrieval = "8436bbdbdc"
-plot = "0.1.2"
 compose = "1.9.1"
 compose-wear = "1.5.1"
 coreKtx = "1.17.0"
@@ -62,7 +61,6 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 androidChart = { module = "com.github.AppDevNext:AndroidChart", version.ref = "mpandroidchart" }
 patreonSupportersRetrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
 play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
-plot = { module = "com.github.madrapps:plot", version.ref = "plot" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
