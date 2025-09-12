@@ -107,6 +107,10 @@ fun SubInfo(
                 FormatText(R.string.transfer_status, stringResource(SubscriptionInfoWrapper.transferStatusToStringRes(it)))
             }
 
+            satelliteESOSSupported?.let {
+                FormatText(R.string.satellite_esos_supported, "$it")
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 FormatText(R.string.uicc_apps_format, "$uiccApplicationsEnabled")
             }

@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
@@ -13,6 +14,7 @@ data class TelephonyDisplayInfoWrapper(
     val overrideNetworkType: Int = CellInfo.TYPE_UNKNOWN,
     val isRoaming: Boolean?,
 ) {
+    @SuppressLint("UseRequiresApi")
     @TargetApi(Build.VERSION_CODES.R)
     constructor(info: TelephonyDisplayInfo) : this(
         info.networkType,

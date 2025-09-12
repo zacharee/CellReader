@@ -47,6 +47,7 @@ data class SubscriptionInfoWrapper(
     val isOnlyNonTerrestrialNetwork: Boolean?,
     val usageSetting: Int?,
     val transferStatus: Int?,
+    val satelliteESOSSupported: Boolean?,
 ) {
     @SuppressLint("MissingPermission", "InlinedApi")
     constructor(info: SubscriptionInfo, context: Context) : this(
@@ -111,6 +112,7 @@ data class SubscriptionInfoWrapper(
         } else {
             null
         },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) info.isSatelliteESOSSupported else null,
     )
 
     val iconBitmapBmp: Bitmap?
