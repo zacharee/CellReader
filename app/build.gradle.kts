@@ -21,6 +21,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        extensions.getByType(BasePluginExtension::class.java).archivesName.set("CellReader_${versionName}")
     }
 
     buildTypes {
