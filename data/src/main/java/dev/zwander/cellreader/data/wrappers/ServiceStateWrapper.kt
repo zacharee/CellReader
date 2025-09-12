@@ -244,45 +244,45 @@ data class ServiceStateWrapper(
 
     @SuppressLint("MissingPermission")
     constructor(state: ServiceState) : this(
-        state.operatorAlphaLong,
-        state.operatorAlphaShort,
-        state.operatorNumeric,
-        state.isManualSelection,
-        state.isEmergencyOnly,
-        state.cssIndicator,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaNetworkId else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaSystemId else CellInfo.UNAVAILABLE,
-        try {
+        operatorAlphaLong = state.operatorAlphaLong,
+        operatorAlphaShort = state.operatorAlphaShort,
+        operatorNumeric = state.operatorNumeric,
+        manualNetworkSelection = state.isManualSelection,
+        emergencyOnly = state.isEmergencyOnly,
+        cssIndicator = state.cssIndicator,
+        networkId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaNetworkId else CellInfo.UNAVAILABLE,
+        systemId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaSystemId else CellInfo.UNAVAILABLE,
+        cdmaRoamingIndicator = try {
             state.cdmaRoamingIndicator
         } catch (_: NoSuchMethodError) {
             CellInfo.UNAVAILABLE
         },
-        try {
+        cdmaDefaultRoamingIndicator = try {
             state.cdmaDefaultRoamingIndicator
         } catch (_: NoSuchMethodError) {
             CellInfo.UNAVAILABLE
         },
-        state.cdmaEriIconIndex,
-        state.cdmaEriIconMode,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.nrFrequencyRange else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.channelNumber else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ArrayList(state.cellBandwidths.toList()) else arrayListOf(),
-        try {
+        cdmaEriIconIndex = state.cdmaEriIconIndex,
+        cdmaEriIconMode = state.cdmaEriIconMode,
+        nrFrequencyRange = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.nrFrequencyRange else CellInfo.UNAVAILABLE,
+        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.channelNumber else CellInfo.UNAVAILABLE,
+        cellBandwidths = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ArrayList(state.cellBandwidths.toList()) else arrayListOf(),
+        arfcnRsrpBoost = try {
             state.arfcnRsrpBoost
         } catch (_: Throwable) {
             0
         },
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        networkRegistrationInfos = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             ArrayList(state.networkRegistrationInfoList.map { NetworkRegistrationInfoWrapper(it) })
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaLongRaw else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaShortRaw else null,
-        state.dataRoamingFromRegistration,
-        state.isIwlanPreferredCompat,
-        state.dataRegState,
-        state.voiceRegState,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) state.isUsingNonTerrestrialNetwork else null,
+        operatorAlphaLongRaw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaLongRaw else null,
+        operatorAlphaShortRaw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaShortRaw else null,
+        dataRoamingFromRegistration = state.dataRoamingFromRegistration,
+        iWlanPreferred = state.isIwlanPreferredCompat,
+        dataRegState = state.dataRegState,
+        voiceRegState = state.voiceRegState,
+        isUsingNonTerrestrialNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) state.isUsingNonTerrestrialNetwork else null,
     )
 }

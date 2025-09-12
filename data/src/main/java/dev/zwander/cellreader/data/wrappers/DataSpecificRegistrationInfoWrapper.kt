@@ -13,16 +13,16 @@ data class DataSpecificRegistrationInfoWrapper(
     val lteAttachExtraInfo: Int?,
 ) {
     constructor(info: DataSpecificRegistrationInfo) : this(
-        info.maxDataCalls,
-        info.isDcNrRestricted,
-        info.isNrAvailable,
-        info.isEnDcAvailable,
-        try {
+        maxDataCalls = info.maxDataCalls,
+        isDcNrRestricted = info.isDcNrRestricted,
+        isNrAvailable = info.isNrAvailable,
+        isEnDcAvailable = info.isEnDcAvailable,
+        vopsSupportInfo = try {
             info.vopsSupportInfo?.let { vops -> VopsSupportInfoWrapper.newInstance(vops) }
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.lteAttachResultType else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.lteAttachExtraInfo else null,
+        lteAttachResultType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.lteAttachResultType else null,
+        lteAttachExtraInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.lteAttachExtraInfo else null,
     )
 }

@@ -11,8 +11,8 @@ data class ClosedSubscriberGroupInfoWrapper(
 ) {
     @RequiresApi(Build.VERSION_CODES.R)
     constructor(info: ClosedSubscriberGroupInfo) : this(
-        info.csgIndicator,
-        info.homeNodebName,
-        info.csgIdentity
+        csgIndicator = info.csgIndicator,
+        homeNodebName = info.homeNodebName,
+        csgIdentity = info.csgIdentity,
     )
 }

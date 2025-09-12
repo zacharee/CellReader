@@ -33,6 +33,7 @@ sealed class CellIdentityWrapper(
 
     val arfcnInfo: List<ARFCNInfo> by lazy { ARFCNTools.getInfo(channelNumber, type) }
 
+    @Suppress("DEPRECATION")
     companion object {
         @Suppress("UNCHECKED_CAST")
         fun <T : CellIdentityWrapper> newInstance(identity: Any): T {
@@ -73,24 +74,24 @@ data class CellIdentityGsmWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellType.GSM
+    CellType.GSM,
 ) {
     constructor(identity: CellIdentityGsm) : this(
-        identity.lac,
-        identity.cid,
-        identity.arfcn,
-        identity.bsic,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        lac = identity.lac,
+        cid = identity.cid,
+        arfcn = identity.arfcn,
+        bsic = identity.bsic,
+        additionalPlmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.arfcn
+        mcc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
+        mnc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
+        alphaLong = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        alphaShort = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
+        globalCellId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
+        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.arfcn,
     )
 
     override fun hashCode(): Int {
@@ -98,7 +99,7 @@ data class CellIdentityGsmWrapper(
             lac, cid,
             additionalPlmns,
             mcc, mnc,
-            alphaLong, alphaShort
+            alphaLong, alphaShort,
         )
     }
 
@@ -117,6 +118,7 @@ data class CellIdentityGsmWrapper(
     }
 }
 
+@Suppress("DEPRECATION")
 data class CellIdentityCdmaWrapper(
     val networkId: Int,
     val systemId: Int,
@@ -128,22 +130,22 @@ data class CellIdentityCdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellType.CDMA
+    CellType.CDMA,
 ) {
     override val mcc: String? = null
     override val mnc: String? = null
 
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityCdma) : this(
-        identity.networkId,
-        identity.systemId,
-        identity.basestationId,
-        identity.longitude,
-        identity.latitude,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else CellInfo.UNAVAILABLE
+        networkId = identity.networkId,
+        systemId = identity.systemId,
+        basestationId = identity.basestationId,
+        longitude = identity.longitude,
+        latitude = identity.latitude,
+        alphaLong = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        alphaShort = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
+        globalCellId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
+        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else CellInfo.UNAVAILABLE
     )
 
     override fun hashCode(): Int {
@@ -153,7 +155,7 @@ data class CellIdentityCdmaWrapper(
             basestationId,
             latitude,
             longitude,
-            alphaLong, alphaShort
+            alphaLong, alphaShort,
         )
     }
 
@@ -183,34 +185,34 @@ data class CellIdentityTdscdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellType.TDSCDMA
+    CellType.TDSCDMA,
 ) {
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityTdscdma) : this(
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.lac else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cid else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cpid else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        lac = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.lac else CellInfo.UNAVAILABLE,
+        cid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cid else CellInfo.UNAVAILABLE,
+        cpid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.cpid else CellInfo.UNAVAILABLE,
+        uarfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             identity.uarfcn
         } else {
             -1
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        additionalPlmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        csgInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             identity.closedSubscriberGroupInfo?.let { ClosedSubscriberGroupInfoWrapper(it) }
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else CellInfo.UNAVAILABLE,
+        mcc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else null,
+        mnc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else null,
+        alphaLong = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        alphaShort = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
+        globalCellId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
+        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else CellInfo.UNAVAILABLE,
     )
 
     override fun hashCode(): Int {
@@ -222,7 +224,7 @@ data class CellIdentityTdscdmaWrapper(
             additionalPlmns,
             csgInfo,
             mcc, mnc, alphaLong, alphaShort,
-            globalCellId, channelNumber
+            globalCellId, channelNumber,
         )
     }
 
@@ -258,29 +260,29 @@ data class CellIdentityWcdmaWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellType.WCDMA
+    CellType.WCDMA,
 ) {
     constructor(identity: CellIdentityWcdma) : this(
-        identity.lac,
-        identity.cid,
-        identity.psc,
-        identity.uarfcn,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        lac = identity.lac,
+        cid = identity.cid,
+        psc = identity.psc,
+        uarfcn = identity.uarfcn,
+        additionalPlmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        csgInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             identity.closedSubscriberGroupInfo?.let { ClosedSubscriberGroupInfoWrapper(it) }
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.uarfcn
+        mcc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
+        mnc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
+        alphaLong = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        alphaShort = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
+        globalCellId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
+        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.uarfcn,
     )
 
     override fun hashCode(): Int {
@@ -292,7 +294,7 @@ data class CellIdentityWcdmaWrapper(
             additionalPlmns,
             csgInfo,
             mcc, mnc, alphaLong, alphaShort,
-            globalCellId, channelNumber
+            globalCellId, channelNumber,
         )
     }
 
@@ -330,36 +332,36 @@ data class CellIdentityLteWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellType.LTE
+    CellType.LTE,
 ) {
     @SuppressLint("InlinedApi")
     constructor(identity: CellIdentityLte) : this(
-        identity.ci,
-        identity.pci,
-        identity.tac,
-        identity.earfcn,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.bandwidth else CellInfo.UNAVAILABLE,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        ci = identity.ci,
+        pci = identity.pci,
+        tac = identity.tac,
+        earfcn = identity.earfcn,
+        bandwidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.bandwidth else CellInfo.UNAVAILABLE,
+        realBands = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             identity.bands.toList().map { it.toString() }
         } else {
             listOf()
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        additionalPlmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        csgInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             identity.closedSubscriberGroupInfo?.let { ClosedSubscriberGroupInfoWrapper(it) }
         } else {
             null
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.earfcn
+        mcc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mccString else identity.mcc.onAvail { it.toString() },
+        mnc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.mncString else identity.mnc.onAvail { it.toString() },
+        alphaLong = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaLong.toString() else null,
+        alphaShort = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.operatorAlphaShort.toString() else null,
+        globalCellId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
+        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) identity.channelNumber else identity.earfcn,
     )
 
     override fun hashCode(): Int {
@@ -374,7 +376,7 @@ data class CellIdentityLteWrapper(
             realBands,
             inferredBands,
             mcc, mnc, alphaLong, alphaShort,
-            globalCellId, channelNumber
+            globalCellId, channelNumber,
         )
     }
 
@@ -412,30 +414,30 @@ data class CellIdentityNrWrapper(
     override val globalCellId: String?,
     override val channelNumber: Int
 ) : CellIdentityWrapper(
-    CellType.NR
+    CellType.NR,
 ) {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(identity: CellIdentityNr) : this(
-        identity.nrarfcn,
-        identity.pci,
-        identity.tac,
-        identity.nci,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        nrArfcn = identity.nrarfcn,
+        pci = identity.pci,
+        tac = identity.tac,
+        nci = identity.nci,
+        realBands = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             identity.bands.toList().map { it.toString() }
         } else {
             listOf()
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        additionalPlmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList(identity.additionalPlmns)
         } else {
             null
         },
-        identity.mccString,
-        identity.mncString,
-        identity.operatorAlphaLong.toString(),
-        identity.operatorAlphaShort.toString(),
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
-        identity.channelNumber
+        mcc = identity.mccString,
+        mnc = identity.mncString,
+        alphaLong = identity.operatorAlphaLong.toString(),
+        alphaShort = identity.operatorAlphaShort.toString(),
+        globalCellId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) identity.globalCellId else null,
+        channelNumber = identity.channelNumber,
     )
 
     override fun hashCode(): Int {
@@ -448,7 +450,7 @@ data class CellIdentityNrWrapper(
             realBands,
             inferredBands,
             mcc, mnc, alphaLong, alphaShort,
-            globalCellId, channelNumber
+            globalCellId, channelNumber,
         )
     }
 

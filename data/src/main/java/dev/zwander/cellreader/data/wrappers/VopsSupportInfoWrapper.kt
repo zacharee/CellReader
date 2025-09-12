@@ -24,7 +24,7 @@ sealed class VopsSupportInfoWrapper {
 
 data class LteVopsSupportInfoWrapper(
     val vopsSupport: Int,
-    override val emcBearerSupport: Int
+    override val emcBearerSupport: Int,
 ) : VopsSupportInfoWrapper() {
     override val vopsSupported: Boolean
         get() = vopsSupport != LteVopsSupportInfo.LTE_STATUS_NOT_SUPPORTED
@@ -36,15 +36,15 @@ data class LteVopsSupportInfoWrapper(
         get() = false
 
     constructor(info: LteVopsSupportInfo) : this(
-        info.vopsSupport,
-        info.emcBearerSupport
+        vopsSupport = info.vopsSupport,
+        emcBearerSupport = info.emcBearerSupport,
     )
 }
 
 data class NrVopsSupportInfoWrapper(
     val vopsSupport: Int,
     override val emcBearerSupport: Int,
-    val emfSupport: Int
+    val emfSupport: Int,
 ) : VopsSupportInfoWrapper() {
     override val vopsSupported: Boolean
         get() = vopsSupport != NrVopsSupportInfo.NR_STATUS_VOPS_NOT_SUPPORTED
@@ -56,8 +56,8 @@ data class NrVopsSupportInfoWrapper(
         get() = emfSupport != NrVopsSupportInfo.NR_STATUS_EMF_NOT_SUPPORTED
 
     constructor(info: NrVopsSupportInfo) : this(
-        info.vopsSupport,
-        info.emcSupport,
-        info.emfSupport
+        vopsSupport = info.vopsSupport,
+        emcBearerSupport = info.emcSupport,
+        emfSupport = info.emfSupport,
     )
 }

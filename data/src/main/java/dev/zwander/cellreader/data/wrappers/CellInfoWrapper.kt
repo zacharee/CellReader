@@ -9,6 +9,7 @@ import java.util.*
 sealed class CellInfoWrapper {
     companion object {
         fun newInstance(info: CellInfo): CellInfoWrapper {
+            @Suppress("DEPRECATION")
             return when {
                 info is CellInfoGsm -> CellInfoGsmWrapper(info)
                 info is CellInfoCdma -> CellInfoCdmaWrapper(info)
@@ -49,30 +50,31 @@ data class CellInfoGsmWrapper(
     override var timeStamp: Long,
     override var connectionStatus: Int,
     override val cellIdentity: CellIdentityGsmWrapper,
-    override val cellSignalStrength: CellSignalStrengthGsmWrapper
+    override val cellSignalStrength: CellSignalStrengthGsmWrapper,
 ) : CellInfoWrapper() {
     constructor(info: CellInfoGsm) : this(
-        info.isRegistered,
-        info.timeStampMillisCompat,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityWrapper.newInstance(info.cellIdentity),
-        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength)
+        isRegistered = info.isRegistered,
+        timeStamp = info.timeStampMillisCompat,
+        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
+        cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }
 
+@Suppress("DEPRECATION")
 data class CellInfoCdmaWrapper(
     override var isRegistered: Boolean,
     override var timeStamp: Long,
     override var connectionStatus: Int,
     override val cellIdentity: CellIdentityCdmaWrapper,
-    override val cellSignalStrength: CellSignalStrengthCdmaWrapper
+    override val cellSignalStrength: CellSignalStrengthCdmaWrapper,
 ) : CellInfoWrapper() {
     constructor(info: CellInfoCdma) : this(
-        info.isRegistered,
-        info.timeStampMillisCompat,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityWrapper.newInstance(info.cellIdentity),
-        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength)
+        isRegistered = info.isRegistered,
+        timeStamp = info.timeStampMillisCompat,
+        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
+        cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }
 
@@ -81,15 +83,15 @@ data class CellInfoTdscdmaWrapper(
     override var timeStamp: Long,
     override var connectionStatus: Int,
     override val cellIdentity: CellIdentityTdscdmaWrapper,
-    override val cellSignalStrength: CellSignalStrengthTdscdmaWrapper
+    override val cellSignalStrength: CellSignalStrengthTdscdmaWrapper,
 ) : CellInfoWrapper() {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(info: CellInfoTdscdma) : this(
-        info.isRegistered,
-        info.timeStampMillisCompat,
-        info.cellConnectionStatus,
-        CellIdentityWrapper.newInstance(info.cellIdentity),
-        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
+        isRegistered = info.isRegistered,
+        timeStamp = info.timeStampMillisCompat,
+        connectionStatus = info.cellConnectionStatus,
+        cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
+        cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }
 
@@ -98,14 +100,14 @@ data class CellInfoWcdmaWrapper(
     override var timeStamp: Long,
     override var connectionStatus: Int,
     override val cellIdentity: CellIdentityWcdmaWrapper,
-    override val cellSignalStrength: CellSignalStrengthWcdmaWrapper
+    override val cellSignalStrength: CellSignalStrengthWcdmaWrapper,
 ) : CellInfoWrapper() {
     constructor(info: CellInfoWcdma) : this(
-        info.isRegistered,
-        info.timeStampMillisCompat,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityWrapper.newInstance(info.cellIdentity),
-        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
+        isRegistered = info.isRegistered,
+        timeStamp = info.timeStampMillisCompat,
+        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
+        cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }
 
@@ -115,15 +117,15 @@ data class CellInfoLteWrapper(
     override var connectionStatus: Int,
     override val cellIdentity: CellIdentityLteWrapper,
     override val cellSignalStrength: CellSignalStrengthLteWrapper,
-    val cellConfig: CellConfigLteWrapper?
+    val cellConfig: CellConfigLteWrapper?,
 ) : CellInfoWrapper() {
     constructor(info: CellInfoLte) : this(
-        info.isRegistered,
-        info.timeStampMillisCompat,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
-        CellIdentityWrapper.newInstance(info.cellIdentity),
-        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null,
+        isRegistered = info.isRegistered,
+        timeStamp = info.timeStampMillisCompat,
+        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
+        cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
+        cellConfig = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null,
     )
 
     override fun hashCode(): Int {
@@ -142,14 +144,14 @@ data class CellInfoNrWrapper(
     override var timeStamp: Long,
     override var connectionStatus: Int,
     override val cellIdentity: CellIdentityNrWrapper,
-    override val cellSignalStrength: CellSignalStrengthNrWrapper
+    override val cellSignalStrength: CellSignalStrengthNrWrapper,
 ) : CellInfoWrapper() {
     @RequiresApi(Build.VERSION_CODES.Q)
     constructor(info: CellInfoNr) : this(
-        info.isRegistered,
-        info.timeStampMillisCompat,
-        info.cellConnectionStatus,
-        CellIdentityWrapper.newInstance(info.cellIdentity),
-        CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
+        isRegistered = info.isRegistered,
+        timeStamp = info.timeStampMillisCompat,
+        connectionStatus = info.cellConnectionStatus,
+        cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
+        cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
 }

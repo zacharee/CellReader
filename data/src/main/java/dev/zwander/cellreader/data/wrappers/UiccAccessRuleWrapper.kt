@@ -26,15 +26,15 @@ data class UiccAccessRuleWrapper(
     }
 
     constructor(rule: UiccAccessRule) : this(
-        rule::class.java
+        certificateHash = rule::class.java
             .getDeclaredField("mCertificateHash")
             .apply { isAccessible = true }
             .get(rule) as ByteArray,
-        rule.packageName,
-        rule::class.java
+        packageName = rule.packageName,
+        accessType = rule::class.java
             .getDeclaredField("mAccessType")
             .apply { isAccessible = true }
-            .getLong(rule)
+            .getLong(rule),
     )
 
     override fun equals(other: Any?): Boolean {

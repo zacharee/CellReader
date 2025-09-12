@@ -72,28 +72,29 @@ data class NetworkRegistrationInfoWrapper(
         get() = registrationState == NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING
 
     constructor(info: NetworkRegistrationInfo) : this(
-        info.domain,
-        info.transportType,
-        try {
+        domain = info.domain,
+        transportType = info.transportType,
+        registrationState = try {
             info.networkRegistrationState
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
+            @Suppress("DEPRECATION")
             info.registrationState
         },
-        info.roamingType,
-        info.accessNetworkTechnology,
-        info.nrState,
-        info.rejectCause,
-        info.isEmergencyEnabled,
-        ArrayList(info.availableServices),
-        info.cellIdentity?.let { CellIdentityWrapper.newInstance(it) },
-        info.voiceSpecificInfo?.let { VoiceSpecificRegistrationInfoWrapper(it) },
-        info.dataSpecificInfo?.let { DataSpecificRegistrationInfoWrapper(it) },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.registeredPlmn else null,
-        try {
+        roamingType = info.roamingType,
+        accessNetworkTechnology = info.accessNetworkTechnology,
+        nrState = info.nrState,
+        rejectCause = info.rejectCause,
+        emergencyOnly = info.isEmergencyEnabled,
+        availableServices = ArrayList(info.availableServices),
+        cellIdentity = info.cellIdentity?.let { CellIdentityWrapper.newInstance(it) },
+        voiceSpecificInfo = info.voiceSpecificInfo?.let { VoiceSpecificRegistrationInfoWrapper(it) },
+        dataSpecificInfo = info.dataSpecificInfo?.let { DataSpecificRegistrationInfoWrapper(it) },
+        rplmn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.registeredPlmn else null,
+        isUsingCarrierAggregation = try {
             info.isUsingCarrierAggregation
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             false
         },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isNonTerrestrialNetwork else null,
+        isNonTerrestrialNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isNonTerrestrialNetwork else null,
     )
 }

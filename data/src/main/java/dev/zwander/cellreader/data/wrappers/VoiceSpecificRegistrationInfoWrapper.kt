@@ -9,9 +9,9 @@ data class VoiceSpecificRegistrationInfoWrapper(
     val defaultRoamingIndicator: Int
 ) {
     constructor(info: VoiceSpecificRegistrationInfo) : this(
-        info.cssSupported,
-        info.roamingIndicator,
-        info.systemIsInPrl,
-        info.defaultRoamingIndicator
+        cssSupported = info.cssSupported,
+        roamingIndicator = info.roamingIndicator,
+        systemIsInPrl = info.systemIsInPrl,
+        defaultRoamingIndicator = info.defaultRoamingIndicator,
     )
 }

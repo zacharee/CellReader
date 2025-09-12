@@ -17,9 +17,9 @@ data class TelephonyDisplayInfoWrapper(
     @SuppressLint("UseRequiresApi")
     @TargetApi(Build.VERSION_CODES.R)
     constructor(info: TelephonyDisplayInfo) : this(
-        info.networkType,
-        info.overrideNetworkType,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.isRoaming else null,
+        networkType = info.networkType,
+        overrideNetworkType = info.overrideNetworkType,
+        isRoaming = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.isRoaming else null,
     )
 
     companion object {
