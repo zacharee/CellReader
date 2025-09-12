@@ -43,13 +43,14 @@ data class ServiceStateWrapper(
 
         /**
          * Transform network type [NetworkType] value to RIL radio technology
-         * [RilRadioTechnology].
+         * [android.telephony.ServiceState.RilRadioTechnology].
          *
          * @param networkType The network type [NetworkType].
-         * @return The RIL radio technology [RilRadioTechnology].
+         * @return The RIL radio technology [android.telephony.ServiceState.RilRadioTechnology].
          *
          * @hide
          */
+        @Suppress("DEPRECATION")
         fun networkTypeToRilRadioTechnology(networkType: Int): Int {
             return when (networkType) {
                 TelephonyManager.NETWORK_TYPE_GPRS -> ServiceState.RIL_RADIO_TECHNOLOGY_GPRS
@@ -251,8 +252,16 @@ data class ServiceStateWrapper(
         state.cssIndicator,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaNetworkId else CellInfo.UNAVAILABLE,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaSystemId else CellInfo.UNAVAILABLE,
-        state.cdmaRoamingIndicator,
-        state.cdmaDefaultRoamingIndicator,
+        try {
+            state.cdmaRoamingIndicator
+        } catch (_: NoSuchMethodError) {
+            CellInfo.UNAVAILABLE
+        },
+        try {
+            state.cdmaDefaultRoamingIndicator
+        } catch (_: NoSuchMethodError) {
+            CellInfo.UNAVAILABLE
+        },
         state.cdmaEriIconIndex,
         state.cdmaEriIconMode,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.nrFrequencyRange else CellInfo.UNAVAILABLE,
@@ -260,7 +269,7 @@ data class ServiceStateWrapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ArrayList(state.cellBandwidths.toList()) else arrayListOf(),
         try {
             state.arfcnRsrpBoost
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             0
         },
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
