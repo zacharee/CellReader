@@ -5,7 +5,7 @@ import android.telephony.UiccAccessRule
 data class UiccAccessRuleWrapper(
     val certificateHash: ByteArray,
     val packageName: String?,
-    val accessType: Long
+    val accessType: Long,
 ) {
     companion object {
         private val HEX_CHARS = charArrayOf(

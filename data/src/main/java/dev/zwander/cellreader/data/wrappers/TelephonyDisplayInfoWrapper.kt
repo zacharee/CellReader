@@ -8,6 +8,7 @@ import android.telephony.Annotation.OverrideNetworkType
 import android.telephony.CellInfo
 import android.telephony.TelephonyDisplayInfo
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.util.withMinApi
 
 data class TelephonyDisplayInfoWrapper(
     val networkType: Int = CellInfo.TYPE_UNKNOWN,
@@ -19,7 +20,9 @@ data class TelephonyDisplayInfoWrapper(
     constructor(info: TelephonyDisplayInfo) : this(
         networkType = info.networkType,
         overrideNetworkType = info.overrideNetworkType,
-        isRoaming = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) info.isRoaming else null,
+        isRoaming = withMinApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            info.isRoaming
+        },
     )
 
     companion object {

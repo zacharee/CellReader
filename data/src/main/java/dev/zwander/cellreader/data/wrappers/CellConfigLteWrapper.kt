@@ -4,7 +4,7 @@ import android.telephony.CellConfigLte
 import dev.zwander.cellreader.data.endcAvailable
 
 data class CellConfigLteWrapper(
-    val endcAvailable: Boolean
+    val endcAvailable: Boolean,
 ) {
     constructor(config: CellConfigLte) : this(endcAvailable = config.endcAvailable)
 }

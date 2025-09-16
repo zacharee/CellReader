@@ -7,7 +7,7 @@ import androidx.annotation.RequiresApi
 data class ClosedSubscriberGroupInfoWrapper(
     val csgIndicator: Boolean,
     val homeNodebName: String?,
-    val csgIdentity: Int
+    val csgIdentity: Int,
 ) {
     @RequiresApi(Build.VERSION_CODES.R)
     constructor(info: ClosedSubscriberGroupInfo) : this(

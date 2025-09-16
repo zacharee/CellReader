@@ -6,7 +6,7 @@ data class VoiceSpecificRegistrationInfoWrapper(
     val cssSupported: Boolean,
     val roamingIndicator: Int,
     val systemIsInPrl: Int,
-    val defaultRoamingIndicator: Int
+    val defaultRoamingIndicator: Int,
 ) {
     constructor(info: VoiceSpecificRegistrationInfo) : this(
         cssSupported = info.cssSupported,

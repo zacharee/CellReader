@@ -13,6 +13,8 @@ import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.allAccessRulesCompat
 import dev.zwander.cellreader.data.cardIdCompat
 import dev.zwander.cellreader.data.util.onAvail
+import dev.zwander.cellreader.data.util.withMinApi
+import dev.zwander.cellreader.data.util.withTryCatch
 import java.io.ByteArrayOutputStream
 
 data class SubscriptionInfoWrapper(
@@ -29,11 +31,11 @@ data class SubscriptionInfoWrapper(
     val iconBitmap: String?,
     val mcc: String?,
     val mnc: String?,
-    val ehplmns: ArrayList<String>?,
-    val hplmns: ArrayList<String>?,
+    val ehplmns: List<String>?,
+    val hplmns: List<String>?,
     val countryIso: String?,
     val embedded: Boolean?,
-    val accessRules: ArrayList<UiccAccessRuleWrapper>?,
+    val accessRules: List<UiccAccessRuleWrapper>?,
     val cardString: String?,
     val cardId: String?,
     val opportunistic: Boolean?,
@@ -56,7 +58,9 @@ data class SubscriptionInfoWrapper(
         simSlotIndex = info.simSlotIndex,
         displayName = info.displayName?.toString(),
         carrierName = info.carrierName?.toString(),
-        carrierId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.carrierId else CellInfo.UNAVAILABLE,
+        carrierId = withMinApi(Build.VERSION_CODES.Q, CellInfo.UNAVAILABLE) {
+            info.carrierId
+        },
         nameSource = try {
             SubscriptionInfo::class.java
                 .getMethod("getNameSource").invoke(info)
@@ -67,13 +71,10 @@ data class SubscriptionInfoWrapper(
                 ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
         },
         iconTint = info.iconTint,
-        number = if (Build.VERSION.SDK_INT >= 33) {
+        number = withMinApi(Build.VERSION_CODES.TIRAMISU, info.number) {
             (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(
                 info.subscriptionId
             )
-        } else {
-            @Suppress("DEPRECATION")
-            info.number
         },
         dataRoaming = info.dataRoaming,
         iconBitmap = ByteArrayOutputStream().use { output ->
@@ -83,36 +84,66 @@ data class SubscriptionInfoWrapper(
             Base64.encodeToString(output.toByteArray(), Base64.DEFAULT)
         },
         mcc = @Suppress("DEPRECATION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mccString else info.mcc.onAvail { it.toString() },
-        mnc = @Suppress("DEPRECATION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.mncString else info.mnc.onAvail { it.toString() },
-        ehplmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ArrayList(info.ehplmns) else arrayListOf(),
-        hplmns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ArrayList(info.hplmns) else arrayListOf(),
-        countryIso = info.countryIso,
-        embedded = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) info.isEmbedded else null,
-        accessRules = ArrayList(info.allAccessRulesCompat.map { UiccAccessRuleWrapper(it) }),
-        cardString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.cardString else null,
-        cardId = info.cardIdCompat,
-        opportunistic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isOpportunistic else null,
-        groupUuid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupUuid?.toString() else null,
-        groupOwner = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.groupOwner else null,
-        groupDisabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.isGroupDisabled else null,
-        profileClass = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.profileClass else CellInfo.UNAVAILABLE,
-        subscriptionType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) info.subscriptionType else CellInfo.UNAVAILABLE,
-        uiccApplicationsEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.areUiccApplicationsEnabled() else null,
-        serviceCapabilities = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.serviceCapabilities else null,
-        isOnlyNonTerrestrialNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isOnlyNonTerrestrialNetwork else null,
-        usageSetting = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) info.usageSetting else null,
-        transferStatus = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
-            try {
-                info.transferStatus
-            } catch (_: Throwable) {
-                null
-            }
-        } else {
-            null
+        withMinApi(Build.VERSION_CODES.Q, info.mcc.onAvail { it.toString() }) {
+            info.mccString
         },
-        satelliteESOSSupported = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) info.isSatelliteESOSSupported else null,
+        mnc = @Suppress("DEPRECATION")
+        withMinApi(Build.VERSION_CODES.Q, info.mnc.onAvail { it.toString() }) {
+            info.mncString
+        },
+        ehplmns = withMinApi(Build.VERSION_CODES.Q, listOf()) {
+            info.ehplmns
+        },
+        hplmns = withMinApi(Build.VERSION_CODES.Q, listOf()) {
+            info.hplmns
+        },
+        countryIso = info.countryIso,
+        embedded = withMinApi(Build.VERSION_CODES.O_MR1) {
+            info.isEmbedded
+        },
+        accessRules = info.allAccessRulesCompat.map { UiccAccessRuleWrapper(it) },
+        cardString = withMinApi(Build.VERSION_CODES.Q) {
+            info.cardString
+        },
+        cardId = info.cardIdCompat,
+        opportunistic = withMinApi(Build.VERSION_CODES.Q) {
+            info.isOpportunistic
+        },
+        groupUuid = withMinApi(Build.VERSION_CODES.Q) {
+            info.groupUuid?.toString()
+        },
+        groupOwner = withMinApi(Build.VERSION_CODES.Q) {
+            info.groupOwner
+        },
+        groupDisabled = withMinApi(Build.VERSION_CODES.Q) {
+            info.isGroupDisabled
+        },
+        profileClass = withMinApi(Build.VERSION_CODES.Q, CellInfo.UNAVAILABLE) {
+            info.profileClass
+        },
+        subscriptionType = withMinApi(Build.VERSION_CODES.Q, CellInfo.UNAVAILABLE) {
+            info.subscriptionType
+        },
+        uiccApplicationsEnabled = withMinApi(Build.VERSION_CODES.R) {
+            info.areUiccApplicationsEnabled()
+        },
+        serviceCapabilities = withMinApi(Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            info.serviceCapabilities
+        },
+        isOnlyNonTerrestrialNetwork = withMinApi(Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            info.isOnlyNonTerrestrialNetwork
+        },
+        usageSetting = withMinApi(Build.VERSION_CODES.TIRAMISU) {
+            info.usageSetting
+        },
+        transferStatus = withMinApi(Build.VERSION_CODES.TIRAMISU) {
+            withTryCatch {
+                info.transferStatus
+            }
+        },
+        satelliteESOSSupported = withMinApi(Build.VERSION_CODES.BAKLAVA) {
+            info.isSatelliteESOSSupported
+        },
     )
 
     val iconBitmapBmp: Bitmap?

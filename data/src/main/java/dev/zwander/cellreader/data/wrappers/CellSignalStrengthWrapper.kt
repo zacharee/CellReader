@@ -6,6 +6,7 @@ import android.telephony.*
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.bitErrorRateCompat
 import dev.zwander.cellreader.data.isValidCompat
+import dev.zwander.cellreader.data.util.withMinApi
 import java.util.*
 
 sealed class CellSignalStrengthWrapper(val type: CellType) {
@@ -44,9 +45,13 @@ data class CellSignalStrengthGsmWrapper(
 ) : CellSignalStrengthWrapper(CellType.GSM) {
     @SuppressLint("NewApi")
     constructor(strength: CellSignalStrengthGsm) : this(
-        rssi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
+        rssi = withMinApi(Build.VERSION_CODES.Q, CellInfo.UNAVAILABLE) {
+            strength.rssi
+        },
         bitErrorRate = strength.bitErrorRateCompat,
-        timingAdvance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) strength.timingAdvance else CellInfo.UNAVAILABLE,
+        timingAdvance = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            strength.timingAdvance
+        },
         level = strength.level,
         dbm = strength.dbm,
         valid = strength.isValidCompat,
@@ -57,7 +62,7 @@ data class CellSignalStrengthGsmWrapper(
         return Objects.hash(
             rssi,
             bitErrorRate,
-            timingAdvance
+            timingAdvance,
         )
     }
 
@@ -104,7 +109,7 @@ data class CellSignalStrengthCdmaWrapper(
         level = strength.level,
         dbm = strength.dbm,
         valid = strength.isValidCompat,
-        asuLevel = strength.asuLevel
+        asuLevel = strength.asuLevel,
     )
 
     override fun hashCode(): Int {
@@ -114,7 +119,7 @@ data class CellSignalStrengthCdmaWrapper(
             evdoDbm,
             evdoEcio,
             evdoSnr,
-            level
+            level,
         )
     }
 
@@ -154,7 +159,7 @@ data class CellSignalStrengthTdscdmaWrapper(
             rssi,
             bitErrorRate,
             rscp,
-            level
+            level,
         )
     }
 
@@ -179,10 +184,16 @@ data class CellSignalStrengthWcdmaWrapper(
 ) : CellSignalStrengthWrapper(CellType.WCDMA) {
     @SuppressLint("NewApi")
     constructor(strength: CellSignalStrengthWcdma) : this(
-        rssi = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.rssi else CellInfo.UNAVAILABLE,
+        rssi = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            strength.rssi
+        },
         bitErrorRate = strength.bitErrorRateCompat,
-        rscp = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.rscp else CellInfo.UNAVAILABLE,
-        ecNo = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) strength.ecNo else CellInfo.UNAVAILABLE,
+        rscp = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            strength.rscp
+        },
+        ecNo = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            strength.ecNo
+        },
         level = strength.level,
         dbm = strength.dbm,
         valid = strength.isValidCompat,
@@ -194,7 +205,7 @@ data class CellSignalStrengthWcdmaWrapper(
             rssi,
             bitErrorRate,
             rscp,
-            ecNo
+            ecNo,
         )
     }
 
@@ -223,11 +234,17 @@ data class CellSignalStrengthLteWrapper(
 ) : CellSignalStrengthWrapper(CellType.LTE) {
     @SuppressLint("InlinedApi", "PrivateApi")
     constructor(strength: CellSignalStrengthLte) : this(
-        rssi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) strength.rssi else CellInfo.UNAVAILABLE,
-        rsrp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) strength.rsrp else strength.dbm,
+        rssi = withMinApi(Build.VERSION_CODES.Q, CellInfo.UNAVAILABLE) {
+            strength.rssi
+        },
+        rsrp = withMinApi(Build.VERSION_CODES.P, strength.dbm) {
+            strength.rsrp
+        },
         rsrq = strength.rsrq,
         rssnr = strength.rssnr,
-        cqiTableIndex = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) strength.cqiTableIndex else CellInfo.UNAVAILABLE,
+        cqiTableIndex = withMinApi(Build.VERSION_CODES.S, CellInfo.UNAVAILABLE) {
+            strength.cqiTableIndex
+        },
         cqi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) strength.cqi else CellSignalStrengthLte::class.java
             .getDeclaredField("mCqi")
             .apply { isAccessible = true }
@@ -248,7 +265,7 @@ data class CellSignalStrengthLteWrapper(
             cqiTableIndex,
             cqi,
             timingAdvance,
-            level
+            level,
         )
     }
 
@@ -270,7 +287,7 @@ data class CellSignalStrengthNrWrapper(
     val csiRsrq: Int,
     val csiSinr: Int,
     val csiCqiTableIndex: Int,
-    val csiCqiReport: ArrayList<Int>?,
+    val csiCqiReport: List<Int>?,
     val ssRsrp: Int,
     val ssRsrq: Int,
     val ssSinr: Int,
@@ -285,8 +302,12 @@ data class CellSignalStrengthNrWrapper(
         csiRsrp = strength.csiRsrp,
         csiRsrq = strength.csiRsrq,
         csiSinr = strength.csiSinr,
-        csiCqiTableIndex = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) strength.csiCqiTableIndex else CellInfo.UNAVAILABLE,
-        csiCqiReport = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ArrayList(strength.csiCqiReport) else null,
+        csiCqiTableIndex = withMinApi(Build.VERSION_CODES.S, CellInfo.UNAVAILABLE) {
+            strength.csiCqiTableIndex
+        },
+        csiCqiReport = withMinApi(Build.VERSION_CODES.S) {
+            strength.csiCqiReport
+        },
         ssRsrp = strength.ssRsrp,
         ssRsrq = strength.ssRsrq,
         ssSinr = strength.ssSinr,
@@ -294,7 +315,9 @@ data class CellSignalStrengthNrWrapper(
         dbm = strength.dbm,
         valid = strength.isValidCompat,
         asuLevel = strength.asuLevel,
-        timingAdvance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) strength.timingAdvanceMicros else null,
+        timingAdvance = withMinApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            strength.timingAdvanceMicros
+        },
     )
 
     override fun hashCode(): Int {

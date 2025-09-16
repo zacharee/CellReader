@@ -9,6 +9,8 @@ import android.telephony.ServiceState.RoamingType
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.isIwlanPreferredCompat
 import dev.zwander.cellreader.data.util.AccessNetworkUtils
+import dev.zwander.cellreader.data.util.withMinApi
+import dev.zwander.cellreader.data.util.withTryCatch
 
 data class ServiceStateWrapper(
     val operatorAlphaLong: String?,
@@ -250,39 +252,55 @@ data class ServiceStateWrapper(
         manualNetworkSelection = state.isManualSelection,
         emergencyOnly = state.isEmergencyOnly,
         cssIndicator = state.cssIndicator,
-        networkId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaNetworkId else CellInfo.UNAVAILABLE,
-        systemId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.cdmaSystemId else CellInfo.UNAVAILABLE,
-        cdmaRoamingIndicator = try {
+        networkId = withTryCatch(CellInfo.UNAVAILABLE) {
+            withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+                state.cdmaNetworkId
+            }
+        },
+        systemId = withTryCatch(CellInfo.UNAVAILABLE) {
+            withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+                state.cdmaSystemId
+            }
+        },
+        cdmaRoamingIndicator = withTryCatch(CellInfo.UNAVAILABLE) {
             state.cdmaRoamingIndicator
-        } catch (_: NoSuchMethodError) {
-            CellInfo.UNAVAILABLE
         },
-        cdmaDefaultRoamingIndicator = try {
+        cdmaDefaultRoamingIndicator = withTryCatch(CellInfo.UNAVAILABLE) {
             state.cdmaDefaultRoamingIndicator
-        } catch (_: NoSuchMethodError) {
-            CellInfo.UNAVAILABLE
         },
-        cdmaEriIconIndex = state.cdmaEriIconIndex,
-        cdmaEriIconMode = state.cdmaEriIconMode,
-        nrFrequencyRange = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.nrFrequencyRange else CellInfo.UNAVAILABLE,
-        channelNumber = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) state.channelNumber else CellInfo.UNAVAILABLE,
-        cellBandwidths = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ArrayList(state.cellBandwidths.toList()) else arrayListOf(),
-        arfcnRsrpBoost = try {
+        cdmaEriIconIndex = withTryCatch(CellInfo.UNAVAILABLE) {
+            state.cdmaEriIconIndex
+        },
+        cdmaEriIconMode = withTryCatch(CellInfo.UNAVAILABLE) {
+            state.cdmaEriIconMode
+        },
+        nrFrequencyRange = withMinApi(Build.VERSION_CODES.Q, CellInfo.UNAVAILABLE) {
+            state.nrFrequencyRange
+        },
+        channelNumber = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            state.channelNumber
+        },
+        cellBandwidths = withMinApi(Build.VERSION_CODES.P, arrayListOf()) {
+            ArrayList(state.cellBandwidths.toList())
+        },
+        arfcnRsrpBoost = withTryCatch(0) {
             state.arfcnRsrpBoost
-        } catch (_: Throwable) {
-            0
         },
-        networkRegistrationInfos = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        networkRegistrationInfos = withMinApi(Build.VERSION_CODES.P) {
             ArrayList(state.networkRegistrationInfoList.map { NetworkRegistrationInfoWrapper(it) })
-        } else {
-            null
         },
-        operatorAlphaLongRaw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaLongRaw else null,
-        operatorAlphaShortRaw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) state.operatorAlphaShortRaw else null,
+        operatorAlphaLongRaw = withMinApi(Build.VERSION_CODES.Q) {
+            state.operatorAlphaLongRaw
+        },
+        operatorAlphaShortRaw = withMinApi(Build.VERSION_CODES.Q) {
+            state.operatorAlphaShortRaw
+        },
         dataRoamingFromRegistration = state.dataRoamingFromRegistration,
         iWlanPreferred = state.isIwlanPreferredCompat,
         dataRegState = state.dataRegState,
         voiceRegState = state.voiceRegState,
-        isUsingNonTerrestrialNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) state.isUsingNonTerrestrialNetwork else null,
+        isUsingNonTerrestrialNetwork = withMinApi(Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            state.isUsingNonTerrestrialNetwork
+        },
     )
 }

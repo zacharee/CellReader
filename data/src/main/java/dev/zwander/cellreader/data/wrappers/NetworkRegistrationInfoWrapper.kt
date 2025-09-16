@@ -5,6 +5,8 @@ import android.os.Build
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.NetworkRegistrationInfo.RegistrationState
 import dev.zwander.cellreader.data.R
+import dev.zwander.cellreader.data.util.withMinApi
+import dev.zwander.cellreader.data.util.withTryCatch
 
 data class NetworkRegistrationInfoWrapper(
     val domain: Int,
@@ -26,7 +28,7 @@ data class NetworkRegistrationInfoWrapper(
     companion object {
         fun registrationStateToString(
             context: Context,
-            @RegistrationState registrationState: Int
+            @RegistrationState registrationState: Int,
         ): String {
             return context.resources.getString(
                 when (registrationState) {
@@ -42,7 +44,7 @@ data class NetworkRegistrationInfoWrapper(
 
         fun serviceTypeToString(
             context: Context,
-            @NetworkRegistrationInfo.ServiceType serviceType: Int
+            @NetworkRegistrationInfo.ServiceType serviceType: Int,
         ): String {
             return context.resources.getString(
                 when (serviceType) {
@@ -74,11 +76,8 @@ data class NetworkRegistrationInfoWrapper(
     constructor(info: NetworkRegistrationInfo) : this(
         domain = info.domain,
         transportType = info.transportType,
-        registrationState = try {
+        registrationState = withTryCatch(info.registrationState) {
             info.networkRegistrationState
-        } catch (_: Throwable) {
-            @Suppress("DEPRECATION")
-            info.registrationState
         },
         roamingType = info.roamingType,
         accessNetworkTechnology = info.accessNetworkTechnology,
@@ -89,12 +88,14 @@ data class NetworkRegistrationInfoWrapper(
         cellIdentity = info.cellIdentity?.let { CellIdentityWrapper.newInstance(it) },
         voiceSpecificInfo = info.voiceSpecificInfo?.let { VoiceSpecificRegistrationInfoWrapper(it) },
         dataSpecificInfo = info.dataSpecificInfo?.let { DataSpecificRegistrationInfoWrapper(it) },
-        rplmn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.registeredPlmn else null,
-        isUsingCarrierAggregation = try {
-            info.isUsingCarrierAggregation
-        } catch (_: Throwable) {
-            false
+        rplmn = withMinApi(Build.VERSION_CODES.R) {
+            info.registeredPlmn
         },
-        isNonTerrestrialNetwork = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) info.isNonTerrestrialNetwork else null,
+        isUsingCarrierAggregation = withTryCatch(false) {
+            info.isUsingCarrierAggregation
+        },
+        isNonTerrestrialNetwork = withMinApi(Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            info.isNonTerrestrialNetwork
+        },
     )
 }

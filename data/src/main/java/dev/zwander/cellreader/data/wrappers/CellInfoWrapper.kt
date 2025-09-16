@@ -4,6 +4,7 @@ import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
 import dev.zwander.cellreader.data.timeStampMillisCompat
+import dev.zwander.cellreader.data.util.withMinApi
 import java.util.*
 
 sealed class CellInfoWrapper {
@@ -55,7 +56,9 @@ data class CellInfoGsmWrapper(
     constructor(info: CellInfoGsm) : this(
         isRegistered = info.isRegistered,
         timeStamp = info.timeStampMillisCompat,
-        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        connectionStatus = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            info.cellConnectionStatus
+        },
         cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
         cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
@@ -72,7 +75,9 @@ data class CellInfoCdmaWrapper(
     constructor(info: CellInfoCdma) : this(
         isRegistered = info.isRegistered,
         timeStamp = info.timeStampMillisCompat,
-        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        connectionStatus = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            info.cellConnectionStatus
+        },
         cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
         cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
@@ -105,7 +110,9 @@ data class CellInfoWcdmaWrapper(
     constructor(info: CellInfoWcdma) : this(
         isRegistered = info.isRegistered,
         timeStamp = info.timeStampMillisCompat,
-        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        connectionStatus = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            info.cellConnectionStatus
+        },
         cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
         cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
     )
@@ -122,7 +129,9 @@ data class CellInfoLteWrapper(
     constructor(info: CellInfoLte) : this(
         isRegistered = info.isRegistered,
         timeStamp = info.timeStampMillisCompat,
-        connectionStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.cellConnectionStatus else CellInfo.UNAVAILABLE,
+        connectionStatus = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
+            info.cellConnectionStatus
+        },
         cellIdentity = CellIdentityWrapper.newInstance(info.cellIdentity),
         cellSignalStrength = CellSignalStrengthWrapper.newInstance(info.cellSignalStrength),
         cellConfig = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) CellConfigLteWrapper(info.cellConfig) else null,
