@@ -71,11 +71,12 @@ data class SubscriptionInfoWrapper(
                 ?.toString()?.toIntOrNull() ?: CellInfo.UNAVAILABLE
         },
         iconTint = info.iconTint,
-        number = withMinApi(Build.VERSION_CODES.TIRAMISU, info.number) {
-            (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(
-                info.subscriptionId
-            )
-        },
+        number = @Suppress("Deprecation")
+                withMinApi(Build.VERSION_CODES.TIRAMISU, info.number) {
+                (context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager).getPhoneNumber(
+                    info.subscriptionId
+                )
+            },
         dataRoaming = info.dataRoaming,
         iconBitmap = ByteArrayOutputStream().use { output ->
             val bmp = info.createIconBitmap(context)

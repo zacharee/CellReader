@@ -6,7 +6,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 data class GraphLineInfo(
     val subId: Int,
@@ -27,11 +26,11 @@ data class GraphLineInfo(
             this.mode = LineDataSet.Mode.LINEAR
             this.setDrawCircles(false)
             this.axisDependency = axis
-            this.highLightColor = Color.WHITE
+            this.setHighLightColor(Color.WHITE)
 
             this.fillColor = if (selected) Color.WHITE else this@GraphLineInfo.color
             this.circleColors = listOf(fillColor)
-            this.colors = listOf(fillColor)
+            this.setColors(fillColor)
         }
     }
 

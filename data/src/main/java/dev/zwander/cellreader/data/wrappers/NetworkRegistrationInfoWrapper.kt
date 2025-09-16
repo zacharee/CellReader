@@ -1,5 +1,6 @@
 package dev.zwander.cellreader.data.wrappers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.telephony.NetworkRegistrationInfo
@@ -76,9 +77,10 @@ data class NetworkRegistrationInfoWrapper(
     constructor(info: NetworkRegistrationInfo) : this(
         domain = info.domain,
         transportType = info.transportType,
-        registrationState = withTryCatch(info.registrationState) {
-            info.networkRegistrationState
-        },
+        registrationState = @Suppress("Deprecation")
+            withTryCatch(info.registrationState) {
+                info.networkRegistrationState
+            },
         roamingType = info.roamingType,
         accessNetworkTechnology = info.accessNetworkTechnology,
         nrState = info.nrState,
