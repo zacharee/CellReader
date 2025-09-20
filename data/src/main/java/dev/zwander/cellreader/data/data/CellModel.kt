@@ -24,6 +24,10 @@ class CellModel private constructor() : CellModelBase() {
         fun getInstance(): CellModel {
             return instance ?: CellModel().apply { instance = this }
         }
+
+        fun createTestInstance(): CellModel {
+            return CellModel()
+        }
     }
 
     override val signalStrengths = MutableStateFlow<HashMap<Int, SignalStrength?>>(hashMapOf())

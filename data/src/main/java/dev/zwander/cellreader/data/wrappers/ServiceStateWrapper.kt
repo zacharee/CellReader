@@ -27,9 +27,9 @@ data class ServiceStateWrapper(
     val cdmaEriIconMode: Int,
     val nrFrequencyRange: Int,
     val channelNumber: Int,
-    val cellBandwidths: ArrayList<Int>,
+    val cellBandwidths: List<Int>,
     val arfcnRsrpBoost: Int,
-    val networkRegistrationInfos: ArrayList<NetworkRegistrationInfoWrapper>?,
+    val networkRegistrationInfos: List<NetworkRegistrationInfoWrapper>?,
     val operatorAlphaLongRaw: String?,
     val operatorAlphaShortRaw: String?,
     val dataRoamingFromRegistration: Boolean,
@@ -280,14 +280,14 @@ data class ServiceStateWrapper(
         channelNumber = withMinApi(Build.VERSION_CODES.P, CellInfo.UNAVAILABLE) {
             state.channelNumber
         },
-        cellBandwidths = withMinApi(Build.VERSION_CODES.P, arrayListOf()) {
-            ArrayList(state.cellBandwidths.toList())
+        cellBandwidths = withMinApi(Build.VERSION_CODES.P, listOf()) {
+            state.cellBandwidths.toList()
         },
         arfcnRsrpBoost = withTryCatch(0) {
             state.arfcnRsrpBoost
         },
         networkRegistrationInfos = withMinApi(Build.VERSION_CODES.P) {
-            ArrayList(state.networkRegistrationInfoList.map { NetworkRegistrationInfoWrapper(it) })
+            state.networkRegistrationInfoList.map { NetworkRegistrationInfoWrapper(it) }
         },
         operatorAlphaLongRaw = withMinApi(Build.VERSION_CODES.Q) {
             state.operatorAlphaLongRaw

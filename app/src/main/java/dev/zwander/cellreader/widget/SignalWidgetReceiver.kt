@@ -9,6 +9,7 @@ import android.telephony.TelephonyManager
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -30,7 +31,10 @@ import dev.zwander.cellreader.UpdaterService
 import dev.zwander.cellreader.data.ARFCNTools
 import dev.zwander.cellreader.data.R
 import dev.zwander.cellreader.data.data.CellModel
+import dev.zwander.cellreader.data.data.LocalCellModel
+import dev.zwander.cellreader.data.data.ProvideCellModel
 import dev.zwander.cellreader.data.layouts.glance.SignalBarGroup
+import dev.zwander.cellreader.data.util.UpdatableTreeSet
 import dev.zwander.cellreader.data.util.asMccMnc
 import dev.zwander.cellreader.data.util.onAvail
 import dev.zwander.cellreader.data.wrappers.*
@@ -62,9 +66,13 @@ class SignalWidget : GlanceAppWidget() {
         provideContent {
             CompositionLocalProvider(
                 LocalConfiguration provides context.resources.configuration,
-                androidx.compose.ui.platform.LocalContext provides context,
+                LocalContext provides context,
             ) {
-                Content()
+                ProvideCellModel(
+                    model = CellModel.getInstance(),
+                ) {
+                    Content()
+                }
             }
         }
     }
@@ -75,7 +83,7 @@ class SignalWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val size = LocalSize.current
 
-        val cellModel = CellModel.getInstance()
+        val cellModel = LocalCellModel.current
         val subIds by cellModel.subIds.collectAsState()
         val subInfos by cellModel.subInfos.collectAsState()
         val serviceStates by cellModel.serviceStates.collectAsState()
@@ -203,6 +211,232 @@ class SignalWidget : GlanceAppWidget() {
             }
         }
     }
+
+//    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+//        val mockModel = CellModel.createTestInstance()
+//
+//        mockModel.subIds.value = UpdatableTreeSet(listOf(1, 2))
+//        mockModel.subInfos.value = hashMapOf(
+//            1 to SubscriptionInfoWrapper(
+//                id = 1,
+//                iccId = null,
+//                simSlotIndex = 0,
+//                displayName = "SIM 1",
+//                carrierName = "Carrier 1",
+//                carrierId = 32,
+//                nameSource = 0,
+//                iconTint = android.graphics.Color.WHITE,
+//                number = null,
+//                dataRoaming = 0,
+//                iconBitmap = null,
+//                mcc = "310",
+//                mnc = "260",
+//                ehplmns = null,
+//                hplmns = null,
+//                countryIso = "US",
+//                embedded = false,
+//                accessRules = null,
+//                cardString = null,
+//                cardId = null,
+//                opportunistic = false,
+//                groupUuid = null,
+//                groupOwner = null,
+//                groupDisabled = false,
+//                profileClass = 0,
+//                subscriptionType = 0,
+//                uiccApplicationsEnabled = false,
+//                serviceCapabilities = null,
+//                isOnlyNonTerrestrialNetwork = false,
+//                usageSetting = null,
+//                transferStatus = null,
+//                satelliteESOSSupported = false,
+//            ),
+//            2 to SubscriptionInfoWrapper(
+//                id = 2,
+//                iccId = null,
+//                simSlotIndex = 1,
+//                displayName = "SIM 2",
+//                carrierName = "Carrier 2",
+//                carrierId = 32,
+//                nameSource = 0,
+//                iconTint = android.graphics.Color.WHITE,
+//                number = null,
+//                dataRoaming = 0,
+//                iconBitmap = null,
+//                mcc = "311",
+//                mnc = "490",
+//                ehplmns = null,
+//                hplmns = null,
+//                countryIso = "US",
+//                embedded = false,
+//                accessRules = null,
+//                cardString = null,
+//                cardId = null,
+//                opportunistic = false,
+//                groupUuid = null,
+//                groupOwner = null,
+//                groupDisabled = false,
+//                profileClass = 0,
+//                subscriptionType = 0,
+//                uiccApplicationsEnabled = false,
+//                serviceCapabilities = null,
+//                isOnlyNonTerrestrialNetwork = false,
+//                usageSetting = null,
+//                transferStatus = null,
+//                satelliteESOSSupported = false,
+//            ),
+//        )
+//        mockModel.serviceStates.value = hashMapOf(
+//            1 to ServiceStateWrapper(
+//                operatorAlphaLong = "Carrier 1",
+//                operatorAlphaShort = "Carrier 1",
+//                operatorNumeric = "1234",
+//                manualNetworkSelection = false,
+//                emergencyOnly = false,
+//                cssIndicator = 0,
+//                networkId = 10,
+//                systemId = 1,
+//                cdmaRoamingIndicator = 0,
+//                cdmaDefaultRoamingIndicator = 0,
+//                cdmaEriIconIndex = 0,
+//                cdmaEriIconMode = 0,
+//                nrFrequencyRange = 0,
+//                channelNumber = 45535,
+//                cellBandwidths = listOf(20000, 10000),
+//                arfcnRsrpBoost = 0,
+//                networkRegistrationInfos = null,
+//                operatorAlphaLongRaw = null,
+//                operatorAlphaShortRaw = null,
+//                dataRoamingFromRegistration = false,
+//                iWlanPreferred = false,
+//                dataRegState = 1,
+//                voiceRegState = 1,
+//                isUsingNonTerrestrialNetwork = false,
+//            ),
+//            2 to ServiceStateWrapper(
+//                operatorAlphaLong = "Carrier 2",
+//                operatorAlphaShort = "Carrier 2",
+//                operatorNumeric = "4321",
+//                manualNetworkSelection = false,
+//                emergencyOnly = false,
+//                cssIndicator = 0,
+//                networkId = 10,
+//                systemId = 1,
+//                cdmaRoamingIndicator = 0,
+//                cdmaDefaultRoamingIndicator = 0,
+//                cdmaEriIconIndex = 0,
+//                cdmaEriIconMode = 0,
+//                nrFrequencyRange = 0,
+//                channelNumber = 45535,
+//                cellBandwidths = listOf(20000, 10000),
+//                arfcnRsrpBoost = 0,
+//                networkRegistrationInfos = null,
+//                operatorAlphaLongRaw = null,
+//                operatorAlphaShortRaw = null,
+//                dataRoamingFromRegistration = false,
+//                iWlanPreferred = false,
+//                dataRegState = 1,
+//                voiceRegState = 1,
+//                isUsingNonTerrestrialNetwork = false,
+//            ),
+//        )
+//
+//        val lteStrength = CellSignalStrengthLteWrapper(
+//            rssi = -75,
+//            rsrp = -90,
+//            rsrq = -6,
+//            rssnr = 2,
+//            cqiTableIndex = 6,
+//            cqi = 4,
+//            timingAdvance = 78,
+//            level = 3,
+//            dbm = -90,
+//            valid = true,
+//            asuLevel = 35,
+//        )
+//        val nrStrength = CellSignalStrengthNrWrapper(
+//            timingAdvance = 78,
+//            level = 3,
+//            dbm = -90,
+//            valid = true,
+//            asuLevel = 35,
+//            csiRsrp = -80,
+//            csiRsrq = -2,
+//            csiSinr = 5,
+//            csiCqiTableIndex = 5,
+//            csiCqiReport = null,
+//            ssRsrp = -80,
+//            ssRsrq = -2,
+//            ssSinr = 5,
+//        )
+//
+//        mockModel.strengthInfos.value = hashMapOf(
+//            1 to listOf(lteStrength),
+//            2 to listOf(nrStrength),
+//        )
+//        mockModel.cellInfos.value = hashMapOf(
+//            1 to listOf(
+//                CellInfoLteWrapper(
+//                    isRegistered = true,
+//                    timeStamp = System.currentTimeMillis(),
+//                    connectionStatus = 1,
+//                    cellIdentity = CellIdentityLteWrapper(
+//                        ci = 1,
+//                        pci = 2,
+//                        tac = 3,
+//                        earfcn = 45535,
+//                        bandwidth = 10000,
+//                        realBands = listOf("2", "4", "12"),
+//                        additionalPlmns = null,
+//                        csgInfo = null,
+//                        mcc = "310",
+//                        mnc = "260",
+//                        alphaLong = "Carrier 1",
+//                        alphaShort = "Carrier 1",
+//                        globalCellId = null,
+//                        channelNumber = 45535,
+//                    ),
+//                    cellSignalStrength = lteStrength,
+//                    cellConfig = null,
+//                ),
+//            ),
+//            2 to listOf(
+//                CellInfoNrWrapper(
+//                    isRegistered = true,
+//                    timeStamp = System.currentTimeMillis(),
+//                    connectionStatus = 1,
+//                    cellIdentity = CellIdentityNrWrapper(
+//                        nrArfcn = 45535,
+//                        pci = 1,
+//                        tac = 2,
+//                        nci = 3,
+//                        realBands = listOf("5", "66"),
+//                        additionalPlmns = null,
+//                        mcc = "311",
+//                        mnc = "490",
+//                        alphaLong = "Carrier 2",
+//                        alphaShort = "Carrier 2",
+//                        globalCellId = null,
+//                        channelNumber = 45535,
+//                    ),
+//                    cellSignalStrength = nrStrength,
+//                ),
+//            ),
+//        )
+//
+//        provideContent {
+//            CompositionLocalProvider(
+//                LocalConfiguration provides context.resources.configuration,
+//                LocalContext provides context,
+//            ) {
+//                ProvideCellModel(
+//                    model = mockModel,
+//                ) {
+//                    Content()
+//                }
+//            }
+//        }
+//    }
 
     private fun CellSignalStrengthWrapper.createItems(
         context: Context,

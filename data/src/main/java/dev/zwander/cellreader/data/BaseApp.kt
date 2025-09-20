@@ -4,9 +4,11 @@ import android.app.Application
 import android.os.Build
 import androidx.annotation.CallSuper
 import com.bugsnag.android.Bugsnag
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
-abstract class BaseApp : Application() {
+abstract class BaseApp : Application(), CoroutineScope by MainScope() {
     @CallSuper
     override fun onCreate() {
         super.onCreate()
